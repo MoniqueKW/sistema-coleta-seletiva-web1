@@ -1,0 +1,83 @@
+1. Antes de começar, atualizar a branch principal na sua IDE:
+git switch main
+git pull origin main (desse jeito, vai atualizar tudo se alguém tiver feito alguma alteração)
+
+2. Criar uma branch para a tarefa:
+git switch -c feat/nome-da-funcionalidade
+
+Exemplos:
+git switch -c feat/cadastro-morador
+git switch -c feat/pontos-coleta
+git switch -c fix/conexao-banco
+
+e aí faz tudo que ter que fazer, e sempre que não for mexer mais e for dar uma pausa, ou até se caso já tenha acabado, só dar um commit pra salvar o que vc fez no código lá no GitHub, e depois quando vc retomar o trabalho, só fazer as mesmas coisas que tá aqui no item 1 e no 2 (atualiza a branch principal, troca pra branch - a mesma que vc criou ou uma nova se já tiver acabado - e continua)
+
+3. Conferir os arquivos modificados:
+git status
+
+4. Adicionar as alterações:
+git add .
+ 
+5. Criar um commit:
+git commit -m "feat: adiciona cadastro de moradores" (essa é a mensagem que vai aparecer no GitHub, é só escrever o que você fez, lá no final eu explico esse padrão desses nomes nas mensagens dos commit tipo o "feat", "fix" e etc)
+
+6. Enviar a branch para o GitHub:
+git push -u origin "feat/nome-da-funcionalidade" (nesse caso o nome da branch que vc criou, que tá lá no item 2 acima falando sobre)
+
+7. Quando já tiver acabado o trabalho que tinha que fazer na branch (Não pausado, mas sim de fato acabado), ir no GitHub, abrir um Pull Request (PR) para comparar a branch com a main e solicitar a integração das alterações. Dessa forma, o seu trabalho finalizado vai ficar na branch principal, já prontinha no código final. E é assim que funciona, as branches trabalhadas vão sendo juntadas aos poucos na main até tudo acabar e virar um código só.
+
+8. Depois que o PR for aprovado e integrado, atualizar a main na sua IDE:
+git switch main
+git pull origin main
+
+9. Criar uma nova branch para a próxima tarefa:
+git switch -c feat/proxima-funcionalidade
+
+
+E assim o ciclo se repete. isso é útil pra não ter que ficar mexendo na branch principal (main) ao mesmo tempo com outras pessoas, dessa forma, criando as branches, dá pra trabalhar em coisas diferentes e só depois vai integrando faendo o Pull Request (que tá falando no item 7 ai em cima)
+
+COMANDOS ÚTEIS
+
+Ver a branch atual:
+git branch
+
+Listar todas as branches:
+git branch -a
+
+Mudar de branch:
+git switch nome-da-branch
+
+Ver alterações:
+git diff
+
+Ver os commits:
+git log --oneline
+
+Baixar atualizações do GitHub:
+git pull
+
+IMPORTANTE
+
+- Não desenvolver diretamente na main, e sim criar uma branch para cada tarefa ou funcionalidade.
+- Usar commits pequenos e com mensagens claras.
+- Antes de começar uma tarefa, atualizar a main.
+- Antes de integrar alterações, conferir se o código funciona.
+- Não enviar senhas, tokens ou credenciais para o GitHub. Qualquer coisa só perguntar a IA a melhor forma de proteger algum dado antes de solicitar um Pull Request (ou seja, mandar pra main)
+- Se houver conflitos, resolver com cuidado e testar antes de concluir.
+- Não usar `git push --force` sem entender as consequências.
+
+PADRÃO DE NOMES PARA BRANCHES
+
+feat/ — novas funcionalidades
+fix/ — correções de erros
+docs/ — documentação
+refactor/ — reorganização do código sem mudar o comportamento
+
+PADRÃO DE COMMITS
+
+feat: adiciona cadastro de moradores
+fix: corrige conexão com PostgreSQL
+docs: atualiza README
+refactor: organiza camada de services
+
+:)
