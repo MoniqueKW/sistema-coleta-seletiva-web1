@@ -17,10 +17,9 @@ public class Historico {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_historico")
     private Integer id;
-    // continuar apos solicitacao
-//    @ManyToOne
-//    @JoinColumn("id_solicitacao")
-//    private Integer solicitacao;
+    @ManyToOne
+    @JoinColumn(name = "id_solicitacao", nullable = false)
+    private Solicitacao solicitacao;
     @Column(name = "situacao_anterior", length = 50)
     private String situacaoAnterior;
     @Column(name = "situacao_nova", length = 50, nullable = false)
