@@ -15,11 +15,9 @@ public class Operador {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-    //(ESPERAR A ENTIDADE PONTO SER FEITA) |
-    //                                    \/
-    //@ManyToOne
-    //@JoinColumn(name = "id_ponto", nullable = false)
-    //private PontoColeta pontoColeta;
+    @ManyToOne
+    @JoinColumn(name = "id_ponto", nullable = false)
+    private PontoColeta pontoColeta;
     @Column(name = "nome", length = 150, nullable = false)
     private String nome;
     @Column(name = "email", nullable = false)
