@@ -1,0 +1,23 @@
+Tanto o ItemConclusaoRequestDTO quanto o ItemSolicitacao fazem parte do fluxo de criação da solicitação e ItemSolicitação, no SolicitaçãoDTO tem uma lista de ItemSolicitação, essa lista vai ser recebida e vai ser usada para criar os itens da tabela ItemSolicitação, e o ItemConclusaoRequestDTO vai ser usado para receber os itens que foram coletados e que vão ser usados para concluir a solicitação mais tarde e também vão ser adicionadas na tabela de ItemSolicitação. É assim que funciona para trabalhar com chaves composta e tabelas associativas no java spring
+
+* FLUXO DE CRIAÇÃO DA SOLICITAÇÃO:
+         *
+         * 1. Receber o SolicitacaoRequestDTO, contendo os dados da solicitação
+         *    e uma lista de itens com idMaterial e quantidade estimada.
+         *
+         * 2. Buscar o morador, o ponto de coleta e os materiais pelos seus IDs.
+         *
+         * 3. Validar se os materiais são aceitos pelo ponto e se as quantidades
+         *    são válidas.
+         *
+         * 4. Salvar a solicitação e obter seu ID.
+         *
+         * 5. Criar os ItemSolicitacao associando cada material à solicitação,
+         *    respeitando a chave composta (idSolicitacao + idMaterial).
+         *
+         * 6. Salvar os itens e registrar o histórico inicial na mesma transação,
+         *    garantindo que não haja gravação parcial em caso de erro.
+         *
+         * OBS.: Os materiais já devem existir no banco. Não são cadastrados
+         * novamente; apenas são associados à solicitação.
+         */
