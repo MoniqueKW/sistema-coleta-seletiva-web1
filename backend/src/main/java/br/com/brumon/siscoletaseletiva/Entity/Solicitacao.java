@@ -48,6 +48,7 @@ public class Solicitacao {
     private LocalDateTime dataConclusao;
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
+    @Version
     @Column(name = "versao", nullable = false)
     private Integer versao;
 }
