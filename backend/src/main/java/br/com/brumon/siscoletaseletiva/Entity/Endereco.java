@@ -26,7 +26,7 @@ public class Endereco {
     @Column(name = "municipio", length = 100, nullable = false)
     private String municipio;
     @Column(name = "uf", length = 2, nullable = false)
-    private String uf;
+    private Character uf;
     @Column(name = "cep", length = 10, nullable = false)
     private String cep;
 }

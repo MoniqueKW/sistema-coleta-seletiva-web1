@@ -15,7 +15,7 @@ public class PontoColeta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "nome", length = 255, nullable = false)
+    @Column(name = "nome", nullable = false)
     private String nome;
     @Column(name = "logradouro", length = 150, nullable = false)
     private String logradouro;
@@ -29,11 +29,11 @@ public class PontoColeta {
     private String uf;
     @Column(name = "cep", length = 10, nullable = false)
     private String cep;
-    @Column(name = "complemento", length = 255)
+    @Column(name = "complemento")
     private String complemento;
-    @Column(name = "contato", length = 255)
+    @Column(name = "contato")
     private String contato;
-    @Column(name = "horarios", length = 255)
+    @Column(name = "horarios")
     private String horarios;
     @Column(name = "situacao", length = 20)
     private String situacao;
