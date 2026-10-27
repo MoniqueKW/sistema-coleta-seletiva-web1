@@ -35,7 +35,7 @@ public class Solicitacao {
     @Column(name = "copia_municipio", length = 100, nullable = false)
     private String municipio;
     @Column(name = "copia_uf", length = 2, nullable = false)
-    private Character uf;
+    private String uf;
     @Column(name = "copia_cep", length = 10, nullable = false)
     private String cep;
     @Column(name = "situacao", length = 50, nullable = false)
