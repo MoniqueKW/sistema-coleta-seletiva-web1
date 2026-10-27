@@ -15,6 +15,9 @@ public class Endereco {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
+    @ManyToOne
+    @JoinColumn(name = "id_morador", nullable = false)
+    private Morador morador;
     @Column(name = "logradouro", length = 150, nullable = false)
     private String logradouro;
     @Column(name = "numero", length = 20, nullable = false)
