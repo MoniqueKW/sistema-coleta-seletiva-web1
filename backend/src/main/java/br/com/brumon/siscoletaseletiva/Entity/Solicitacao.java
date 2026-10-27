@@ -25,19 +25,19 @@ public class Solicitacao {
     @Column(name = "protocolo_unico", length = 50, nullable = false)
     private String protocoloUnico;
     @Column(name = "copia_logradouro", length = 150, nullable = false)
-    private String logradouro;
+    private String copiaLogradouro;
     @Column(name = "copia_numero", length = 20, nullable = false)
-    private String numero;
+    private String copiaNumero;
     @Column(name = "copia_complemento")
-    private String complemento;
+    private String copiaComplemento;
     @Column(name = "copia_bairro", length = 100, nullable = false)
-    private String bairro;
+    private String copiaBairro;
     @Column(name = "copia_municipio", length = 100, nullable = false)
-    private String municipio;
+    private String copiaMunicipio;
     @Column(name = "copia_uf", length = 2, nullable = false)
-    private String uf;
+    private String copiaUf;
     @Column(name = "copia_cep", length = 10, nullable = false)
-    private String cep;
+    private String copiaCep;
     @Column(name = "situacao", length = 50, nullable = false)
     private String situacao;
     @Column(name = "data_criacao", insertable = false, updatable = false, nullable = false)
