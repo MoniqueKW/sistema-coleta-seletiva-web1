@@ -21,5 +21,12 @@ public class Endereco {
     private String numero;
     @Column(name = "complemento")
     private String complemento;
-    // CONTINUAR
+    @Column(name = "bairro", length = 100, nullable = false)
+    private String bairro;
+    @Column(name = "municipio", length = 100, nullable = false)
+    private String municipio;
+    @Column(name = "uf", length = 2, nullable = false)
+    private String uf;
+    @Column(name = "cep", length = 10, nullable = false)
+    private String cep;
 }
