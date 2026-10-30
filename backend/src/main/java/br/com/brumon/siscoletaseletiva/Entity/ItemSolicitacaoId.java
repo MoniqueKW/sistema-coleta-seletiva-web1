@@ -12,10 +12,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class ItemSolicitacaoId implements Serializable {
-
     @Column(name ="id_solicitacao")
     private Integer idSolicitacao;
-
     @Column(name = "id_material")
     private Integer idMaterial;
 

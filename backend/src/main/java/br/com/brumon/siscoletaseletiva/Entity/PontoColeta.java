@@ -2,6 +2,7 @@ package br.com.brumon.siscoletaseletiva.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import br.com.brumon.siscoletaseletiva.Enum.SituacaoPonto;
 
 @Builder
 @AllArgsConstructor
@@ -35,8 +36,9 @@ public class PontoColeta {
     private String contato;
     @Column(name = "horarios")
     private String horarios;
-    @Column(name = "situacao", length = 20)
-    private String situacao;
-    @Column(name = "recolhimento_domiciliar")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "situacao", length = 20, nullable = false)
+    private SituacaoPonto situacao = SituacaoPonto.ATIVO;
+    @Column(name = "recolhimento_domiciliar", nullable = false)
     private Boolean recolhimentoDomiciliar;
 }

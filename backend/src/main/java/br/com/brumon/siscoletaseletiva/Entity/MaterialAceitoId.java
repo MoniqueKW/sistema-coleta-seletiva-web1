@@ -12,10 +12,8 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class MaterialAceitoId implements Serializable {
-
     @Column(name = "id_ponto")
     private Integer idPonto;
-
     @Column(name = "id_material")
     private Integer idMaterial;
 }
