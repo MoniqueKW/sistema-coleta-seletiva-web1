@@ -2,6 +2,7 @@ package br.com.brumon.siscoletaseletiva.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import br.com.brumon.siscoletaseletiva.Enum.SituacaoMaterial;
 
 @Builder
 @AllArgsConstructor
@@ -23,6 +24,7 @@ public class Material {
     private String unidade;
     @Column(name = "orientacao", columnDefinition = "TEXT")
     private String orientacao;
-    @Column(name = "situacao", length = 20)
-    private String situacao;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "situacao", length = 20, nullable = false)
+    private SituacaoMaterial situacao = SituacaoMaterial.ATIVO;
 }
