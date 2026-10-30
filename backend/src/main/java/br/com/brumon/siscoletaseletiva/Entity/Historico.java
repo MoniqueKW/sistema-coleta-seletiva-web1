@@ -17,7 +17,7 @@ public class Historico {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_historico")
     private Integer id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_solicitacao", nullable = false)
     private Solicitacao solicitacao;
     @Column(name = "situacao_anterior", length = 50)

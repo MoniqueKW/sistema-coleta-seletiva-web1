@@ -15,7 +15,7 @@ public class Endereco {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_morador", nullable = false)
     private Morador morador;
     @Column(name = "logradouro", length = 150, nullable = false)

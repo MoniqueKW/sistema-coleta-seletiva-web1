@@ -16,10 +16,10 @@ public class Solicitacao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_morador", nullable = false)
     private Morador morador;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ponto", nullable = false)
     private PontoColeta pontoColeta;
     @Column(name = "protocolo_unico", length = 50, nullable = false)
