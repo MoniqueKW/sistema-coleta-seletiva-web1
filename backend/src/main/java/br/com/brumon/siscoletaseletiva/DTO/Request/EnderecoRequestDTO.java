@@ -1,14 +1,10 @@
-package br.com.brumon.siscoletaseletiva.DTO;
+package br.com.brumon.siscoletaseletiva.DTO.Request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
-public record PontoColetaRequestDTO(
-        @NotBlank
-        @Size(max = 150)
-        String nome,
+public record EnderecoRequestDTO(
+        @NotNull
+        Integer idMorador,
         @NotBlank
         @Size(max = 150)
         String logradouro,
@@ -29,12 +25,6 @@ public record PontoColetaRequestDTO(
         String uf,
         @NotBlank
         @Size(max = 10)
-        String cep,
-        @Size(max = 255)
-        String contato,
-        @Size(max = 255)
-        String horarios,
-        @NotNull
-        Boolean recolhimentoDomiciliar
+        String cep
 ) {
 }

@@ -1,16 +1,16 @@
-package br.com.brumon.siscoletaseletiva.DTO;
+package br.com.brumon.siscoletaseletiva.DTO.Request;
 
 import jakarta.validation.constraints.*;
 
-public record OperadorRequestDTO(
-        @NotNull
-        Integer idPonto,
+public record MoradorRequestDTO(
         @NotBlank
         @Size(max = 150)
         String nome,
         @NotBlank
         @Email
         @Size(max = 255)
-        String email
+        String email,
+        @Size(max = 20)
+        String telefone
 ) {
 }

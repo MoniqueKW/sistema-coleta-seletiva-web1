@@ -1,4 +1,4 @@
-package br.com.brumon.siscoletaseletiva.DTO;
+package br.com.brumon.siscoletaseletiva.DTO.Response;
 
 public record MaterialResponseDTO(
         Integer id,

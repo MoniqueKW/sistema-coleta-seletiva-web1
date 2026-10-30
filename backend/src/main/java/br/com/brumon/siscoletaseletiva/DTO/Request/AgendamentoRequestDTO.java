@@ -1,4 +1,4 @@
-package br.com.brumon.siscoletaseletiva.DTO;
+package br.com.brumon.siscoletaseletiva.DTO.Request;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;

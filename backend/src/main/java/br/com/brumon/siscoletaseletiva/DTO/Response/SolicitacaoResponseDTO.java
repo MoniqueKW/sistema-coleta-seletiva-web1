@@ -1,6 +1,7 @@
-package br.com.brumon.siscoletaseletiva.DTO;
+package br.com.brumon.siscoletaseletiva.DTO.Response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record SolicitacaoResponseDTO(
         Integer id,
@@ -18,6 +19,7 @@ public record SolicitacaoResponseDTO(
         LocalDateTime dataCriacao,
         LocalDateTime dataConclusao,
         String observacoes,
-        Integer versao
+        Integer versao,
+        List<ItemSolicitacaoResponseDTO> itens
 ) {
 }
