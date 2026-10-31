@@ -14,4 +14,5 @@ public interface EnderecoRepository extends JpaRepository<Endereco, Integer> {
     List<Endereco> findByCep(String cep);
     List<Endereco> findByLogradouro(String logradouro);
     List<Endereco> findByBairro(String bairro);
+    void deleteByMorador_id(Integer id);
 }

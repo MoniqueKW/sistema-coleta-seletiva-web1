@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface MaterialRepository extends JpaRepository<Material, Integer> {
     Optional<Material> findByNome(String nome);
     List<Material> findBySituacao(String situacao);
+    void deleteByNome(String nome);
 }

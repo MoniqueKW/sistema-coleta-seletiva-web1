@@ -12,4 +12,5 @@ public interface OperadorRepository extends JpaRepository<Operador, Integer> {
     Optional<Operador> findByNome(String nome);
     Optional<Operador> findByEmail(String email);
     List<Operador> findByPonto_id(Integer idPonto);
+    void deleteByNome(String nome);
 }

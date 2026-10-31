@@ -11,5 +11,6 @@ public interface MoradorRepository extends JpaRepository<Morador, Integer> {
     Optional<Morador> findByNome(String nome);
     Optional<Morador> findByEmail(String email);
     Optional<Morador> findByTelefone(String telefone);
+    void deleteByNome(String nome);
 
 }
