@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface PontoColetaRepository extends JpaRepository<PontoColeta, Integer> {
-    Optional<PontoColeta> findByNome(String nome);
+    Optional<PontoColeta> findByNomeContainingIgnoreCase(String nome);
     List<PontoColeta> findByCep(String cep);
     List<PontoColeta> findByMunicipio(String municipio);
     List<PontoColeta> findByUf(String uf);
