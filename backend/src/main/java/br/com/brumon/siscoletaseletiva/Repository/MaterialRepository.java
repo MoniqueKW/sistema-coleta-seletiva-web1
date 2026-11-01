@@ -11,5 +11,6 @@ import java.util.Optional;
 public interface MaterialRepository extends JpaRepository<Material, Integer> {
     Optional<Material> findByNomeContainingIgnoreCase(String nome);
     List<Material> findBySituacao(String situacao);
+    boolean existsByNome(String nome);
     void deleteByNome(String nome);
 }
