@@ -73,22 +73,39 @@ public class MoradorService {
                 morador.getTelefone()
         );
     }
-    public MoradorResponseDTO salvarMorador(MoradorRequestDTO morador) {
-        Morador morador1 = rep.save(Morador.builder()
-                .nome(morador.nome())
-                .email(morador.email())
-                .telefone(morador.telefone())
+    public MoradorResponseDTO salvarMorador(MoradorRequestDTO moradordto) {
+        Morador morador = rep.save(Morador.builder()
+                .nome(moradordto.nome())
+                .email(moradordto.email())
+                .telefone(moradordto.telefone())
                 .build());
         return new MoradorResponseDTO(
-                morador1.getId(),
-                morador1.getNome(),
-                morador1.getEmail(),
-                morador1.getTelefone()
+                morador.getId(),
+                morador.getNome(),
+                morador.getEmail(),
+                morador.getTelefone()
         );
     }
-//
-    public MoradorResponseDTO atualizarMorador(MoradorRequestDTO morador){
-        //continuar
-        return null;
+        public MoradorResponseDTO atualizarMorador(MoradorRequestDTO moradordto, Integer id) {
+            Morador morador = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
+                morador.builder()
+                        .nome(moradordto.nome())
+                        .email(moradordto.email())
+                        .telefone(moradordto.telefone())
+                        .build();
+            Morador moradorSalvo = rep.save(morador);
+            return new MoradorResponseDTO(
+                    moradorSalvo.getId(),
+                    moradorSalvo.getNome(),
+                    moradorSalvo.getEmail(),
+                    moradorSalvo.getTelefone()
+            );
+    }
+    public void deleteMoradorById(Integer id) {
+        if (rep.findById(id).isPresent()) {
+            rep.deleteById(id);
+        } else {
+            throw new RecursoNaoEncontradoException("Morador não encontrado");
+        }
     }
 }
