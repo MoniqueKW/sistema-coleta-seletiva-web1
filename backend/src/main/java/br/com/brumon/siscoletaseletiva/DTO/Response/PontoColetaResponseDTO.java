@@ -1,5 +1,7 @@
 package br.com.brumon.siscoletaseletiva.DTO.Response;
 
+import br.com.brumon.siscoletaseletiva.Enum.SituacaoPonto;
+
 public record PontoColetaResponseDTO(
         Integer idPonto,
         String nome,
@@ -12,7 +14,7 @@ public record PontoColetaResponseDTO(
         String cep,
         String contato,
         String horarios,
-        String situacao,
+        SituacaoPonto situacao,
         Boolean recolhimentoDomiciliar
 ) {
 }

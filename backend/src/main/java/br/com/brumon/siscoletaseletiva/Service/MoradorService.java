@@ -88,7 +88,7 @@ public class MoradorService {
     }
         public MoradorResponseDTO atualizarMorador(MoradorRequestDTO moradordto, Integer id) {
             Morador morador = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
-                morador.builder()
+                morador = morador.builder()
                         .nome(moradordto.nome())
                         .email(moradordto.email())
                         .telefone(moradordto.telefone())
@@ -101,7 +101,7 @@ public class MoradorService {
                     moradorSalvo.getTelefone()
             );
     }
-    public void deleteMoradorById(Integer id) {
+    public void deleteById(Integer id) {
         if (rep.findById(id).isPresent()) {
             rep.deleteById(id);
         } else {
