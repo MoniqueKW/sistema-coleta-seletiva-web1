@@ -5,6 +5,7 @@ import br.com.brumon.siscoletaseletiva.DTO.Response.MoradorResponseDTO;
 import br.com.brumon.siscoletaseletiva.Entity.Morador;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.Repository.MoradorRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -73,6 +74,7 @@ public class MoradorService {
                 morador.getTelefone()
         );
     }
+    @Transactional
     public MoradorResponseDTO salvarMorador(MoradorRequestDTO moradordto) {
         Morador morador = rep.save(Morador.builder()
                 .nome(moradordto.nome())
@@ -86,6 +88,7 @@ public class MoradorService {
                 morador.getTelefone()
         );
     }
+    @Transactional
         public MoradorResponseDTO atualizarMorador(MoradorRequestDTO moradordto, Integer id) {
             Morador morador = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
                 morador = morador.builder()
@@ -101,6 +104,7 @@ public class MoradorService {
                     moradorSalvo.getTelefone()
             );
     }
+
     public void deleteById(Integer id) {
         if (rep.findById(id).isPresent()) {
             rep.deleteById(id);
