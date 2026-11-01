@@ -1,0 +1,17 @@
+No final, quando os Service ja tiverem feitos, fazer uma classe converterParaDTO, assim fica mais facil, em vez de fazer, por exemplo:
+
+ return new MaterialResponseDTO(
+                material.getId(),
+                material.getNome(),
+                material.getUnidade(),
+                material.getDescricao(),
+                material.getOrientacao(),
+                material.getSituacao()
+        );
+
+a gente só faria
+
+return new converterParaDTO(material)
+
+mas é bom entender como funciona primeiro, aí depois dá para fazer essas coisas para simplificar o código
+
