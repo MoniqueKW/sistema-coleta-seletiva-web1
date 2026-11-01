@@ -9,10 +9,10 @@ import java.util.List;
 @Repository
 public interface EnderecoRepository extends JpaRepository<Endereco, Integer> {
     List<Endereco> findByMorador_id(Integer id);
-    List<Endereco> findByUf(String uf);
-    List<Endereco> findByMunicipio(String municipio);
+    List<Endereco> findByUfContainingIgnoreCase(String uf);
+    List<Endereco> findByMunicipioContainingIgnoreCase(String municipio);
     List<Endereco> findByCep(String cep);
-    List<Endereco> findByLogradouro(String logradouro);
-    List<Endereco> findByBairro(String bairro);
+    List<Endereco> findByLogradouroContainingIgnoreCase(String logradouro);
+    List<Endereco> findByBairroContainingIgnoreCase(String bairro);
     void deleteByMorador_id(Integer id);
 }
