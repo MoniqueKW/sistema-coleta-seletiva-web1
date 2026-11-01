@@ -101,13 +101,10 @@ public class MaterialService {
         if (!material.getNome().equalsIgnoreCase(materialdto.nome()) && rep.findByNomeContainingIgnoreCase(materialdto.nome()).isPresent()) {
             throw new RecursoDuplicadoException("Material com nome já cadastrado. Este material já existe.");
         }
-        material = material.builder()
-                .nome(materialdto.nome())
-                .descricao(materialdto.descricao())
-                .unidade(materialdto.unidade())
-                .orientacao(materialdto.orientacao())
-                .situacao(material.getSituacao())
-                .build();
+        material.setNome(materialdto.nome());
+        material.setUnidade(materialdto.unidade());
+        material.setDescricao(materialdto.descricao());
+        material.setOrientacao(materialdto.orientacao());
         Material materialSalvo = rep.save(material);
         return new MaterialResponseDTO(
                 materialSalvo.getId(),

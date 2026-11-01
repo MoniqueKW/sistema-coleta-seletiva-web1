@@ -91,11 +91,9 @@ public class MoradorService {
     @Transactional
         public MoradorResponseDTO atualizarMorador(MoradorRequestDTO moradordto, Integer id) {
             Morador morador = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
-                morador = morador.builder()
-                        .nome(moradordto.nome())
-                        .email(moradordto.email())
-                        .telefone(moradordto.telefone())
-                        .build();
+            morador.setNome(moradordto.nome());
+            morador.setEmail(moradordto.email());
+            morador.setTelefone(moradordto.telefone());
             Morador moradorSalvo = rep.save(morador);
             return new MoradorResponseDTO(
                     moradorSalvo.getId(),
