@@ -8,6 +8,7 @@ import br.com.brumon.siscoletaseletiva.Enum.SituacaoMaterial;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoDuplicadoException;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -73,6 +74,7 @@ public class MaterialService {
                 ))
                 .toList();
     }
+    @Transactional
     public MaterialResponseDTO salvarMaterial(MaterialRequestDTO materialdto) {
         if (rep.findByNomeContainingIgnoreCase(materialdto.nome()).isPresent()) {
             throw new RecursoDuplicadoException("Material com nome já cadastrado. Este material já existe.");
@@ -93,6 +95,7 @@ public class MaterialService {
                 material.getSituacao()
         );
     }
+    @Transactional
     public MaterialResponseDTO atualizarMaterial(MaterialRequestDTO materialdto, Integer id) {
         Material material = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
         if (!material.getNome().equalsIgnoreCase(materialdto.nome()) && rep.findByNomeContainingIgnoreCase(materialdto.nome()).isPresent()) {
@@ -115,6 +118,7 @@ public class MaterialService {
                 materialSalvo.getSituacao()
         );
     }
+    @Transactional
     public MaterialResponseDTO alterarSituacao(Integer id, AlterarSituacaoMaterialRequestDTO situacaodto){
         Material material = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
         material.setSituacao(situacaodto.situacao());
@@ -135,6 +139,7 @@ public class MaterialService {
             throw new RecursoNaoEncontradoException("Material não encontrado");
         }
     }
+    @Transactional
     public void deleteByNome(String nome) {
         if (rep.findByNomeContainingIgnoreCase(nome).isPresent()) {
             rep.deleteByNome(nome);

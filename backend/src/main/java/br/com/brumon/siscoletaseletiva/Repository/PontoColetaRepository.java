@@ -1,20 +1,26 @@
 package br.com.brumon.siscoletaseletiva.Repository;
-
 import br.com.brumon.siscoletaseletiva.Entity.PontoColeta;
+import br.com.brumon.siscoletaseletiva.Enum.SituacaoPonto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+//Usando page em vez de lista pq o requisito no PDF pede que as consultas
+// aos pontos usem filtros e paginação, os filtros são
+// esses normais que fazemos no repository, mas a paginação
+// é feita com o a classe Page e Pageable, que estão aí
+// abaixo. Dessa forma, em vez do sistema retornar, por exemplo,
+// 200 pontos (muitos), será possível retornar apenas 10, 20, 50, etc, por página,
+// e o usuário poderá navegar entre as páginas, como em uma pesquisa no Google, por exemplo
 
 @Repository
 public interface PontoColetaRepository extends JpaRepository<PontoColeta, Integer> {
-    Optional<PontoColeta> findByNomeContainingIgnoreCase(String nome);
-    List<PontoColeta> findByCep(String cep);
-    List<PontoColeta> findByMunicipio(String municipio);
-    List<PontoColeta> findByUf(String uf);
-    List<PontoColeta> findByBairro(String bairro);
-    List<PontoColeta> findBySituacao(String situacao);
-    List<PontoColeta> findByRecolhimentoDomiciliar(Boolean recolhimentoDomiciliar);
-    void deleteByNome(String nome);
+    Page<PontoColeta> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
+    Page<PontoColeta> findByCep(String cep, Pageable pageable);
+    Page<PontoColeta> findByMunicipioIgnoreCase(String municipio, Pageable pageable);
+    Page<PontoColeta> findByUf(String uf, Pageable pageable);
+    Page<PontoColeta> findByBairro(String bairro, Pageable pageable);
+    Page<PontoColeta> findBySituacao(SituacaoPonto situacao, Pageable pageable);
+    Page<PontoColeta> findByRecolhimentoDomiciliar(Boolean recolhimentoDomiciliar, Pageable pageable);
 }
