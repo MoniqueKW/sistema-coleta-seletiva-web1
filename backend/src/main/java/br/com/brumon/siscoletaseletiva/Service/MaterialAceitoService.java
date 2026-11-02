@@ -5,10 +5,13 @@ import br.com.brumon.siscoletaseletiva.DTO.Request.MaterialAceitoUpdateRequestDT
 import br.com.brumon.siscoletaseletiva.DTO.Response.MaterialAceitoResponseDTO;
 import br.com.brumon.siscoletaseletiva.Entity.Material;
 import br.com.brumon.siscoletaseletiva.Entity.MaterialAceito;
+import br.com.brumon.siscoletaseletiva.Entity.MaterialAceitoId;
 import br.com.brumon.siscoletaseletiva.Entity.PontoColeta;
+import br.com.brumon.siscoletaseletiva.Enum.SituacaoSolicitacao;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoDuplicadoException;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.Exception.RegraNegocioException;
+import br.com.brumon.siscoletaseletiva.Repository.ItemSolicitacaoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialAceitoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialRepository;
 import br.com.brumon.siscoletaseletiva.Repository.PontoColetaRepository;
@@ -18,20 +21,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class MaterialAceitoService {
     private final MaterialAceitoRepository rep;
     private final MaterialRepository repMaterial;
     private final PontoColetaRepository repPonto;
+    private final ItemSolicitacaoRepository repItemSolicitacao;
     public MaterialAceitoService(
             MaterialAceitoRepository rep,
             MaterialRepository repMaterial,
-            PontoColetaRepository repPonto
+            PontoColetaRepository repPonto,
+            ItemSolicitacaoRepository repItemSolicitacao
     ) {
         this.rep = rep;
         this.repMaterial = repMaterial;
         this.repPonto = repPonto;
+        this.repItemSolicitacao = repItemSolicitacao;
     }
     public Page<MaterialAceitoResponseDTO> findAll(Pageable pageable) {
         Page<MaterialAceito> materialAceitos = rep.findAll(pageable);
@@ -109,22 +116,38 @@ public class MaterialAceitoService {
     }
     @Transactional
     public void deleteByPontoColeta_IdAndMaterial_Id(Integer idPonto, Integer idMaterial) {
-        if (rep.existsByPontoColeta_IdAndMaterial_Id(idPonto, idMaterial)) {
-            rep.deleteByPontoColeta_IdAndMaterial_Id(idPonto, idMaterial);
-        } else {
-            throw new RecursoNaoEncontradoException("Associação de material não encontrada");
+        MaterialAceito materialAceito = rep.findById(new MaterialAceitoId(idPonto, idMaterial))
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Associação de material não encontrada"));
+        List<SituacaoSolicitacao> situacoesAbertas = List.of(
+                SituacaoSolicitacao.AGENDADA,
+                SituacaoSolicitacao.SOLICITADA,
+                SituacaoSolicitacao.EM_RECOLHIMENTO
+        );
+        boolean materialEmUso = repItemSolicitacao
+                .existsBySolicitacao_PontoColeta_IdAndSolicitacao_SituacaoInAndMaterial_Id(
+                        idPonto,
+                        situacoesAbertas,
+                        idMaterial
+                );
+        if (materialEmUso) {
+            throw new RegraNegocioException("Não é possível excluir a associação de material, pois existem solicitações em andamento para este material no ponto de coleta.");
         }
+        rep.delete(materialAceito);
     }
+
+    //Com isso, consegue alterar um materialAceito associado a um ponto de coleta, mesmo que o material seja
+    // diferente do original. A ideia é que o usuário possa alterar a associação para outro material,
+    // caso queira.
     @Transactional
     public MaterialAceitoResponseDTO alterarAssociacao(Integer idPonto, Integer idMaterial, MaterialAceitoRequestDTO dto) {
         if(dto.idMaterial() == idMaterial) {
             throw new RecursoDuplicadoException("Não é possível alterar a associação para o mesmo material. Informe um material diferente.");
         }
-        if(rep.existsByPontoColeta_IdAndMaterial_Id(idPonto,idMaterial)) {
-            deleteByPontoColeta_IdAndMaterial_Id(idPonto,idMaterial);
+        if(rep.existsByPontoColeta_IdAndMaterial_Id(idPonto, idMaterial)) {
+            deleteByPontoColeta_IdAndMaterial_Id(idPonto, idMaterial);
         } else {
             throw new RecursoNaoEncontradoException("Associação de material não encontrada");
         }
-        return associarMaterial(idPonto,dto);
+        return associarMaterial(idPonto, dto);
     }
 }

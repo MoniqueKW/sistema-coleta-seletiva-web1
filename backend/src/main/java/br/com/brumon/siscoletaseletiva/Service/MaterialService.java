@@ -7,6 +7,9 @@ import br.com.brumon.siscoletaseletiva.Entity.Material;
 import br.com.brumon.siscoletaseletiva.Enum.SituacaoMaterial;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoDuplicadoException;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
+import br.com.brumon.siscoletaseletiva.Exception.RegraNegocioException;
+import br.com.brumon.siscoletaseletiva.Repository.ItemSolicitacaoRepository;
+import br.com.brumon.siscoletaseletiva.Repository.MaterialAceitoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -16,8 +19,14 @@ import java.util.List;
 @Service
 public class MaterialService {
     private final MaterialRepository rep;
-    public MaterialService(MaterialRepository rep) {
+    private final ItemSolicitacaoRepository repItemSolicitacao;
+    private final MaterialAceitoRepository repMaterialAceito;
+    public MaterialService(MaterialRepository rep,
+                           ItemSolicitacaoRepository repItemSolicitacao,
+                           MaterialAceitoRepository repMaterialAceito) {
         this.rep = rep;
+        this.repItemSolicitacao = repItemSolicitacao;
+        this.repMaterialAceito = repMaterialAceito;
     }
 
     public List<MaterialResponseDTO> findAll() {
@@ -129,19 +138,19 @@ public class MaterialService {
                 materialSalvo.getSituacao()
         );
     }
-    public void deleteById(Integer id) {
-        if (rep.existsById(id)) {
-            rep.deleteById(id);
-        } else {
-            throw new RecursoNaoEncontradoException("Material não encontrado");
-        }
-    }
+    //apaga se nao tiver associacoes (ou seja, so pra testar)
     @Transactional
-    public void deleteByNome(String nome) {
-        if (rep.existsByNome(nome)) {
-            rep.deleteByNome(nome);
-        } else {
-            throw new RecursoNaoEncontradoException("Material não encontrado");
+    public void deleteById(Integer idMaterial) {
+        Material material = rep.findById(idMaterial)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado."));
+        boolean possuiAssociacoes = repMaterialAceito.existsByMaterial_Id(idMaterial);
+        if (possuiAssociacoes) {
+            throw new RegraNegocioException("Não é possível excluir o material, pois existem associações com ele.");
         }
+        boolean possuiSolicitacoes = repItemSolicitacao.existsByMaterial_Id(idMaterial);
+        if (possuiSolicitacoes) {
+            throw new RegraNegocioException("Não é possível excluir o material, pois existem solicitações associadas a ele.");
+        }
+        rep.delete(material);
     }
 }

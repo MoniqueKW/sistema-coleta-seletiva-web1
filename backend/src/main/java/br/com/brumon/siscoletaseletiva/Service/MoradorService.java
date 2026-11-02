@@ -3,8 +3,11 @@ package br.com.brumon.siscoletaseletiva.Service;
 import br.com.brumon.siscoletaseletiva.DTO.Request.MoradorRequestDTO;
 import br.com.brumon.siscoletaseletiva.DTO.Response.MoradorResponseDTO;
 import br.com.brumon.siscoletaseletiva.Entity.Morador;
+import br.com.brumon.siscoletaseletiva.Exception.RecursoDuplicadoException;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
+import br.com.brumon.siscoletaseletiva.Exception.RegraNegocioException;
 import br.com.brumon.siscoletaseletiva.Repository.MoradorRepository;
+import br.com.brumon.siscoletaseletiva.Repository.SolicitacaoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +16,10 @@ import java.util.List;
 @Service
 public class MoradorService {
     private final MoradorRepository rep;
-    public MoradorService(MoradorRepository rep) {
+    private final SolicitacaoRepository repSolicitacao;
+    public MoradorService(MoradorRepository rep, SolicitacaoRepository repSolicitacao) {
         this.rep = rep;
+        this.repSolicitacao = repSolicitacao;
     }
 
     public List<MoradorResponseDTO> findAll() {
@@ -76,6 +81,10 @@ public class MoradorService {
     }
     @Transactional
     public MoradorResponseDTO salvarMorador(MoradorRequestDTO moradordto) {
+        //ver em relaçao ao RN de "validar nomes certos"
+        if(rep.existsByEmail(moradordto.email())) {
+            throw new RecursoDuplicadoException("Morador com email já cadastrado");
+        }
         Morador morador = rep.save(Morador.builder()
                 .nome(moradordto.nome())
                 .email(moradordto.email())
@@ -102,12 +111,18 @@ public class MoradorService {
                     moradorSalvo.getTelefone()
             );
     }
-
-    public void deleteById(Integer id) {
-        if (rep.existsById(id)) {
-            rep.deleteById(id);
-        } else {
-            throw new RecursoNaoEncontradoException("Morador não encontrado");
+    //so deleta se nao tiver nenhuma solicitacao vinculada
+    @Transactional
+    public void deleteById(Integer idMorador) {
+        Morador morador = rep.findById(idMorador)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Morador não encontrado."
+                ));
+        if (repSolicitacao.existsByMorador_Id(idMorador)) {
+            throw new RegraNegocioException(
+                    "Não é possível excluir este morador, pois ele possui solicitações vinculadas."
+            );
         }
+        rep.delete(morador);
     }
 }

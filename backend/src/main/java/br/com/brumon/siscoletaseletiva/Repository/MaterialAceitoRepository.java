@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface MaterialAceitoRepository extends JpaRepository<MaterialAceito, MaterialAceitoId> {
     boolean existsByPontoColeta_IdAndMaterial_Id(Integer idPonto, Integer idMaterial);
     Page<MaterialAceito> findByPontoColeta_Id(Integer idPonto, Pageable pageable);
-    void deleteByPontoColeta_IdAndMaterial_Id(Integer idPonto, Integer idMaterial);
-    void deleteByPontoColeta_Id(Integer idPonto);
     Optional<MaterialAceito> findByPontoColeta_IdAndMaterial_Id(Integer idPonto, Integer idMaterial);
+    boolean existsByPontoColeta_Id(Integer idPonto);
+    boolean existsByMaterial_Id(Integer idMaterial);
 }

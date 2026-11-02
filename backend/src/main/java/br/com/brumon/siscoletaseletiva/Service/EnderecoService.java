@@ -213,10 +213,7 @@ public class EnderecoService {
     }
 
     public void deleteById(Integer id) {
-        if (rep.existsById(id)) {
-            rep.deleteById(id);
-        } else {
-            throw new RecursoNaoEncontradoException("Endereço não encontrado");
-        }
+       Endereco endereco = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Endereço não encontrado"));
+       rep.delete(endereco);
     }
 }

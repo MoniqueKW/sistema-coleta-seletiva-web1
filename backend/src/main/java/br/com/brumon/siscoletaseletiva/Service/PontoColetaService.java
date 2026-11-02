@@ -5,18 +5,28 @@ import br.com.brumon.siscoletaseletiva.DTO.Request.PontoColetaRequestDTO;
 import br.com.brumon.siscoletaseletiva.DTO.Response.PontoColetaResponseDTO;
 import br.com.brumon.siscoletaseletiva.Entity.PontoColeta;
 import br.com.brumon.siscoletaseletiva.Enum.SituacaoPonto;
+import br.com.brumon.siscoletaseletiva.Enum.SituacaoSolicitacao;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
+import br.com.brumon.siscoletaseletiva.Exception.RegraNegocioException;
+import br.com.brumon.siscoletaseletiva.Repository.MaterialAceitoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.PontoColetaRepository;
+import br.com.brumon.siscoletaseletiva.Repository.SolicitacaoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class PontoColetaService {
     private final PontoColetaRepository rep;
-    public PontoColetaService (PontoColetaRepository rep) {
+    private final SolicitacaoRepository repSolicitacao;
+    private final MaterialAceitoRepository repMaterialAceito;
+    public PontoColetaService (PontoColetaRepository rep, SolicitacaoRepository repSolicitacao, MaterialAceitoRepository repMaterialAceito) {
         this.rep = rep;
+        this.repSolicitacao = repSolicitacao;
+        this.repMaterialAceito = repMaterialAceito;
     }
 
     public Page<PontoColetaResponseDTO> findAll(Pageable pageable) {
@@ -271,6 +281,19 @@ public class PontoColetaService {
     @Transactional
     public PontoColetaResponseDTO alterarSituacao(Integer id, AlterarSituacaoPontoRequestDTO situacaodto) {
         PontoColeta ponto = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
+        // abaixo, feito para verificar se existem solicitacoes que contenham
+        // o id do Ponto passado no parametro e uma das situacoes da lista.
+        // se tiver, significa que o ponto de coleta está vinculado a uma
+        // solicitacao aberta e não pode ser inativado.
+        if (situacaodto.situacao() == SituacaoPonto.INATIVO) {
+            boolean isAberta = repSolicitacao.existsByPontoColeta_IdAndSituacaoIn(id, List.of(
+                    (SituacaoSolicitacao.AGENDADA),
+                    (SituacaoSolicitacao.SOLICITADA),
+                    (SituacaoSolicitacao.EM_RECOLHIMENTO)));
+            if (isAberta) {
+                throw new RegraNegocioException("Não é possível inativar o ponto de coleta, pois existem solicitações abertas vinculadas a ele.");
+            }
+        }
         ponto.setSituacao(situacaodto.situacao());
         PontoColeta pontoSalvo = rep.save(ponto);
         return new PontoColetaResponseDTO(
@@ -289,12 +312,21 @@ public class PontoColetaService {
                 pontoSalvo.getRecolhimentoDomiciliar()
         );
     }
-
-    public void deleteById(Integer id) {
-        if (rep.existsById(id)) {
-            rep.deleteById(id);
-        } else {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
+    //apaga se nao tiver associacoes (ou seja, so pra testar)
+    @Transactional
+    public void deleteById(Integer idPonto) {
+        PontoColeta ponto = rep.findById(idPonto)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Ponto de coleta não encontrado."
+                ));
+        boolean possuiAssociacoes = repMaterialAceito.existsByPontoColeta_Id(idPonto);
+        if (possuiAssociacoes) {
+            throw new RegraNegocioException("Não é possível excluir o ponto, pois existem materiais associados a ele.");
         }
+        boolean possuiSolicitacoes = repSolicitacao.existsByPontoColeta_Id(idPonto);
+        if (possuiSolicitacoes) {
+            throw new RegraNegocioException("Não é possível excluir o ponto, pois existem solicitações associadas a ele.");
+        }
+        rep.delete(ponto);
     }
 }

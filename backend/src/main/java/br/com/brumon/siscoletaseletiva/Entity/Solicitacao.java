@@ -1,5 +1,6 @@
 package br.com.brumon.siscoletaseletiva.Entity;
 
+import br.com.brumon.siscoletaseletiva.Enum.SituacaoSolicitacao;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -38,8 +39,10 @@ public class Solicitacao {
     private String copiaUf;
     @Column(name = "copia_cep", length = 10, nullable = false)
     private String copiaCep;
-    @Column(name = "situacao", length = 50, nullable = false)
-    private String situacao;
+   @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "situacao", length = 20, nullable = false)
+    private SituacaoSolicitacao situacao = SituacaoSolicitacao.SOLICITADA;
     @Column(name = "data_criacao", insertable = false, updatable = false, nullable = false)
     private LocalDateTime dataCriacao;
     @Column(name = "data_agendamento")

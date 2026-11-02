@@ -24,6 +24,7 @@ public class Material {
     private String unidade;
     @Column(name = "orientacao", columnDefinition = "TEXT")
     private String orientacao;
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "situacao", length = 20, nullable = false)
     private SituacaoMaterial situacao = SituacaoMaterial.ATIVO;
