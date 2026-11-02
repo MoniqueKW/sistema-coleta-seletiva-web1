@@ -53,7 +53,7 @@ public class EnderecoService {
         );
     }
     public Page<EnderecoResponseDTO> findByMoradorId(Integer idMorador, Pageable pageable) {
-        Page<Endereco> page = rep.findByMorador_id(idMorador, pageable);
+        Page<Endereco> page = rep.findByMorador_Id(idMorador, pageable);
         if (page.isEmpty()) {
             throw new RecursoNaoEncontradoException("Não há endereços cadastrados para o morador informado");
         }
@@ -206,10 +206,10 @@ public class EnderecoService {
         if (!repMorador.existsById(idMorador)){
             throw new RecursoNaoEncontradoException("Morador não encontrado");
         }
-        if (!rep.existsByMorador_id(idMorador)) {
+        if (!rep.existsByMorador_Id(idMorador)) {
             throw new RecursoNaoEncontradoException("Endereco não encontrado para esse morador");
         }
-        rep.deleteByMorador_id(idMorador);
+        rep.deleteByMorador_Id(idMorador);
     }
 
     public void deleteById(Integer id) {
