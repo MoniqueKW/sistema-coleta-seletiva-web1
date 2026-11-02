@@ -8,12 +8,12 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EnderecoRepository extends JpaRepository<Endereco, Integer> {
-    Page<Endereco> findByMorador_id(Integer idMorador, Pageable pageable);
+    Page<Endereco> findByMorador_Id(Integer idMorador, Pageable pageable);
     Page<Endereco> findByUfContainingIgnoreCase(String uf, Pageable pageable);
     Page<Endereco> findByMunicipioContainingIgnoreCase(String municipio, Pageable pageable);
     Page<Endereco> findByCep(String cep, Pageable pageable);
     Page<Endereco> findByLogradouroContainingIgnoreCase(String logradouro, Pageable pageable);
     Page<Endereco> findByBairroContainingIgnoreCase(String bairro, Pageable pageable);
-    void deleteByMorador_id(Integer idMorador);
-    boolean existsByMorador_id(Integer idMorador);
+    void deleteByMorador_Id(Integer idMorador);
+    boolean existsByMorador_Id(Integer idMorador);
 }

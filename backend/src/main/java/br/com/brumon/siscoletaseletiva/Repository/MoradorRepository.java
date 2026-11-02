@@ -12,6 +12,4 @@ public interface MoradorRepository extends JpaRepository<Morador, Integer> {
     List<Morador> findByNomeContainingIgnoreCase(String nome);
     Optional<Morador> findByEmail(String email);
     Optional<Morador> findByTelefone(String telefone);
-    void deleteByNome(String nome);
-
 }
