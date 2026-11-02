@@ -40,6 +40,24 @@ public class PontoColetaService {
                         pontoColeta.getRecolhimentoDomiciliar()
                 ));
     }
+    public PontoColetaResponseDTO findById(Integer id) {
+        PontoColeta ponto = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
+        return new PontoColetaResponseDTO(
+                ponto.getId(),
+                ponto.getNome(),
+                ponto.getCep(),
+                ponto.getMunicipio(),
+                ponto.getUf(),
+                ponto.getBairro(),
+                ponto.getLogradouro(),
+                ponto.getNumero(),
+                ponto.getComplemento(),
+                ponto.getContato(),
+                ponto.getHorarios(),
+                ponto.getSituacao(),
+                ponto.getRecolhimentoDomiciliar()
+        );
+    }
     public Page<PontoColetaResponseDTO> findByNome(String nome, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByNomeContainingIgnoreCase(nome, pageable);
         if (pontos.isEmpty()) {
@@ -271,9 +289,9 @@ public class PontoColetaService {
                 pontoSalvo.getRecolhimentoDomiciliar()
         );
     }
-    @Transactional
+
     public void deleteById(Integer id) {
-        if (rep.findById(id).isPresent()) {
+        if (rep.existsById(id)) {
             rep.deleteById(id);
         } else {
             throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
