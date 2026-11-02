@@ -104,7 +104,7 @@ public class MoradorService {
     }
 
     public void deleteById(Integer id) {
-        if (rep.findById(id).isPresent()) {
+        if (rep.existsById(id)) {
             rep.deleteById(id);
         } else {
             throw new RecursoNaoEncontradoException("Morador não encontrado");

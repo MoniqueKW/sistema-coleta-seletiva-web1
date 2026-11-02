@@ -76,7 +76,7 @@ public class MaterialService {
     }
     @Transactional
     public MaterialResponseDTO salvarMaterial(MaterialRequestDTO materialdto) {
-        if (rep.findByNomeContainingIgnoreCase(materialdto.nome()).isPresent()) {
+        if (rep.existsByNome(materialdto.nome())) {
             throw new RecursoDuplicadoException("Material com nome já cadastrado. Este material já existe.");
         }
         Material material = rep.save(Material.builder()
@@ -130,7 +130,7 @@ public class MaterialService {
         );
     }
     public void deleteById(Integer id) {
-        if (rep.findById(id).isPresent()) {
+        if (rep.existsById(id)) {
             rep.deleteById(id);
         } else {
             throw new RecursoNaoEncontradoException("Material não encontrado");
@@ -138,7 +138,7 @@ public class MaterialService {
     }
     @Transactional
     public void deleteByNome(String nome) {
-        if (rep.findByNomeContainingIgnoreCase(nome).isPresent()) {
+        if (rep.existsByNome(nome)) {
             rep.deleteByNome(nome);
         } else {
             throw new RecursoNaoEncontradoException("Material não encontrado");
