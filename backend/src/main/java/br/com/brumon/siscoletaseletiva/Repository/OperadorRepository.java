@@ -12,5 +12,4 @@ public interface OperadorRepository extends JpaRepository<Operador, Integer> {
     Optional<Operador> findByNomeContainingIgnoreCase(String nome);
     Optional<Operador> findByEmail(String email);
     List<Operador> findByPontoColeta_Id(Integer idPonto);
-    void deleteByNome(String nome);
 }

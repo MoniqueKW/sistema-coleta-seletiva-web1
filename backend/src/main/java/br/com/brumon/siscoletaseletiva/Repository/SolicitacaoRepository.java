@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 @Repository
 public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Integer> {
@@ -18,8 +19,10 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Intege
             LocalDateTime dataFim,
             Pageable pageable
     );
-
     Page<Solicitacao> findByPontoColeta_Id(Integer idPonto, Pageable pageable);
     Page<Solicitacao> findBySituacao(SituacaoSolicitacao situacao, Pageable pageable);
-    Page<Solicitacao> findByMoradorId(Integer idMorador, Pageable pageable);
+    Page<Solicitacao> findByMorador_Id(Integer idMorador, Pageable pageable);
+    boolean existsByPontoColeta_IdAndSituacaoIn(Integer idPonto, Collection<SituacaoSolicitacao> situacoes);
+    boolean existsByMorador_Id(Integer idMorador);
+    boolean existsByPontoColeta_Id(Integer idPonto);
 }

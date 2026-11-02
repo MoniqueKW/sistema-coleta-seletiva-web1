@@ -13,5 +13,4 @@ public interface MaterialRepository extends JpaRepository<Material, Integer> {
     Optional<Material> findByNomeContainingIgnoreCase(String nome);
     List<Material> findBySituacao(SituacaoMaterial situacao);
     boolean existsByNome(String nome);
-    void deleteByNome(String nome);
 }

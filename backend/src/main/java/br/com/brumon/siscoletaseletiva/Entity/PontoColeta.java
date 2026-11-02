@@ -36,6 +36,7 @@ public class PontoColeta {
     private String contato;
     @Column(name = "horarios")
     private String horarios;
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "situacao", length = 20, nullable = false)
     private SituacaoPonto situacao = SituacaoPonto.ATIVO;
