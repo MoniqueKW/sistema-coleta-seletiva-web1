@@ -5,17 +5,20 @@ import br.com.brumon.siscoletaseletiva.DTO.Request.SolicitacaoRequestDTO;
 import br.com.brumon.siscoletaseletiva.DTO.Response.ItemSolicitacaoResponseDTO;
 import br.com.brumon.siscoletaseletiva.DTO.Response.SolicitacaoResponseDTO;
 import br.com.brumon.siscoletaseletiva.Entity.*;
+import br.com.brumon.siscoletaseletiva.Enum.SituacaoMaterial;
+import br.com.brumon.siscoletaseletiva.Enum.SituacaoPonto;
 import br.com.brumon.siscoletaseletiva.Enum.SituacaoSolicitacao;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
+import br.com.brumon.siscoletaseletiva.Exception.RegraNegocioException;
 import br.com.brumon.siscoletaseletiva.Repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class SolicitacaoService {
@@ -26,13 +29,15 @@ public class SolicitacaoService {
     private final MoradorRepository repMorador;
     private final PontoColetaRepository repPonto;
     private final MaterialRepository repMaterial;
+    private final MaterialAceitoRepository repMaterialAceito;
     public SolicitacaoService(SolicitacaoRepository rep,
                               HistoricoRepository repHistorico,
                               ItemSolicitacaoRepository repItemSolicitacao,
                               HistoricoService serviceHistorico,
                               MoradorRepository repMorador,
                               PontoColetaRepository repPonto,
-                              MaterialRepository repMaterial) {
+                              MaterialRepository repMaterial,
+                              MaterialAceitoRepository repMaterialAceito) {
         this.rep = rep;
         this.repHistorico = repHistorico;
         this.repItemSolicitacao = repItemSolicitacao;
@@ -40,6 +45,7 @@ public class SolicitacaoService {
         this.repMorador = repMorador;
         this.repPonto = repPonto;
         this.repMaterial = repMaterial;
+        this.repMaterialAceito = repMaterialAceito;
     }
     public Page<SolicitacaoResponseDTO> findAll(Pageable pageable) {
         Page<Solicitacao> solicitacoes = rep.findAll(pageable);
@@ -103,6 +109,56 @@ public class SolicitacaoService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
         PontoColeta ponto = repPonto.findById(solicitacaodto.idPonto())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
+        if (ponto.getSituacao() != SituacaoPonto.ATIVO) {
+            throw new RegraNegocioException("O ponto de coleta não está ativo.");
+        }
+        //verifica se o ponto permite recolhimento domiciliar, se for o caso
+        if (solicitacaodto.recolhimentoDomiciliar() && !ponto.getRecolhimentoDomiciliar()) {
+            throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
+        }
+        if (solicitacaodto.itens() == null || solicitacaodto.itens().isEmpty()) {
+            throw new RegraNegocioException("A solicitação deve conter pelo menos um item.");
+        }
+        // abaixo, fiz isso tudo para preencher a tabela de ItemSolicitacao, é aqui que essa entidade
+        // é implementada. Em cada nova solicitação, uma lista de itens de materiais é requerido,
+        // dessa forma, essa lista é usada aqui para preencher a tabela ItemSolicitação e, dessa forma,
+        // fazer a relação entre Solicitação e Material. Além disso, adiciono os itens no próprio
+        // campo de itens da entidade Solicitação, só para guardar os dados.
+        List<ItemSolicitacao> itensValidados = new ArrayList<>();
+        Set<Integer> materiaisAdicionados = new HashSet<>();
+        for (ItemSolicitacaoRequestDTO itemDTO : solicitacaodto.itens()) {
+            Material material = repMaterial.findById(itemDTO.idMaterial())
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado."));
+            //verifica se o material está ativo
+            if (material.getSituacao() != SituacaoMaterial.ATIVO) {
+                throw new RegraNegocioException("O material não está ativo e não pode ser solicitado.");
+            }
+            // Usando o set lá de cima, o sistema verifica se o material é repetido. Set não aceita itens
+            // duplicados, então fazer uma condição num add dele se encaixa perfeitamente
+            if (!materiaisAdicionados.add(material.getId())) {
+                throw new RegraNegocioException("O mesmo material não pode ser adicionado duas vezes à solicitação.");
+            }
+            //verifica se a qtdEstimada do material é maior que zero
+            if (itemDTO.qtdEstimada() == null || itemDTO.qtdEstimada().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new RegraNegocioException("A quantidade estimada do material deve ser maior que zero.");
+            }
+            //verifica o limite de recebimento, comparando se a qtdEstimada é maior que limiteOpcional
+            MaterialAceitoId id = new MaterialAceitoId(ponto.getId(), material.getId());
+            MaterialAceito materialAceito = repMaterialAceito.findById(id)
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("O material não está associado ao ponto de coleta."));
+            if(materialAceito.getLimiteOpcional() != null && itemDTO.qtdEstimada().compareTo(materialAceito.getLimiteOpcional()) > 0) {
+                throw new RegraNegocioException("A quantidade solicitada ultrapassa o limite aceito para este material.");
+            }
+            ItemSolicitacao item = ItemSolicitacao.builder()
+                    //ainda n seto o atributo solicitacao pq a variavel dele
+                    // ainda n foi criada nesse ponto, mas dps irei setar num
+                    // for each
+                    .material(material)
+                    .copiaUnidade(material.getUnidade())
+                    .qtdEstimada(itemDTO.qtdEstimada())
+                    .build();
+            itensValidados.add(item);
+        }
         Solicitacao solicitacao = rep.save(Solicitacao.builder()
                 .morador(morador)
                 .pontoColeta(ponto)
@@ -117,23 +173,13 @@ public class SolicitacaoService {
                 .situacao(SituacaoSolicitacao.SOLICITADA)
                 .dataCriacao(LocalDateTime.now())
                 .observacoes(solicitacaodto.observacoes())
+                .recolhimentoDomiciliar(solicitacaodto.recolhimentoDomiciliar())
                 //nao escrevemos .version() pq o hibernate vai controlar
                 //esse campo para evitar concorrencias
                 .build());
-        // abaixo, fiz para preencher a tabela de ItemSolicitacao, é aqui que essa entidade
-        // é implementada. Em cada nova solicitação, uma lista de itens de materiais é requerido,
-        // dessa forma, essa lista é usada para preencher a tabela ItemSolicitação e fazer
-        // a relação entre Solicitação e Material. Além disso, adiciono as alterações no próprio
-        // campo de itens da entidade Solicitação, persistindo os dados
-        for (ItemSolicitacaoRequestDTO itemDTO : solicitacaodto.itens()) {
-            Material material = repMaterial.findById(itemDTO.idMaterial())
-                    .orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado."));
-            ItemSolicitacao item = ItemSolicitacao.builder()
-                    .solicitacao(solicitacao)
-                    .material(material)
-                    .copiaUnidade(material.getUnidade())
-                    .qtdEstimada(itemDTO.qtdEstimada())
-                    .build();
+        for (ItemSolicitacao item : itensValidados) {
+           //agora, seto o atributo solicitacao de ItemSolicitacao que tinha faltado
+            item.setSolicitacao(solicitacao);
             solicitacao.getItens().add(item);
             repItemSolicitacao.save(item);
         }
@@ -184,6 +230,7 @@ public class SolicitacaoService {
                 solicitacao.getDataAgendamento(),
                 solicitacao.getDataConclusao(),
                 solicitacao.getObservacoes(),
+                solicitacao.getRecolhimentoDomiciliar(),
                 solicitacao.getVersao(),
                 itens
         );

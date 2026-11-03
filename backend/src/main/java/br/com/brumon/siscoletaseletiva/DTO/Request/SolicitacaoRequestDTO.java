@@ -35,6 +35,8 @@ public record SolicitacaoRequestDTO(
         LocalDateTime dataAgendamento,
         @Size(max = 255)
         String observacoes,
+        @NotNull
+        Boolean recolhimentoDomiciliar,
         @NotEmpty
         List<@Valid ItemSolicitacaoRequestDTO> itens
 ) {

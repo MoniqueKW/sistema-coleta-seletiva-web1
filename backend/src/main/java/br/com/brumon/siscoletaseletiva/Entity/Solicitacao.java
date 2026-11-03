@@ -25,7 +25,7 @@ public class Solicitacao {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ponto", nullable = false)
     private PontoColeta pontoColeta;
-    @Column(name = "protocolo_unico", length = 50, nullable = false)
+    @Column(name = "protocolo_unico", length = 50, nullable = false, unique = true)
     private String protocoloUnico;
     @Column(name = "copia_logradouro", length = 150, nullable = false)
     private String copiaLogradouro;
@@ -53,6 +53,11 @@ public class Solicitacao {
     private LocalDateTime dataConclusao;
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
+    // adicionei para cumprir a RN01 do projeto, onde deixa a entender que um morador
+    // pode escolher a modalidade de recolhimento domiciliar a uma solicitação se o ponto
+    // atrelado a esta permitir. Com esse atributo, dá pra validar isso.
+    @Column(name = "recolhimento_domiciliar", nullable = false)
+    private Boolean recolhimentoDomiciliar;
     @Version
     @Column(name = "versao", nullable = false)
     private Integer versao;
