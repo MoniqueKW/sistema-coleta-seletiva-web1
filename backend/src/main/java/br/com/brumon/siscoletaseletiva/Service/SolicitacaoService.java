@@ -338,7 +338,23 @@ public class SolicitacaoService {
     }
 
     public SolicitacaoResponseDTO agendarSolicitacao (Integer id, AgendamentoRequestDTO agendamentodto) {
-        return null; //FAZER
+        Solicitacao solicitacao = rep.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
+        if (solicitacao.getSituacao() != SituacaoSolicitacao.SOLICITADA) {
+            throw new RegraNegocioException("A solicitação não pode ser agendada, pois não está mais na situação SOLICITADA.");
+        }
+        solicitacao.setDataAgendamento(agendamentodto.dataAgendamento());
+        SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
+        solicitacao.setSituacao(SituacaoSolicitacao.AGENDADA);
+        rep.save(solicitacao);
+        serviceHistorico.registrarHistorico(
+                solicitacao.getId(),
+                situacaoAntiga.name(),
+                solicitacao.getSituacao().name(),
+                "Sistema",
+                "Solicitação agendada",
+                null);
+        return converterParaDTO(solicitacao);
     }
 
     //nessa conversao para dto, pego uma lista de ItemSolicitacao e atribuo a ela
