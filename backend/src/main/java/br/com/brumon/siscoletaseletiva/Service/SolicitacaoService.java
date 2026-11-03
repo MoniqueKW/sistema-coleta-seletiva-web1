@@ -1,7 +1,9 @@
 package br.com.brumon.siscoletaseletiva.Service;
 
+import br.com.brumon.siscoletaseletiva.DTO.Request.AgendamentoRequestDTO;
 import br.com.brumon.siscoletaseletiva.DTO.Request.ItemSolicitacaoRequestDTO;
 import br.com.brumon.siscoletaseletiva.DTO.Request.SolicitacaoRequestDTO;
+import br.com.brumon.siscoletaseletiva.DTO.Request.SolicitacaoUpdateRequestDTO;
 import br.com.brumon.siscoletaseletiva.DTO.Response.ItemSolicitacaoResponseDTO;
 import br.com.brumon.siscoletaseletiva.DTO.Response.SolicitacaoResponseDTO;
 import br.com.brumon.siscoletaseletiva.Entity.*;
@@ -103,11 +105,16 @@ public class SolicitacaoService {
         Page<Solicitacao> solicitacoes = rep.findByMorador_IdAndDataCriacaoBetween(idMorador, dataInicio, dataFim, pageable);
         return solicitacoes.map(solicitacao -> converterParaDTO(solicitacao));
     }
+    public Page<SolicitacaoResponseDTO> findByDataCriacaoBetween(LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable) {
+        Page<Solicitacao> solicitacoes = rep.findByDataCriacaoBetween(dataInicio, dataFim, pageable);
+        return solicitacoes.map(solicitacao -> converterParaDTO(solicitacao));
+    }
     public SolicitacaoResponseDTO findByProtocoloUnico(String protocolo) {
         Solicitacao solicitacao = rep.findByProtocoloUnico(protocolo)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
         return converterParaDTO(solicitacao);
     }
+
     @Transactional
     public SolicitacaoResponseDTO salvarSolicitacao(SolicitacaoRequestDTO solicitacaodto) {
         Morador morador = repMorador.findById(solicitacaodto.idMorador())
@@ -148,16 +155,16 @@ public class SolicitacaoService {
                 throw new RegraNegocioException("A quantidade estimada do material deve ser maior que zero.");
             }
             //verifica o limite de recebimento, comparando se a qtdEstimada é maior que limiteOpcional
-            MaterialAceitoId id = new MaterialAceitoId(ponto.getId(), material.getId());
-            MaterialAceito materialAceito = repMaterialAceito.findById(id)
+            MaterialAceitoId idMatAceito = new MaterialAceitoId(ponto.getId(), material.getId());
+            MaterialAceito materialAceito = repMaterialAceito.findById(idMatAceito)
                     .orElseThrow(() -> new RegraNegocioException("O material não está associado ao ponto de coleta."));
             if(materialAceito.getLimiteOpcional() != null && itemDTO.qtdEstimada().compareTo(materialAceito.getLimiteOpcional()) > 0) {
                 throw new RegraNegocioException("A quantidade solicitada ultrapassa o limite aceito para este material.");
             }
             ItemSolicitacao item = ItemSolicitacao.builder()
                     //ainda n seto o atributo solicitacao pq a variavel dele
-                    // ainda n foi criada nesse ponto, mas dps irei setar num
-                    // for each
+                    // ainda n foi criada nesse ponto, só mais embaixo, entao dps irei setar num
+                    // for each que utilizarei mais abaixo
                     .material(material)
                     .copiaUnidade(material.getUnidade())
                     .qtdEstimada(itemDTO.qtdEstimada())
@@ -197,16 +204,146 @@ public class SolicitacaoService {
                 null);
         return converterParaDTO(solicitacao);
     }
+
+
     @Transactional
-    public SolicitacaoResponseDTO atualizarSolicitacao (Integer id, SolicitacaoRequestDTO solicitacaodto) {
-        if (!rep.existsById(id)) {
-            throw new RecursoNaoEncontradoException("Solicitação não encontrada");
+    public SolicitacaoResponseDTO atualizarSolicitacao (Integer id, SolicitacaoUpdateRequestDTO solicitacaodto) {
+        Solicitacao solicitacao = rep.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
+        if (solicitacao.getSituacao() != SituacaoSolicitacao.SOLICITADA) {
+            throw new RegraNegocioException("A solicitação não pode ser atualizada, pois não está mais na situação SOLICITADA.");
         }
-        //CONTINUAR
+        //usei ternario para poupar linha em vez de inicializar a variavel como null e fazer if else
+        PontoColeta ponto = solicitacaodto.idPonto() != null ? repPonto.findById(solicitacaodto.idPonto())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado")) :
+                solicitacao.getPontoColeta();
+
+        //defino a situacao do recolhimentoDomiciliar aqui para usar duas vezes abaixo,
+        Boolean recDomiciliarFinal = solicitacaodto.recolhimentoDomiciliar() != null
+                ? solicitacaodto.recolhimentoDomiciliar() : solicitacao.getRecolhimentoDomiciliar();
+
+        //verificando se o pontoId gerado mais acima é igual ao antigo, se for diferente,
+        //quer dizer então que o usuário passou um novo ponto, então é necessário validar as
+        //coisas
+        if (!Objects.equals(ponto.getId(), solicitacao.getPontoColeta().getId())) {
+            if (ponto.getSituacao() != SituacaoPonto.ATIVO) {
+                throw new RegraNegocioException("O ponto de coleta não está ativo.");
+            }
+            // uso o Boolean.TRUE.equals para prevenir NullPointerException usando Boolean
+                if (Boolean.TRUE.equals(recDomiciliarFinal) && !Boolean.TRUE.equals(ponto.getRecolhimentoDomiciliar())) {
+                    throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
+                }
+        }
+        solicitacao.setPontoColeta(ponto);
+        //colocando oq o usuario mandou na lista para essa nova lista abaixo, caso nao mandou nada,
+        // a lista é preenchida com os itens que ja tavam antes
+        List<ItemSolicitacaoRequestDTO> itensParaValidar;
+        if (solicitacaodto.itens() != null) {
+            itensParaValidar = solicitacaodto.itens();
+        } else {
+            itensParaValidar = solicitacao.getItens().stream()
+                    .map(item -> new ItemSolicitacaoRequestDTO(
+                            item.getMaterial().getId(),
+                            item.getQtdEstimada()
+                    ))
+                    .toList();
+        }
+        //caso o usuario só mande uma lista vazia
+        if (itensParaValidar.isEmpty()) {
+            throw new RegraNegocioException("A solicitação deve conter pelo menos um item.");
+        }
+        //mesma logica que tem no metodo de salvar, conferindo os itens, mesmo se não forem novos,
+        // ou seja, se o ponto mudar, mas os itens continuarem
+            List<ItemSolicitacao> itensValidados = new ArrayList<>();
+            Set<Integer> materiaisAdicionados = new HashSet<>();
+            for (ItemSolicitacaoRequestDTO itemDTO : itensParaValidar) {
+                Material material = repMaterial.findById(itemDTO.idMaterial())
+                        .orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado."));
+                if (material.getSituacao() != SituacaoMaterial.ATIVO) {
+                    throw new RegraNegocioException("O material não está ativo e não pode ser solicitado.");
+                }
+                if (!materiaisAdicionados.add(material.getId())) {
+                    throw new RegraNegocioException("O mesmo material não pode ser adicionado duas vezes à solicitação.");
+                }
+                if (itemDTO.qtdEstimada() == null || itemDTO.qtdEstimada().compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new RegraNegocioException("A quantidade estimada do material deve ser maior que zero.");
+                }
+                MaterialAceitoId idMatAceito = new MaterialAceitoId(ponto.getId(), material.getId());
+                MaterialAceito materialAceito = repMaterialAceito.findById(idMatAceito)
+                        .orElseThrow(() -> new RegraNegocioException("O material não está associado ao ponto de coleta."));
+                if (materialAceito.getLimiteOpcional() != null && itemDTO.qtdEstimada().compareTo(materialAceito.getLimiteOpcional()) > 0) {
+                    throw new RegraNegocioException("A quantidade solicitada ultrapassa o limite aceito para este material.");
+                }
+                //so entra nessas se a lista for nova
+                if (solicitacaodto.itens() != null) {
+                    ItemSolicitacao item = ItemSolicitacao.builder()
+                            //diferente do salvarSolicit, aqui ja da pra setar
+                            //solicitacao, ja que ja foi declarada la em cima
+                            .solicitacao(solicitacao)
+                            .material(material)
+                            .copiaUnidade(material.getUnidade())
+                            .qtdEstimada(itemDTO.qtdEstimada())
+                            .build();
+                    itensValidados.add(item);
+                }
+            }
+        //se tiver sido uma lista nova deleta todos os itens antigos pra depois adicionar os novos
+            if (solicitacaodto.itens() != null) {
+                repItemSolicitacao.deleteAllBySolicitacao_Id(solicitacao.getId());
+                solicitacao.getItens().clear();
+                for (ItemSolicitacao item : itensValidados) {
+                    solicitacao.getItens().add(item);
+                    repItemSolicitacao.save(item);
+                }
+            }
+        if(solicitacaodto.copiaLogradouro() != null) {
+            solicitacao.setCopiaLogradouro(solicitacaodto.copiaLogradouro());
+        }
+        if(solicitacaodto.copiaNumero() != null) {
+            solicitacao.setCopiaNumero(solicitacaodto.copiaNumero());
+        }
+        if(solicitacaodto.copiaComplemento() != null) {
+            solicitacao.setCopiaComplemento(solicitacaodto.copiaComplemento());
+        }
+        if(solicitacaodto.copiaBairro() != null) {
+            solicitacao.setCopiaBairro(solicitacaodto.copiaBairro());
+        }
+        if(solicitacaodto.copiaMunicipio() != null) {
+            solicitacao.setCopiaMunicipio(solicitacaodto.copiaMunicipio());
+        }
+        if(solicitacaodto.copiaUf() != null) {
+            solicitacao.setCopiaUf(solicitacaodto.copiaUf());
+        }
+        if(solicitacaodto.copiaCep() != null) {
+            solicitacao.setCopiaCep(solicitacaodto.copiaCep());
+        }
+        if(solicitacaodto.observacoes() != null) {
+            solicitacao.setObservacoes(solicitacaodto.observacoes());
+        }
+        //verifica se o ponto aceita recolhimento domiciliar se o usuario tiver mudado na solicitacao
+        if (Boolean.TRUE.equals(recDomiciliarFinal) && !Boolean.TRUE.equals(solicitacao.getPontoColeta().getRecolhimentoDomiciliar())) {
+            throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
+        }
+        solicitacao.setRecolhimentoDomiciliar(recDomiciliarFinal);
+
+        rep.save(solicitacao);
+        serviceHistorico.registrarHistorico(
+                solicitacao.getId(),
+                null,
+                solicitacao.getSituacao().name(),
+                "Sistema",
+                "Solicitação atualizada",
+                null);
+        return converterParaDTO(solicitacao);
     }
-    //nessa conversao para dto, pego uma lista de ItemSolicitacao atribuindo a ela,
-    //o campo dos itens da solicitacao, e depois uso essa lista para retornar junto com os outros campos da
-    //SolicitacaoResponseDTO, todos agora transformados em ItemSolicitacaoResponseDTO.
+
+    public SolicitacaoResponseDTO agendarSolicitacao (Integer id, AgendamentoRequestDTO agendamentodto) {
+        return null; //FAZER
+    }
+
+    //nessa conversao para dto, pego uma lista de ItemSolicitacao e atribuo a ela
+    //o a lista atributo Itens da solicitacao, depois de fazer a conversão com stream,
+    // uso essa lista para retornar ela junto com os outros campos da SolicitacaoResponseDTO
     private SolicitacaoResponseDTO converterParaDTO(Solicitacao solicitacao) {
         List<ItemSolicitacaoResponseDTO> itens = solicitacao.getItens()
                 .stream()

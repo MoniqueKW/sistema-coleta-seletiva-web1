@@ -17,4 +17,5 @@ public interface ItemSolicitacaoRepository extends JpaRepository<ItemSolicitacao
     );
     boolean existsByMaterial_Id(Integer idMaterial);
     List<ItemSolicitacao> findBySolicitacao_Id(Integer idSolicitacao);
+    void deleteAllBySolicitacao_Id(Integer idSolicitacao);
 }
