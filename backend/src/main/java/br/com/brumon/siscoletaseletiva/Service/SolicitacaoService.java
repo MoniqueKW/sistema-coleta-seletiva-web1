@@ -152,12 +152,12 @@ public class SolicitacaoService {
     //nessa conversao para dto, pego uma lista de ItemSolicitacao procurando pelo seu repository,
     //pelo id da solicitação, e depois uso essa lista para retornar junto com os outros campos da
     //SolicitacaoResponseDTO.
-    public SolicitacaoResponseDTO converterParaDTO(Solicitacao solicitacao) {
-        List<ItemSolicitacaoResponseDTO> itens = repItemSolicitacao.findBySolicitacao_Id(solicitacao.getId())
+    private SolicitacaoResponseDTO converterParaDTO(Solicitacao solicitacao) {
+        List<ItemSolicitacaoResponseDTO> itens = solicitacao.getItens()
                 .stream()
                 .map(item -> new ItemSolicitacaoResponseDTO(
-                        item.getSolicitacao().getId(),
                         item.getMaterial().getId(),
+                        item.getMaterial().getNome(),
                         item.getCopiaUnidade(),
                         item.getQtdEstimada(),
                         item.getQtdEfetiva()
@@ -170,11 +170,11 @@ public class SolicitacaoService {
                 solicitacao.getProtocoloUnico(),
                 solicitacao.getCopiaLogradouro(),
                 solicitacao.getCopiaNumero(),
-                solicitacao.getCopiaComplemento(),
                 solicitacao.getCopiaBairro(),
                 solicitacao.getCopiaMunicipio(),
                 solicitacao.getCopiaUf(),
                 solicitacao.getCopiaCep(),
+                solicitacao.getCopiaComplemento(),
                 solicitacao.getSituacao(),
                 solicitacao.getDataCriacao(),
                 solicitacao.getDataAgendamento(),

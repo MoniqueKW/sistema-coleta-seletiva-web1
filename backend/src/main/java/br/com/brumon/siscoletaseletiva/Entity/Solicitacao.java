@@ -4,6 +4,8 @@ import br.com.brumon.siscoletaseletiva.Enum.SituacaoSolicitacao;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -54,4 +56,7 @@ public class Solicitacao {
     @Version
     @Column(name = "versao", nullable = false)
     private Integer versao;
+    @Builder.Default
+    @OneToMany(mappedBy = "solicitacao", fetch = FetchType.LAZY)
+    private List<ItemSolicitacao> itens = new ArrayList<>();
 }
