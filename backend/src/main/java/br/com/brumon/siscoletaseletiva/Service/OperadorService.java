@@ -66,7 +66,9 @@ public class OperadorService {
 
     @Transactional
     public OperadorResponseDTO salvarOperador(OperadorRequestDTO dto) {
-        if (rep.existsByEmail(dto.email())) {
+        //deixa o email recebido em caixa baixa para evitar duplicidade de emails com letras maiusculas e minusculas
+        String emailPadrao = dto.email().trim().toLowerCase();
+        if (rep.existsByEmail(emailPadrao)) {
             throw new RecursoDuplicadoException("Já existe um operador cadastrado com este e-mail.");
         }
         PontoColeta ponto = pontoRep.findById(dto.idPonto())
@@ -74,7 +76,7 @@ public class OperadorService {
         Operador operador = rep.save(Operador.builder()
                 .pontoColeta(ponto)
                 .nome(dto.nome())
-                .email(dto.email())
+                .email(emailPadrao)
                 .build());
         return new OperadorResponseDTO(
                 operador.getId(),
@@ -88,15 +90,15 @@ public class OperadorService {
     public OperadorResponseDTO atualizarOperador(Integer id, OperadorRequestDTO dto) {
         Operador operador = rep.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
-        if (rep.existsByEmail(dto.email()) && !operador.getEmail().equals(dto.email())) {
+        String emailPadrao = dto.email().trim().toLowerCase();
+        if (rep.existsByEmail(emailPadrao) && !operador.getEmail().equals(emailPadrao)) {
             throw new RecursoDuplicadoException("Já existe um operador cadastrado com este e-mail.");
         }
-
         PontoColeta ponto = pontoRep.findById(dto.idPonto())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
         operador.setPontoColeta(ponto);
         operador.setNome(dto.nome());
-        operador.setEmail(dto.email());
+        operador.setEmail(emailPadrao);
         Operador atualizado = rep.save(operador);
         return new OperadorResponseDTO(
                 atualizado.getId(),

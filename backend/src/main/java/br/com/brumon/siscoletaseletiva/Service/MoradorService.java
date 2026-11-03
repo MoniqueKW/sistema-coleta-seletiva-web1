@@ -82,12 +82,13 @@ public class MoradorService {
     @Transactional
     public MoradorResponseDTO salvarMorador(MoradorRequestDTO moradordto) {
         //ver em relaçao ao RN de "validar nomes certos"
-        if(rep.existsByEmail(moradordto.email())) {
+        String emailPadrao = moradordto.email().trim().toLowerCase();
+        if(rep.existsByEmail(emailPadrao)) {
             throw new RecursoDuplicadoException("Morador com email já cadastrado");
         }
         Morador morador = rep.save(Morador.builder()
                 .nome(moradordto.nome())
-                .email(moradordto.email())
+                .email(emailPadrao)
                 .telefone(moradordto.telefone())
                 .build());
         return new MoradorResponseDTO(
@@ -100,8 +101,12 @@ public class MoradorService {
     @Transactional
         public MoradorResponseDTO atualizarMorador(MoradorRequestDTO moradordto, Integer id) {
             Morador morador = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
+            String emailPadrao = moradordto.email().trim().toLowerCase();
+            if (!morador.getEmail().equals(emailPadrao) && rep.existsByEmail(emailPadrao)) {
+                throw new RecursoDuplicadoException("Já existe um morador cadastrado com este e-mail.");
+            }
             morador.setNome(moradordto.nome());
-            morador.setEmail(moradordto.email());
+            morador.setEmail(emailPadrao);
             morador.setTelefone(moradordto.telefone());
             Morador moradorSalvo = rep.save(morador);
             return new MoradorResponseDTO(

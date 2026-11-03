@@ -20,6 +20,6 @@ public class Operador {
     private PontoColeta pontoColeta;
     @Column(name = "nome", length = 150, nullable = false)
     private String nome;
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 }

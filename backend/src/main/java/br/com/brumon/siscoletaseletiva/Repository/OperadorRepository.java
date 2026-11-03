@@ -17,5 +17,4 @@ public interface OperadorRepository extends JpaRepository<Operador, Integer> {
     Optional<Operador> findByEmail(String email);
     Page<Operador> findByPontoColeta_Id(Integer idPonto, Pageable pageable);
     boolean existsByEmail(String email);
-    boolean existsByPontoColeta_IdAndPontoColeta_SituacaoIn(Integer idPonto, Collection<SituacaoPonto> situacoes);
 }
