@@ -31,9 +31,6 @@ public class PontoColetaService {
 
     public Page<PontoColetaResponseDTO> findAll(Pageable pageable) {
         Page<PontoColeta> pontos = rep.findAll(pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Não há pontos de coleta cadastrados");
-        }
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
                         pontoColeta.getId(),
                         pontoColeta.getNome(),
@@ -70,9 +67,6 @@ public class PontoColetaService {
     }
     public Page<PontoColetaResponseDTO> findByNome(String nome, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByNomeContainingIgnoreCase(nome, pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
                 pontoColeta.getId(),
                 pontoColeta.getNome(),
@@ -91,9 +85,6 @@ public class PontoColetaService {
     }
     public Page<PontoColetaResponseDTO> findByCep(String cep, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByCep(cep, pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
                 pontoColeta.getId(),
                 pontoColeta.getNome(),
@@ -112,9 +103,6 @@ public class PontoColetaService {
     }
     public Page<PontoColetaResponseDTO> findByMunicipio(String municipio, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByMunicipioIgnoreCase(municipio, pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
                 pontoColeta.getId(),
                 pontoColeta.getNome(),
@@ -133,9 +121,6 @@ public class PontoColetaService {
     }
     public Page<PontoColetaResponseDTO> findByUf(String uf, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByUf(uf.toUpperCase(), pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
                 pontoColeta.getId(),
                 pontoColeta.getNome(),
@@ -154,9 +139,6 @@ public class PontoColetaService {
     }
     public Page<PontoColetaResponseDTO> findByBairro(String bairro, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByBairro(bairro, pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
                 pontoColeta.getId(),
                 pontoColeta.getNome(),
@@ -175,9 +157,6 @@ public class PontoColetaService {
     }
     public Page<PontoColetaResponseDTO> findBySituacao(SituacaoPonto situacaodto, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findBySituacao(situacaodto, pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
                 pontoColeta.getId(),
                 pontoColeta.getNome(),
@@ -196,9 +175,6 @@ public class PontoColetaService {
     }
     public Page<PontoColetaResponseDTO> findByRecolhimentoDomiciliar(Boolean recolhimentoDomiciliar, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByRecolhimentoDomiciliar(recolhimentoDomiciliar, pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
                 pontoColeta.getId(),
                 pontoColeta.getNome(),

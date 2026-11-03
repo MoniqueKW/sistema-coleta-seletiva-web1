@@ -22,9 +22,6 @@ public class HistoricoService {
     }
     public Page<HistoricoResponseDTO> findAll(Pageable pageable) {
         Page<Historico> historicos = rep.findAll(pageable);
-        if (historicos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Nenhum histórico encontrado");
-        }
         return historicos.map(historico -> new HistoricoResponseDTO(
                 historico.getId(),
                 historico.getSolicitacao().getId(),
@@ -54,12 +51,6 @@ public class HistoricoService {
 
     public Page<HistoricoResponseDTO> findBySolicitacaoId(Integer idSolicitacao, Pageable pageable) {
         Page<Historico> historicos = rep.findBySolicitacao_IdOrderByDataAsc(idSolicitacao, pageable);
-        if (!repSolicitacao.existsById(idSolicitacao)) {
-            throw new RecursoNaoEncontradoException("Solicitação não encontrada");
-        }
-        if (historicos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Nenhum histórico encontrado para esta solicitação");
-        }
         return historicos.map(historico -> new HistoricoResponseDTO(
                 historico.getId(),
                 historico.getSolicitacao().getId(),

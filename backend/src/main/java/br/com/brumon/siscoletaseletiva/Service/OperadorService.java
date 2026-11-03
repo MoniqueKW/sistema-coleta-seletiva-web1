@@ -28,9 +28,6 @@ public class OperadorService {
 
     public Page<OperadorResponseDTO> findAll(Pageable pageable) {
         Page<Operador> operadores = rep.findAll(pageable);
-        if (operadores.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Nenhum operador cadastrado");
-        }
         return operadores
                 .map(operador -> new OperadorResponseDTO(
                         operador.getId(),
@@ -53,9 +50,6 @@ public class OperadorService {
 
     public Page<OperadorResponseDTO> findByPontoColetaId(Integer idPonto, Pageable pageable) {
         Page<Operador> operadores = rep.findByPontoColeta_Id(idPonto, pageable);
-        if (operadores.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Nenhum operador encontrado para este ponto de coleta");
-        }
         return operadores.map(operador -> new OperadorResponseDTO(
                 operador.getId(),
                 operador.getPontoColeta().getId(),

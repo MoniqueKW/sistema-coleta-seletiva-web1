@@ -22,9 +22,6 @@ public class EnderecoService {
 
     public Page<EnderecoResponseDTO> findAll(Pageable pageable) {
         Page<Endereco> page = rep.findAll(pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Não há endereços cadastrados");
-        }
         return page.map(endereco -> new EnderecoResponseDTO(
                 endereco.getId(),
                 endereco.getMorador().getId(),
@@ -54,9 +51,6 @@ public class EnderecoService {
     }
     public Page<EnderecoResponseDTO> findByMoradorId(Integer idMorador, Pageable pageable) {
         Page<Endereco> page = rep.findByMorador_Id(idMorador, pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Não há endereços cadastrados para o morador informado");
-        }
         return page.map(endereco -> new EnderecoResponseDTO(
                 endereco.getId(),
                 endereco.getMorador().getId(),
@@ -71,9 +65,6 @@ public class EnderecoService {
     }
     public Page<EnderecoResponseDTO> findByCep(String cep, Pageable pageable) {
         Page<Endereco> page = rep.findByCep(cep, pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Endereço não encontrado");
-        }
         return page.map(endereco -> new EnderecoResponseDTO(
                 endereco.getId(),
                 endereco.getMorador().getId(),
@@ -88,9 +79,6 @@ public class EnderecoService {
     }
     public Page<EnderecoResponseDTO> findByUf(String uf, Pageable pageable) {
         Page<Endereco> page = rep.findByUfContainingIgnoreCase(uf, pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Endereço não encontrado");
-        }
         return page.map(endereco -> new EnderecoResponseDTO(
                 endereco.getId(),
                 endereco.getMorador().getId(),
@@ -105,9 +93,6 @@ public class EnderecoService {
     }
     public Page<EnderecoResponseDTO> findByMunicipio(String municipio, Pageable pageable) {
         Page<Endereco> page = rep.findByMunicipioContainingIgnoreCase(municipio, pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Endereço não encontrado");
-        }
         return page.map(endereco -> new EnderecoResponseDTO(
                 endereco.getId(),
                 endereco.getMorador().getId(),
@@ -122,9 +107,6 @@ public class EnderecoService {
     }
     public Page<EnderecoResponseDTO> findByBairro(String bairro, Pageable pageable) {
         Page<Endereco> page = rep.findByBairroContainingIgnoreCase(bairro, pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Endereço não encontrado");
-        }
         return page.map(endereco -> new EnderecoResponseDTO(
                 endereco.getId(),
                 endereco.getMorador().getId(),
@@ -139,9 +121,6 @@ public class EnderecoService {
     }
     public Page<EnderecoResponseDTO> findByLogradouro(String logradouro, Pageable pageable) {
         Page<Endereco> page = rep.findByLogradouroContainingIgnoreCase(logradouro, pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Endereço não encontrado");
-        }
         return page.map(endereco -> new EnderecoResponseDTO(
                 endereco.getId(),
                 endereco.getMorador().getId(),

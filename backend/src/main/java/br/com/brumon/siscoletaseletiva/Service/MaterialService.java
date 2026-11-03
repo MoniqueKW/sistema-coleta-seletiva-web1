@@ -12,6 +12,8 @@ import br.com.brumon.siscoletaseletiva.Repository.ItemSolicitacaoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialAceitoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,21 +31,16 @@ public class MaterialService {
         this.repMaterialAceito = repMaterialAceito;
     }
 
-    public List<MaterialResponseDTO> findAll() {
-        List<Material> lista = rep.findAll();
-        if (lista.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Não há materiais cadastrados");
-        }
-        return lista.stream()
-                .map(material -> new MaterialResponseDTO(
-                        material.getId(),
-                        material.getNome(),
+    public Page<MaterialResponseDTO> findAll(Pageable pageable) {
+        Page<Material> page = rep.findAll(pageable);
+        return page.map(material -> new MaterialResponseDTO(
+                material.getId(),
+                material.getNome(),
                         material.getUnidade(),
                         material.getDescricao(),
                         material.getOrientacao(),
                         material.getSituacao())
-                )
-                .toList();
+                );
     }
     public MaterialResponseDTO findByNome(String nome) {
         Material material = rep.findByNomeContainingIgnoreCase(nome).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
@@ -69,9 +66,6 @@ public class MaterialService {
     }
     public List<MaterialResponseDTO> findBySituacao(SituacaoMaterial situacao) {
         List<Material> lista = rep.findBySituacao(situacao);
-        if (lista.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Material não encontrado");
-        }
         return lista.stream()
                 .map(material -> new MaterialResponseDTO(
                         material.getId(),

@@ -24,9 +24,6 @@ public class MoradorService {
 
     public List<MoradorResponseDTO> findAll() {
         List<Morador> lista = rep.findAll();
-        if (lista.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Nenhum morador cadastrado");
-        }
         return lista.stream()
                 .map(morador -> new MoradorResponseDTO(
                     morador.getId(),
@@ -49,9 +46,6 @@ public class MoradorService {
 
     public List<MoradorResponseDTO> findByNome(String nome) {
         List<Morador> lista = rep.findByNomeContainingIgnoreCase(nome);
-        if (lista.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Morador não encontrado");
-        }
         return lista.stream()
                 .map(morador -> new MoradorResponseDTO(
                         morador.getId(),

@@ -42,9 +42,6 @@ public class MaterialAceitoService {
     }
     public Page<MaterialAceitoResponseDTO> findAll(Pageable pageable) {
         Page<MaterialAceito> materialAceitos = rep.findAll(pageable);
-        if (materialAceitos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Não há materiais aceitos cadastrados");
-        }
         return materialAceitos.map(materialAceito -> new MaterialAceitoResponseDTO(
                 materialAceito.getPontoColeta().getId(),
                 materialAceito.getMaterial().getId(),
@@ -55,9 +52,6 @@ public class MaterialAceitoService {
     }
     public Page<MaterialAceitoResponseDTO> findByIdPonto(Integer idPonto, Pageable pageable) {
         Page<MaterialAceito> materialAceitos = rep.findByPontoColeta_Id(idPonto, pageable);
-        if (materialAceitos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Não há materiais aceitos cadastrados para o ponto de coleta informado");
-        }
         return materialAceitos.map(materialAceito -> new MaterialAceitoResponseDTO(
                 materialAceito.getPontoColeta().getId(),
                 materialAceito.getMaterial().getId(),
