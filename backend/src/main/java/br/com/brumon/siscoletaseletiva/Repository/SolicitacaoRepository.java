@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Optional;
 
 @Repository
 public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Integer> {
@@ -44,6 +45,7 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Intege
     Page<Solicitacao> findByMorador_Id(Integer idMorador, Pageable pageable);
     Page<Solicitacao> findByMorador_IdAndSituacao(Integer idMorador, SituacaoSolicitacao situacao, Pageable pageable);
     Page<Solicitacao> findByPontoColeta_IdAndSituacao(Integer idPonto, SituacaoSolicitacao situacao, Pageable pageable);
+    Optional<Solicitacao> findByProtocoloUnico(String protocolo);
     boolean existsByPontoColeta_IdAndSituacaoIn(Integer idPonto, Collection<SituacaoSolicitacao> situacoes);
     boolean existsByMorador_Id(Integer idMorador);
     boolean existsByPontoColeta_Id(Integer idPonto);

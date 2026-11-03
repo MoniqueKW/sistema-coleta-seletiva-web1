@@ -103,6 +103,11 @@ public class SolicitacaoService {
         Page<Solicitacao> solicitacoes = rep.findByMorador_IdAndDataCriacaoBetween(idMorador, dataInicio, dataFim, pageable);
         return solicitacoes.map(solicitacao -> converterParaDTO(solicitacao));
     }
+    public SolicitacaoResponseDTO findByProtocoloUnico(String protocolo) {
+        Solicitacao solicitacao = rep.findByProtocoloUnico(protocolo)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
+        return converterParaDTO(solicitacao);
+    }
     @Transactional
     public SolicitacaoResponseDTO salvarSolicitacao(SolicitacaoRequestDTO solicitacaodto) {
         Morador morador = repMorador.findById(solicitacaodto.idMorador())
@@ -145,7 +150,7 @@ public class SolicitacaoService {
             //verifica o limite de recebimento, comparando se a qtdEstimada é maior que limiteOpcional
             MaterialAceitoId id = new MaterialAceitoId(ponto.getId(), material.getId());
             MaterialAceito materialAceito = repMaterialAceito.findById(id)
-                    .orElseThrow(() -> new RecursoNaoEncontradoException("O material não está associado ao ponto de coleta."));
+                    .orElseThrow(() -> new RegraNegocioException("O material não está associado ao ponto de coleta."));
             if(materialAceito.getLimiteOpcional() != null && itemDTO.qtdEstimada().compareTo(materialAceito.getLimiteOpcional()) > 0) {
                 throw new RegraNegocioException("A quantidade solicitada ultrapassa o limite aceito para este material.");
             }
@@ -193,11 +198,12 @@ public class SolicitacaoService {
         return converterParaDTO(solicitacao);
     }
     @Transactional
-//    public SolicitacaoResponseDTO atualizarSolicitacao (Integer id, SolicitacaoRequestDTO solicitacaodto) {
-//        if (!rep.existsById(id)) {
-//            throw new RecursoNaoEncontradoException("Solicitação não encontrada");
-//        }
-//    }
+    public SolicitacaoResponseDTO atualizarSolicitacao (Integer id, SolicitacaoRequestDTO solicitacaodto) {
+        if (!rep.existsById(id)) {
+            throw new RecursoNaoEncontradoException("Solicitação não encontrada");
+        }
+        //CONTINUAR
+    }
     //nessa conversao para dto, pego uma lista de ItemSolicitacao atribuindo a ela,
     //o campo dos itens da solicitacao, e depois uso essa lista para retornar junto com os outros campos da
     //SolicitacaoResponseDTO, todos agora transformados em ItemSolicitacaoResponseDTO.
