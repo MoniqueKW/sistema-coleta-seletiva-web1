@@ -11,9 +11,6 @@ public record SolicitacaoRequestDTO(
         @NotNull
         Integer idPonto,
         @NotBlank
-        @Size(max = 50)
-        String protocoloUnico,
-        @NotBlank
         @Size(max = 150)
         String copiaLogradouro,
         @NotBlank

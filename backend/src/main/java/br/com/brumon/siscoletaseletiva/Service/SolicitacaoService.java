@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class SolicitacaoService {
@@ -105,7 +106,7 @@ public class SolicitacaoService {
         Solicitacao solicitacao = rep.save(Solicitacao.builder()
                 .morador(morador)
                 .pontoColeta(ponto)
-                .protocoloUnico(solicitacaodto.protocoloUnico())
+                .protocoloUnico(gerarProtocolo())
                 .copiaLogradouro(solicitacaodto.copiaLogradouro())
                 .copiaNumero(solicitacaodto.copiaNumero())
                 .copiaComplemento(solicitacaodto.copiaComplemento())
@@ -122,7 +123,8 @@ public class SolicitacaoService {
         // abaixo, fiz para preencher a tabela de ItemSolicitacao, é aqui que essa entidade
         // é implementada. Em cada nova solicitação, uma lista de itens de materiais é requerido,
         // dessa forma, essa lista é usada para preencher a tabela ItemSolicitação e fazer
-        // a relação entre Solicitação e Material.
+        // a relação entre Solicitação e Material. Além disso, adiciono as alterações no próprio
+        // campo de itens da entidade Solicitação, persistindo os dados
         for (ItemSolicitacaoRequestDTO itemDTO : solicitacaodto.itens()) {
             Material material = repMaterial.findById(itemDTO.idMaterial())
                     .orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado."));
@@ -132,6 +134,7 @@ public class SolicitacaoService {
                     .copiaUnidade(material.getUnidade())
                     .qtdEstimada(itemDTO.qtdEstimada())
                     .build();
+            solicitacao.getItens().add(item);
             repItemSolicitacao.save(item);
         }
         serviceHistorico.registrarHistorico(
@@ -149,13 +152,14 @@ public class SolicitacaoService {
 //            throw new RecursoNaoEncontradoException("Solicitação não encontrada");
 //        }
 //    }
-    //nessa conversao para dto, pego uma lista de ItemSolicitacao procurando pelo seu repository,
-    //pelo id da solicitação, e depois uso essa lista para retornar junto com os outros campos da
-    //SolicitacaoResponseDTO.
+    //nessa conversao para dto, pego uma lista de ItemSolicitacao atribuindo a ela,
+    //o campo dos itens da solicitacao, e depois uso essa lista para retornar junto com os outros campos da
+    //SolicitacaoResponseDTO, todos agora transformados em ItemSolicitacaoResponseDTO.
     private SolicitacaoResponseDTO converterParaDTO(Solicitacao solicitacao) {
         List<ItemSolicitacaoResponseDTO> itens = solicitacao.getItens()
                 .stream()
                 .map(item -> new ItemSolicitacaoResponseDTO(
+                        item.getSolicitacao().getId(),
                         item.getMaterial().getId(),
                         item.getMaterial().getNome(),
                         item.getCopiaUnidade(),
@@ -183,5 +187,17 @@ public class SolicitacaoService {
                 solicitacao.getVersao(),
                 itens
         );
+    }
+    // Fiz esse metodo para gerar um protocolo unico para cada
+    // solicitação, usando UUID, passivel a alteracoes
+    private String gerarProtocolo() {
+        String protocolo;
+        do {
+            protocolo = "SC-" + UUID.randomUUID()
+                    .toString()
+                    .substring(0, 8)
+                    .toUpperCase();
+        } while (rep.existsByProtocoloUnico(protocolo));
+        return protocolo;
     }
 }

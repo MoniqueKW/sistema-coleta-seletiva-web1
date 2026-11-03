@@ -47,4 +47,5 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Intege
     boolean existsByPontoColeta_IdAndSituacaoIn(Integer idPonto, Collection<SituacaoSolicitacao> situacoes);
     boolean existsByMorador_Id(Integer idMorador);
     boolean existsByPontoColeta_Id(Integer idPonto);
+    boolean existsByProtocoloUnico(String protocoloUnico);
 }
