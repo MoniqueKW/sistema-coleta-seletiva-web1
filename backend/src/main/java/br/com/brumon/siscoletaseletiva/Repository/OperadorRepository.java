@@ -1,15 +1,21 @@
 package br.com.brumon.siscoletaseletiva.Repository;
 
 import br.com.brumon.siscoletaseletiva.Entity.Operador;
+import br.com.brumon.siscoletaseletiva.Enum.SituacaoPonto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface OperadorRepository extends JpaRepository<Operador, Integer> {
-    Optional<Operador> findByNomeContainingIgnoreCase(String nome);
+    Page<Operador> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
     Optional<Operador> findByEmail(String email);
-    List<Operador> findByPontoColeta_Id(Integer idPonto);
+    Page<Operador> findByPontoColeta_Id(Integer idPonto, Pageable pageable);
+    boolean existsByEmail(String email);
+    boolean existsByPontoColeta_IdAndPontoColeta_SituacaoIn(Integer idPonto, Collection<SituacaoPonto> situacoes);
 }
