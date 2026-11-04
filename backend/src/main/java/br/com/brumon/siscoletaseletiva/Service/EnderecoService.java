@@ -6,7 +6,7 @@ import br.com.brumon.siscoletaseletiva.Entity.Endereco;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.Repository.EnderecoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.MoradorRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class EnderecoService {
         this.rep = rep;
         this.repMorador = repMorador;
     }
-
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findAll(Pageable pageable) {
         Page<Endereco> page = rep.findAll(pageable);
         return page.map(endereco -> new EnderecoResponseDTO(
@@ -34,6 +34,7 @@ public class EnderecoService {
                 endereco.getCep()
         ));
     }
+    @Transactional(readOnly = true)
     public EnderecoResponseDTO findById(Integer id) {
         Endereco endereco = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Endereço não " +
                 "encontrado"));
@@ -49,6 +50,7 @@ public class EnderecoService {
                 endereco.getCep()
         );
     }
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findByMoradorId(Integer idMorador, Pageable pageable) {
         Page<Endereco> page = rep.findByMorador_Id(idMorador, pageable);
         return page.map(endereco -> new EnderecoResponseDTO(
@@ -63,6 +65,7 @@ public class EnderecoService {
                 endereco.getCep()
         ));
     }
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findByCep(String cep, Pageable pageable) {
         Page<Endereco> page = rep.findByCep(cep, pageable);
         return page.map(endereco -> new EnderecoResponseDTO(
@@ -77,6 +80,7 @@ public class EnderecoService {
                 endereco.getCep()
         ));
     }
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findByUf(String uf, Pageable pageable) {
         Page<Endereco> page = rep.findByUfContainingIgnoreCase(uf, pageable);
         return page.map(endereco -> new EnderecoResponseDTO(
@@ -91,6 +95,7 @@ public class EnderecoService {
                 endereco.getCep()
         ));
     }
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findByMunicipio(String municipio, Pageable pageable) {
         Page<Endereco> page = rep.findByMunicipioContainingIgnoreCase(municipio, pageable);
         return page.map(endereco -> new EnderecoResponseDTO(
@@ -105,6 +110,7 @@ public class EnderecoService {
                 endereco.getCep()
         ));
     }
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findByBairro(String bairro, Pageable pageable) {
         Page<Endereco> page = rep.findByBairroContainingIgnoreCase(bairro, pageable);
         return page.map(endereco -> new EnderecoResponseDTO(
@@ -119,6 +125,7 @@ public class EnderecoService {
                 endereco.getCep()
         ));
     }
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findByLogradouro(String logradouro, Pageable pageable) {
         Page<Endereco> page = rep.findByLogradouroContainingIgnoreCase(logradouro, pageable);
         return page.map(endereco -> new EnderecoResponseDTO(

@@ -12,6 +12,7 @@ import br.com.brumon.siscoletaseletiva.Repository.SolicitacaoRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -26,6 +27,7 @@ public class HistoricoService {
         this.repSolicitacao = repSolicitacao;
         this.repOperador = repOperador;
     }
+    @Transactional(readOnly = true)
     public Page<HistoricoResponseDTO> findAll(Pageable pageable) {
         Page<Historico> historicos = rep.findAll(pageable);
         return historicos.map(historico -> new HistoricoResponseDTO(
@@ -40,6 +42,7 @@ public class HistoricoService {
         ));
     }
 
+    @Transactional(readOnly = true)
     public HistoricoResponseDTO findById(Integer id) {
         Historico historico = rep.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Histórico não encontrado"));
@@ -54,6 +57,7 @@ public class HistoricoService {
                 historico.getInfoTentativa()
         );
     }
+    @Transactional(readOnly = true)
     public Page<HistoricoResponseDTO> findByResponsavelId(Integer idOperador, Pageable pageable) {
         Page<Historico> historicos = rep.findByResponsavel_Id(idOperador, pageable);
         return historicos.map(historico -> new HistoricoResponseDTO(
@@ -67,6 +71,7 @@ public class HistoricoService {
                 historico.getInfoTentativa()
         ));
     }
+    @Transactional(readOnly = true)
     public Page<HistoricoResponseDTO> findBySolicitacaoId(Integer idSolicitacao, Pageable pageable) {
         Page<Historico> historicos = rep.findBySolicitacao_IdOrderByDataAsc(idSolicitacao, pageable);
         return historicos.map(historico -> new HistoricoResponseDTO(

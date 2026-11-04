@@ -4,18 +4,15 @@ import br.com.brumon.siscoletaseletiva.DTO.Request.OperadorRequestDTO;
 import br.com.brumon.siscoletaseletiva.DTO.Response.OperadorResponseDTO;
 import br.com.brumon.siscoletaseletiva.Entity.Operador;
 import br.com.brumon.siscoletaseletiva.Entity.PontoColeta;
-import br.com.brumon.siscoletaseletiva.Enum.SituacaoPonto;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoDuplicadoException;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.Exception.RegraNegocioException;
 import br.com.brumon.siscoletaseletiva.Repository.OperadorRepository;
 import br.com.brumon.siscoletaseletiva.Repository.PontoColetaRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class OperadorService {
@@ -26,6 +23,7 @@ public class OperadorService {
         this.pontoRep = pontoRep;
     }
 
+    @Transactional(readOnly = true)
     public Page<OperadorResponseDTO> findAll(Pageable pageable) {
         Page<Operador> operadores = rep.findAll(pageable);
         return operadores
@@ -37,6 +35,7 @@ public class OperadorService {
                 ));
     }
 
+    @Transactional(readOnly = true)
     public OperadorResponseDTO findById(Integer id) {
         Operador operador = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não " +
                 "encontrado"));
@@ -48,6 +47,7 @@ public class OperadorService {
         );
     }
 
+    @Transactional(readOnly = true)
     public Page<OperadorResponseDTO> findByPontoColetaId(Integer idPonto, Pageable pageable) {
         Page<Operador> operadores = rep.findByPontoColeta_Id(idPonto, pageable);
         return operadores.map(operador -> new OperadorResponseDTO(

@@ -8,7 +8,7 @@ import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.Exception.RegraNegocioException;
 import br.com.brumon.siscoletaseletiva.Repository.MoradorRepository;
 import br.com.brumon.siscoletaseletiva.Repository.SolicitacaoRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public class MoradorService {
         this.rep = rep;
         this.repSolicitacao = repSolicitacao;
     }
-
+    @Transactional(readOnly = true)
     public List<MoradorResponseDTO> findAll() {
         List<Morador> lista = rep.findAll();
         return lista.stream()
@@ -33,7 +33,7 @@ public class MoradorService {
                 ))
                 .toList();
     }
-
+    @Transactional(readOnly = true)
     public MoradorResponseDTO findById(Integer id) {
         Morador morador = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
         return new MoradorResponseDTO(
@@ -43,7 +43,7 @@ public class MoradorService {
                 morador.getTelefone()
         );
     }
-
+    @Transactional(readOnly = true)
     public List<MoradorResponseDTO> findByNome(String nome) {
         List<Morador> lista = rep.findByNomeContainingIgnoreCase(nome);
         return lista.stream()
@@ -55,6 +55,7 @@ public class MoradorService {
                 ))
                 .toList();
     }
+    @Transactional(readOnly = true)
     public MoradorResponseDTO findByEmail(String email) {
         Morador morador = rep.findByEmail(email).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
         return new MoradorResponseDTO(
@@ -64,6 +65,7 @@ public class MoradorService {
                 morador.getTelefone()
         );
     }
+    @Transactional(readOnly = true)
     public MoradorResponseDTO findByTelefone(String telefone) {
         Morador morador = rep.findByTelefone(telefone).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
         return new MoradorResponseDTO(

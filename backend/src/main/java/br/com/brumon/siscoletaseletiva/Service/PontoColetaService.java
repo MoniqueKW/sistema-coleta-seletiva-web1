@@ -11,7 +11,7 @@ import br.com.brumon.siscoletaseletiva.Exception.RegraNegocioException;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialAceitoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.PontoColetaRepository;
 import br.com.brumon.siscoletaseletiva.Repository.SolicitacaoRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class PontoColetaService {
         this.repSolicitacao = repSolicitacao;
         this.repMaterialAceito = repMaterialAceito;
     }
-
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findAll(Pageable pageable) {
         Page<PontoColeta> pontos = rep.findAll(pageable);
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
@@ -47,6 +47,7 @@ public class PontoColetaService {
                         pontoColeta.getRecolhimentoDomiciliar()
                 ));
     }
+    @Transactional(readOnly = true)
     public PontoColetaResponseDTO findById(Integer id) {
         PontoColeta ponto = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
         return new PontoColetaResponseDTO(
@@ -65,6 +66,7 @@ public class PontoColetaService {
                 ponto.getRecolhimentoDomiciliar()
         );
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findByNome(String nome, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByNomeContainingIgnoreCase(nome, pageable);
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
@@ -83,6 +85,7 @@ public class PontoColetaService {
                 pontoColeta.getRecolhimentoDomiciliar()
         ));
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findByCep(String cep, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByCep(cep, pageable);
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
@@ -101,6 +104,7 @@ public class PontoColetaService {
                 pontoColeta.getRecolhimentoDomiciliar()
         ));
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findByMunicipio(String municipio, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByMunicipioIgnoreCase(municipio, pageable);
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
@@ -119,6 +123,7 @@ public class PontoColetaService {
                 pontoColeta.getRecolhimentoDomiciliar()
         ));
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findByUf(String uf, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByUf(uf.toUpperCase(), pageable);
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
@@ -137,6 +142,7 @@ public class PontoColetaService {
                 pontoColeta.getRecolhimentoDomiciliar()
         ));
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findByBairro(String bairro, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByBairro(bairro, pageable);
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
@@ -155,6 +161,7 @@ public class PontoColetaService {
                 pontoColeta.getRecolhimentoDomiciliar()
         ));
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findBySituacao(SituacaoPonto situacaodto, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findBySituacao(situacaodto, pageable);
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
@@ -173,6 +180,7 @@ public class PontoColetaService {
                 pontoColeta.getRecolhimentoDomiciliar()
         ));
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findByRecolhimentoDomiciliar(Boolean recolhimentoDomiciliar, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByRecolhimentoDomiciliar(recolhimentoDomiciliar, pageable);
         return pontos.map(pontoColeta -> new PontoColetaResponseDTO(

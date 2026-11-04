@@ -15,7 +15,7 @@ import br.com.brumon.siscoletaseletiva.Repository.ItemSolicitacaoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialAceitoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialRepository;
 import br.com.brumon.siscoletaseletiva.Repository.PontoColetaRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,6 +40,7 @@ public class MaterialAceitoService {
         this.repPonto = repPonto;
         this.repItemSolicitacao = repItemSolicitacao;
     }
+    @Transactional(readOnly = true)
     public Page<MaterialAceitoResponseDTO> findAll(Pageable pageable) {
         Page<MaterialAceito> materialAceitos = rep.findAll(pageable);
         return materialAceitos.map(materialAceito -> new MaterialAceitoResponseDTO(
@@ -50,6 +51,7 @@ public class MaterialAceitoService {
                 materialAceito.getLimiteOpcional()
         ));
     }
+    @Transactional(readOnly = true)
     public Page<MaterialAceitoResponseDTO> findByIdPonto(Integer idPonto, Pageable pageable) {
         Page<MaterialAceito> materialAceitos = rep.findByPontoColeta_Id(idPonto, pageable);
         return materialAceitos.map(materialAceito -> new MaterialAceitoResponseDTO(

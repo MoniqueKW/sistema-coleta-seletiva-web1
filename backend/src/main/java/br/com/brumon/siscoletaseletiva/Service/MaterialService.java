@@ -11,7 +11,7 @@ import br.com.brumon.siscoletaseletiva.Exception.RegraNegocioException;
 import br.com.brumon.siscoletaseletiva.Repository.ItemSolicitacaoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialAceitoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class MaterialService {
         this.repItemSolicitacao = repItemSolicitacao;
         this.repMaterialAceito = repMaterialAceito;
     }
-
+    @Transactional(readOnly = true)
     public Page<MaterialResponseDTO> findAll(Pageable pageable) {
         Page<Material> page = rep.findAll(pageable);
         return page.map(material -> new MaterialResponseDTO(
@@ -42,6 +42,7 @@ public class MaterialService {
                         material.getSituacao())
                 );
     }
+    @Transactional(readOnly = true)
     public MaterialResponseDTO findByNome(String nome) {
         Material material = rep.findByNomeContainingIgnoreCase(nome).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
         return new MaterialResponseDTO(
@@ -53,6 +54,7 @@ public class MaterialService {
                 material.getSituacao()
         );
     }
+    @Transactional(readOnly = true)
     public MaterialResponseDTO findById(Integer id) {
         Material material = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
         return new MaterialResponseDTO(
@@ -64,6 +66,7 @@ public class MaterialService {
                 material.getSituacao()
         );
     }
+    @Transactional(readOnly = true)
     public List<MaterialResponseDTO> findBySituacao(SituacaoMaterial situacao) {
         List<Material> lista = rep.findBySituacao(situacao);
         return lista.stream()
