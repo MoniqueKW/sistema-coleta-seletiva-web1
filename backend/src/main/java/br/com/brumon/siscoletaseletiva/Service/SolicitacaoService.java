@@ -1,9 +1,6 @@
 package br.com.brumon.siscoletaseletiva.Service;
 
-import br.com.brumon.siscoletaseletiva.DTO.Request.AgendamentoRequestDTO;
-import br.com.brumon.siscoletaseletiva.DTO.Request.ItemSolicitacaoRequestDTO;
-import br.com.brumon.siscoletaseletiva.DTO.Request.SolicitacaoRequestDTO;
-import br.com.brumon.siscoletaseletiva.DTO.Request.SolicitacaoUpdateRequestDTO;
+import br.com.brumon.siscoletaseletiva.DTO.Request.*;
 import br.com.brumon.siscoletaseletiva.DTO.Response.ItemSolicitacaoResponseDTO;
 import br.com.brumon.siscoletaseletiva.DTO.Response.SolicitacaoResponseDTO;
 import br.com.brumon.siscoletaseletiva.Entity.*;
@@ -25,7 +22,6 @@ import java.util.*;
 @Service
 public class SolicitacaoService {
     private final SolicitacaoRepository rep;
-    private final HistoricoRepository repHistorico;
     private final ItemSolicitacaoRepository repItemSolicitacao;
     private final HistoricoService serviceHistorico;
     private final MoradorRepository repMorador;
@@ -34,7 +30,6 @@ public class SolicitacaoService {
     private final MaterialAceitoRepository repMaterialAceito;
     private final OperadorRepository repOperador;
     public SolicitacaoService(SolicitacaoRepository rep,
-                              HistoricoRepository repHistorico,
                               ItemSolicitacaoRepository repItemSolicitacao,
                               HistoricoService serviceHistorico,
                               MoradorRepository repMorador,
@@ -43,7 +38,6 @@ public class SolicitacaoService {
                               MaterialAceitoRepository repMaterialAceito,
                               OperadorRepository repOperador) {
         this.rep = rep;
-        this.repHistorico = repHistorico;
         this.repItemSolicitacao = repItemSolicitacao;
         this.serviceHistorico = serviceHistorico;
         this.repMorador = repMorador;
@@ -119,7 +113,7 @@ public class SolicitacaoService {
     }
 
     @Transactional
-    public SolicitacaoResponseDTO salvarSolicitacao(SolicitacaoRequestDTO solicitacaodto, Integer idOperador) {
+    public SolicitacaoResponseDTO salvarSolicitacao(SolicitacaoRequestDTO solicitacaodto) {
         Morador morador = repMorador.findById(solicitacaodto.idMorador())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
         PontoColeta ponto = repPonto.findById(solicitacaodto.idPonto())
@@ -127,7 +121,7 @@ public class SolicitacaoService {
         if (ponto.getSituacao() != SituacaoPonto.ATIVO) {
             throw new RegraNegocioException("O ponto de coleta não está ativo.");
         }
-        //verifica se o ponto permite recolhimento domiciliar, se for o caso
+
         if (solicitacaodto.recolhimentoDomiciliar() && !ponto.getRecolhimentoDomiciliar()) {
             throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
         }
@@ -202,7 +196,7 @@ public class SolicitacaoService {
                 solicitacao.getId(),
                 null,
                 solicitacao.getSituacao().name(),
-                idOperador,
+                null,
                 "Solicitação criada",
                 null);
         return converterParaDTO(solicitacao);
@@ -329,11 +323,11 @@ public class SolicitacaoService {
             throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
         }
         solicitacao.setRecolhimentoDomiciliar(recDomiciliarFinal);
-
         rep.save(solicitacao);
+        SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
         serviceHistorico.registrarHistorico(
                 solicitacao.getId(),
-                null,
+                situacaoAntiga.name(),
                 solicitacao.getSituacao().name(),
                 idOperador,
                 "Solicitação atualizada",
@@ -351,7 +345,7 @@ public class SolicitacaoService {
         if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
             throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
         }
-        if (agendamentodto.dataAgendamento() == null || agendamentodto.dataAgendamento().isBefore(LocalDateTime.now())) {
+        if (agendamentodto.dataAgendamento() == null || !agendamentodto.dataAgendamento().isAfter(LocalDateTime.now())) {
             throw new RegraNegocioException("A data do agendamento deve ser futura.");
         }
         solicitacao.setDataAgendamento(agendamentodto.dataAgendamento());
@@ -365,6 +359,175 @@ public class SolicitacaoService {
                 idOperador,
                 "Solicitação agendada",
                 null);
+        return converterParaDTO(solicitacao);
+    }
+
+    @Transactional
+    public SolicitacaoResponseDTO recusarSolicitacao (Integer id,  String motivo, Integer idOperador) {
+        Solicitacao solicitacao = rep.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
+        if (solicitacao.getSituacao() != SituacaoSolicitacao.SOLICITADA) {
+            throw new RegraNegocioException("A solicitação não pode ser recusada, pois não está mais na situação " +
+                    "SOLICITADA.");
+        }
+        Operador operador = repOperador.findById(idOperador).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+        if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
+            throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
+        }
+        if (motivo == null || motivo.isBlank()) {throw new RegraNegocioException("O motivo da recusa é obrigatório.");
+        }
+        SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
+        solicitacao.setSituacao(SituacaoSolicitacao.RECUSADA);
+        rep.save(solicitacao);
+        serviceHistorico.registrarHistorico(
+                solicitacao.getId(),
+                situacaoAntiga.name(),
+                solicitacao.getSituacao().name(),
+                idOperador,
+                motivo,
+                null);
+        return converterParaDTO(solicitacao);
+    }
+
+    @Transactional
+    public SolicitacaoResponseDTO iniciarRecolhimento(Integer id, Integer idOperador) {
+        Solicitacao solicitacao = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
+        if (solicitacao.getSituacao() != SituacaoSolicitacao.AGENDADA) {
+            throw new RegraNegocioException("A solicitação não pode ser iniciada, pois não está mais na situação AGENDADA.");
+        }
+        Operador operador = repOperador.findById(idOperador).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+        if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
+            throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
+        }
+        SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
+        solicitacao.setSituacao(SituacaoSolicitacao.EM_RECOLHIMENTO);
+        rep.save(solicitacao);
+        serviceHistorico.registrarHistorico(
+                solicitacao.getId(),
+                situacaoAntiga.name(),
+                solicitacao.getSituacao().name(),
+                idOperador,
+                "Solicitação iniciada (Em recolhimento)",
+                null);
+        return converterParaDTO(solicitacao);
+    }
+    @Transactional
+    public SolicitacaoResponseDTO cancelarSolicitacao(Integer id, String motivo, Integer idOperador) {
+        Solicitacao solicitacao = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
+        if (solicitacao.getSituacao() != SituacaoSolicitacao.AGENDADA && solicitacao.getSituacao() != SituacaoSolicitacao.SOLICITADA) {
+            throw new RegraNegocioException("A solicitação não pode ser cancelada, pois não está na situação " +
+                    "SOLICITADA ou AGENDADA.");
+        }
+        Operador operador = repOperador.findById(idOperador).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+        if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
+            throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
+        }
+        if (motivo == null || motivo.isBlank()) {
+            throw new RegraNegocioException("O motivo do cancelamento é obrigatório.");
+        }
+        SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
+        solicitacao.setSituacao(SituacaoSolicitacao.CANCELADA);
+        rep.save(solicitacao);
+        serviceHistorico.registrarHistorico(
+                solicitacao.getId(),
+                situacaoAntiga.name(),
+                solicitacao.getSituacao().name(),
+                idOperador,
+                motivo,
+                null);
+        return converterParaDTO(solicitacao);
+    }
+
+    @Transactional
+    public SolicitacaoResponseDTO concluirSolicitacao(Integer id, ConclusaoRequestDTO conclusaodto,
+                                                      Integer idOperador) {
+        Solicitacao solicitacao = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
+        if (solicitacao.getSituacao() != SituacaoSolicitacao.EM_RECOLHIMENTO) {
+            throw new RegraNegocioException("A solicitação não pode ser concluída, pois não está na situação EM " +
+                    "RECOLHIMENTO.");
+        }
+        Operador operador = repOperador.findById(idOperador).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+        if(!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
+            throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
+        }
+        if(conclusaodto.itens() == null || conclusaodto.itens().isEmpty()) {
+            throw new RegraNegocioException("A solicitação deve conter pelo menos um item.");
+        }
+        List<ItemSolicitacao> itensValidados = new ArrayList<>();
+        Set<Integer> materiaisAdicionados = new HashSet<>();
+        //atendendo aos requisitos do projeto, que pelo menos um item tem que ter a
+        //quantidade efetiva positiva
+        boolean existePositivo = false;
+        for(ItemConclusaoRequestDTO item : conclusaodto.itens()){
+            ItemSolicitacao itemSolicitacao = repItemSolicitacao.findBySolicitacao_IdAndMaterial_Id(solicitacao.getId(), item.idMaterial())
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Item da solicitação não encontrado"));
+            if(item.quantidadeEfetiva() == null || item.quantidadeEfetiva().compareTo(BigDecimal.ZERO) < 0) {
+                throw new RegraNegocioException("A quantidade efetiva do material deve ser maior ou igual a zero.");
+            }
+            if(!materiaisAdicionados.add(item.idMaterial())) {
+                throw new RegraNegocioException("O mesmo material não pode ser adicionado duas vezes à conclusão da solicitação.");
+            }
+            if (item.quantidadeEfetiva().compareTo(BigDecimal.ZERO) > 0) {
+                existePositivo = true;
+            }
+            itemSolicitacao.setQtdEfetiva(item.quantidadeEfetiva());
+            itensValidados.add(itemSolicitacao);
+            //e assim, com a conclusao da solicitacao,
+            // a tabela ItemSolicitacao é preenchida completamente
+        }
+        if (!existePositivo) {
+            throw new RegraNegocioException("A solicitação deve conter pelo menos um item com quantidade efetiva positiva.");
+        }
+        if (conclusaodto.itens().size() != solicitacao.getItens().size()) {
+            throw new RegraNegocioException("É necessário informar a quantidade efetiva de todos os itens da solicitação.");
+        }
+        repItemSolicitacao.saveAll(itensValidados);
+        SituacaoSolicitacao situacaoAnterior = solicitacao.getSituacao();
+        solicitacao.setSituacao(SituacaoSolicitacao.CONCLUIDA);
+        solicitacao.setDataConclusao(LocalDateTime.now());
+        rep.save(solicitacao);
+        serviceHistorico.registrarHistorico(
+                solicitacao.getId(),
+                situacaoAnterior.name(),
+                solicitacao.getSituacao().name(),
+                idOperador,
+                "Solicitação concluída",
+                null);
+        return converterParaDTO(solicitacao);
+    }
+    @Transactional
+    public SolicitacaoResponseDTO reagendarSolicitacao(Integer id, String motivo,
+                                                       String infoTentativa, AgendamentoRequestDTO agendamentodto,
+                                                       Integer idOperador) {
+        Solicitacao solicitacao = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
+        if (solicitacao.getSituacao() != SituacaoSolicitacao.EM_RECOLHIMENTO && solicitacao.getSituacao() != SituacaoSolicitacao.AGENDADA) {
+            throw new RegraNegocioException("A solicitação não pode ser reagendada, pois não está na situação " +
+                    "EM RECOLHIMENTO ou AGENDADA.");
+        }
+        Operador operador = repOperador.findById(idOperador).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+        if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
+            throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
+        }
+        if (agendamentodto.dataAgendamento() == null || !agendamentodto.dataAgendamento().isAfter(LocalDateTime.now())) {
+            throw new RegraNegocioException("A nova data do agendamento deve ser futura.");
+        }
+        if (motivo == null || motivo.isBlank()) {
+            throw new RegraNegocioException("A justificativa do reagendamento é obrigatória.");
+        }
+        if (infoTentativa == null || infoTentativa.isBlank()) {throw new RegraNegocioException("A informação da tentativa é " +
+                "obrigatória.");
+        }
+        SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
+        solicitacao.setSituacao(SituacaoSolicitacao.AGENDADA);
+        solicitacao.setDataAgendamento(agendamentodto.dataAgendamento());
+        rep.save(solicitacao);
+        serviceHistorico.registrarHistorico(
+                solicitacao.getId(),
+                situacaoAntiga.name(),
+                solicitacao.getSituacao().name(),
+                idOperador,
+                motivo,
+                infoTentativa);
         return converterParaDTO(solicitacao);
     }
 

@@ -22,7 +22,7 @@ public record SolicitacaoResponseDTO(
         LocalDateTime dataAgendamento,
         LocalDateTime dataConclusao,
         String observacoes,
-        boolean receolhimentoDomiciliar,
+        Boolean receolhimentoDomiciliar,
         Integer versao,
         List<ItemSolicitacaoResponseDTO> itens
 ) {
