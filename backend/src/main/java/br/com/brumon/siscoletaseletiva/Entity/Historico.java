@@ -26,8 +26,12 @@ public class Historico {
     private String situacaoNova;
     @Column(name = "data", nullable = false, insertable = false, updatable = false)
     private LocalDateTime data;
-    @Column(name = "responsavel", length = 150, nullable = false)
-    private String responsavel;
+    //Decidimos usar Operador para representar quem foi diretamente o responsável
+    //por cada alteração no histórico, podendo ser nulo caso tenha sido alterado por
+    //um morador, assim como diz nos requisitos
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_operador")
+    private Operador responsavel;
     @Column(name = "motivo", columnDefinition = "TEXT")
     private String motivo;
     @Column(name = "info_tentativa", columnDefinition = "TEXT")

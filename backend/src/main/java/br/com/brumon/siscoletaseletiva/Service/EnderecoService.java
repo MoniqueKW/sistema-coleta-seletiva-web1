@@ -6,7 +6,7 @@ import br.com.brumon.siscoletaseletiva.Entity.Endereco;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.Repository.EnderecoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.MoradorRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,140 +19,46 @@ public class EnderecoService {
         this.rep = rep;
         this.repMorador = repMorador;
     }
-
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findAll(Pageable pageable) {
-        Page<Endereco> page = rep.findAll(pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Não há endereços cadastrados");
-        }
-        return page.map(endereco -> new EnderecoResponseDTO(
-                endereco.getId(),
-                endereco.getMorador().getId(),
-                endereco.getLogradouro(),
-                endereco.getNumero(),
-                endereco.getComplemento(),
-                endereco.getBairro(),
-                endereco.getMunicipio(),
-                endereco.getUf(),
-                endereco.getCep()
-        ));
+        Page<Endereco> enderecos = rep.findAll(pageable);
+        return enderecos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public EnderecoResponseDTO findById(Integer id) {
         Endereco endereco = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Endereço não " +
                 "encontrado"));
-        return new EnderecoResponseDTO(
-                endereco.getId(),
-                endereco.getMorador().getId(),
-                endereco.getLogradouro(),
-                endereco.getNumero(),
-                endereco.getComplemento(),
-                endereco.getBairro(),
-                endereco.getMunicipio(),
-                endereco.getUf(),
-                endereco.getCep()
-        );
+        return converterParaDTO(endereco);
     }
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findByMoradorId(Integer idMorador, Pageable pageable) {
-        Page<Endereco> page = rep.findByMorador_Id(idMorador, pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Não há endereços cadastrados para o morador informado");
-        }
-        return page.map(endereco -> new EnderecoResponseDTO(
-                endereco.getId(),
-                endereco.getMorador().getId(),
-                endereco.getLogradouro(),
-                endereco.getNumero(),
-                endereco.getComplemento(),
-                endereco.getBairro(),
-                endereco.getMunicipio(),
-                endereco.getUf(),
-                endereco.getCep()
-        ));
+        Page<Endereco> enderecos = rep.findByMorador_Id(idMorador, pageable);
+        return enderecos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findByCep(String cep, Pageable pageable) {
-        Page<Endereco> page = rep.findByCep(cep, pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Endereço não encontrado");
-        }
-        return page.map(endereco -> new EnderecoResponseDTO(
-                endereco.getId(),
-                endereco.getMorador().getId(),
-                endereco.getLogradouro(),
-                endereco.getNumero(),
-                endereco.getComplemento(),
-                endereco.getBairro(),
-                endereco.getMunicipio(),
-                endereco.getUf(),
-                endereco.getCep()
-        ));
+        Page<Endereco> enderecos = rep.findByCep(cep, pageable);
+        return enderecos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findByUf(String uf, Pageable pageable) {
-        Page<Endereco> page = rep.findByUfContainingIgnoreCase(uf, pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Endereço não encontrado");
-        }
-        return page.map(endereco -> new EnderecoResponseDTO(
-                endereco.getId(),
-                endereco.getMorador().getId(),
-                endereco.getLogradouro(),
-                endereco.getNumero(),
-                endereco.getComplemento(),
-                endereco.getBairro(),
-                endereco.getMunicipio(),
-                endereco.getUf(),
-                endereco.getCep()
-        ));
+        Page<Endereco> enderecos = rep.findByUfContainingIgnoreCase(uf, pageable);
+        return enderecos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findByMunicipio(String municipio, Pageable pageable) {
-        Page<Endereco> page = rep.findByMunicipioContainingIgnoreCase(municipio, pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Endereço não encontrado");
-        }
-        return page.map(endereco -> new EnderecoResponseDTO(
-                endereco.getId(),
-                endereco.getMorador().getId(),
-                endereco.getLogradouro(),
-                endereco.getNumero(),
-                endereco.getComplemento(),
-                endereco.getBairro(),
-                endereco.getMunicipio(),
-                endereco.getUf(),
-                endereco.getCep()
-        ));
+        Page<Endereco> enderecos = rep.findByMunicipioContainingIgnoreCase(municipio, pageable);
+        return enderecos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findByBairro(String bairro, Pageable pageable) {
-        Page<Endereco> page = rep.findByBairroContainingIgnoreCase(bairro, pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Endereço não encontrado");
-        }
-        return page.map(endereco -> new EnderecoResponseDTO(
-                endereco.getId(),
-                endereco.getMorador().getId(),
-                endereco.getLogradouro(),
-                endereco.getNumero(),
-                endereco.getComplemento(),
-                endereco.getBairro(),
-                endereco.getMunicipio(),
-                endereco.getUf(),
-                endereco.getCep()
-        ));
+        Page<Endereco> enderecos = rep.findByBairroContainingIgnoreCase(bairro, pageable);
+        return enderecos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public Page<EnderecoResponseDTO> findByLogradouro(String logradouro, Pageable pageable) {
-        Page<Endereco> page = rep.findByLogradouroContainingIgnoreCase(logradouro, pageable);
-        if (page.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Endereço não encontrado");
-        }
-        return page.map(endereco -> new EnderecoResponseDTO(
-                endereco.getId(),
-                endereco.getMorador().getId(),
-                endereco.getLogradouro(),
-                endereco.getNumero(),
-                endereco.getComplemento(),
-                endereco.getBairro(),
-                endereco.getMunicipio(),
-                endereco.getUf(),
-                endereco.getCep()
-        ));
+        Page<Endereco> enderecos = rep.findByLogradouroContainingIgnoreCase(logradouro, pageable);
+        return enderecos.map(this::converterParaDTO);
     }
     @Transactional
     public EnderecoResponseDTO salvarEndereco(EnderecoRequestDTO enderecodto) {
@@ -166,17 +72,7 @@ public class EnderecoService {
                 .uf(enderecodto.uf())
                 .cep(enderecodto.cep())
                 .build());
-        return new EnderecoResponseDTO(
-                endereco.getId(),
-                endereco.getMorador().getId(),
-                endereco.getLogradouro(),
-                endereco.getNumero(),
-                endereco.getComplemento(),
-                endereco.getBairro(),
-                endereco.getMunicipio(),
-                endereco.getUf(),
-                endereco.getCep()
-        );
+        return converterParaDTO(endereco);
     }
     @Transactional
     public EnderecoResponseDTO atualizarEndereco(Integer id, EnderecoRequestDTO enderecodto) {
@@ -189,17 +85,7 @@ public class EnderecoService {
         endereco.setUf(enderecodto.uf());
         endereco.setCep(enderecodto.cep());
         Endereco enderecoSalvo = rep.save(endereco);
-        return new EnderecoResponseDTO(
-                enderecoSalvo.getId(),
-                enderecoSalvo.getMorador().getId(),
-                enderecoSalvo.getLogradouro(),
-                enderecoSalvo.getNumero(),
-                enderecoSalvo.getComplemento(),
-                enderecoSalvo.getBairro(),
-                enderecoSalvo.getMunicipio(),
-                enderecoSalvo.getUf(),
-                enderecoSalvo.getCep()
-        );
+        return converterParaDTO(enderecoSalvo);
     }
     @Transactional
     public void deleteByMorador_id(Integer idMorador) {
@@ -215,5 +101,19 @@ public class EnderecoService {
     public void deleteById(Integer id) {
        Endereco endereco = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Endereço não encontrado"));
        rep.delete(endereco);
+    }
+
+    public EnderecoResponseDTO converterParaDTO(Endereco endereco) {
+        return new EnderecoResponseDTO(
+                endereco.getId(),
+                endereco.getMorador().getId(),
+                endereco.getLogradouro(),
+                endereco.getNumero(),
+                endereco.getComplemento(),
+                endereco.getBairro(),
+                endereco.getMunicipio(),
+                endereco.getUf(),
+                endereco.getCep()
+        );
     }
 }

@@ -1,5 +1,7 @@
 package br.com.brumon.siscoletaseletiva.DTO.Response;
 
+import br.com.brumon.siscoletaseletiva.Enum.SituacaoSolicitacao;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,10 +17,12 @@ public record SolicitacaoResponseDTO(
         String copiaUf,
         String copiaCep,
         String copiaComplemento,
-        String situacao,
+        SituacaoSolicitacao situacao,
         LocalDateTime dataCriacao,
+        LocalDateTime dataAgendamento,
         LocalDateTime dataConclusao,
         String observacoes,
+        Boolean receolhimentoDomiciliar,
         Integer versao,
         List<ItemSolicitacaoResponseDTO> itens
 ) {

@@ -4,18 +4,15 @@ import br.com.brumon.siscoletaseletiva.DTO.Request.OperadorRequestDTO;
 import br.com.brumon.siscoletaseletiva.DTO.Response.OperadorResponseDTO;
 import br.com.brumon.siscoletaseletiva.Entity.Operador;
 import br.com.brumon.siscoletaseletiva.Entity.PontoColeta;
-import br.com.brumon.siscoletaseletiva.Enum.SituacaoPonto;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoDuplicadoException;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.Exception.RegraNegocioException;
 import br.com.brumon.siscoletaseletiva.Repository.OperadorRepository;
 import br.com.brumon.siscoletaseletiva.Repository.PontoColetaRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class OperadorService {
@@ -26,42 +23,23 @@ public class OperadorService {
         this.pontoRep = pontoRep;
     }
 
+    @Transactional(readOnly = true)
     public Page<OperadorResponseDTO> findAll(Pageable pageable) {
         Page<Operador> operadores = rep.findAll(pageable);
-        if (operadores.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Nenhum operador cadastrado");
-        }
-        return operadores
-                .map(operador -> new OperadorResponseDTO(
-                        operador.getId(),
-                        operador.getPontoColeta().getId(),
-                        operador.getNome(),
-                        operador.getEmail()
-                ));
+        return operadores.map(this::converterParaDTO);
     }
 
+    @Transactional(readOnly = true)
     public OperadorResponseDTO findById(Integer id) {
         Operador operador = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não " +
                 "encontrado"));
-        return new OperadorResponseDTO(
-                operador.getId(),
-                operador.getPontoColeta().getId(),
-                operador.getNome(),
-                operador.getEmail()
-        );
+        return converterParaDTO(operador);
     }
 
+    @Transactional(readOnly = true)
     public Page<OperadorResponseDTO> findByPontoColetaId(Integer idPonto, Pageable pageable) {
         Page<Operador> operadores = rep.findByPontoColeta_Id(idPonto, pageable);
-        if (operadores.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Nenhum operador encontrado para este ponto de coleta");
-        }
-        return operadores.map(operador -> new OperadorResponseDTO(
-                operador.getId(),
-                operador.getPontoColeta().getId(),
-                operador.getNome(),
-                operador.getEmail()
-        ));
+        return operadores.map(this::converterParaDTO);
     }
 
     @Transactional
@@ -78,12 +56,7 @@ public class OperadorService {
                 .nome(dto.nome())
                 .email(emailPadrao)
                 .build());
-        return new OperadorResponseDTO(
-                operador.getId(),
-                operador.getPontoColeta().getId(),
-                operador.getNome(),
-                operador.getEmail()
-        );
+        return converterParaDTO(operador);
     }
 
     @Transactional
@@ -100,12 +73,7 @@ public class OperadorService {
         operador.setNome(dto.nome());
         operador.setEmail(emailPadrao);
         Operador atualizado = rep.save(operador);
-        return new OperadorResponseDTO(
-                atualizado.getId(),
-                atualizado.getPontoColeta().getId(),
-                atualizado.getNome(),
-                atualizado.getEmail()
-        );
+        return converterParaDTO(atualizado);
     }
 
     @Transactional
@@ -121,5 +89,13 @@ public class OperadorService {
             );
         }
         rep.delete(operador);
+    }
+    public OperadorResponseDTO converterParaDTO(Operador operador) {
+        return new OperadorResponseDTO(
+                operador.getId(),
+                operador.getPontoColeta().getId(),
+                operador.getNome(),
+                operador.getEmail()
+        );
     }
 }

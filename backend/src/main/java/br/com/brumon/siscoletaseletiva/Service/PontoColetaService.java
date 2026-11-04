@@ -11,7 +11,7 @@ import br.com.brumon.siscoletaseletiva.Exception.RegraNegocioException;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialAceitoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.PontoColetaRepository;
 import br.com.brumon.siscoletaseletiva.Repository.SolicitacaoRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,192 +28,50 @@ public class PontoColetaService {
         this.repSolicitacao = repSolicitacao;
         this.repMaterialAceito = repMaterialAceito;
     }
-
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findAll(Pageable pageable) {
         Page<PontoColeta> pontos = rep.findAll(pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Não há pontos de coleta cadastrados");
-        }
-        return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
-                        pontoColeta.getId(),
-                        pontoColeta.getNome(),
-                        pontoColeta.getCep(),
-                        pontoColeta.getMunicipio(),
-                        pontoColeta.getUf(),
-                        pontoColeta.getBairro(),
-                        pontoColeta.getLogradouro(),
-                        pontoColeta.getNumero(),
-                        pontoColeta.getComplemento(),
-                        pontoColeta.getContato(),
-                        pontoColeta.getHorarios(),
-                        pontoColeta.getSituacao(),
-                        pontoColeta.getRecolhimentoDomiciliar()
-                ));
+        return pontos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public PontoColetaResponseDTO findById(Integer id) {
         PontoColeta ponto = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
-        return new PontoColetaResponseDTO(
-                ponto.getId(),
-                ponto.getNome(),
-                ponto.getCep(),
-                ponto.getMunicipio(),
-                ponto.getUf(),
-                ponto.getBairro(),
-                ponto.getLogradouro(),
-                ponto.getNumero(),
-                ponto.getComplemento(),
-                ponto.getContato(),
-                ponto.getHorarios(),
-                ponto.getSituacao(),
-                ponto.getRecolhimentoDomiciliar()
-        );
+        return converterParaDTO(ponto);
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findByNome(String nome, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByNomeContainingIgnoreCase(nome, pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
-        return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
-                pontoColeta.getId(),
-                pontoColeta.getNome(),
-                pontoColeta.getCep(),
-                pontoColeta.getMunicipio(),
-                pontoColeta.getUf(),
-                pontoColeta.getBairro(),
-                pontoColeta.getLogradouro(),
-                pontoColeta.getNumero(),
-                pontoColeta.getComplemento(),
-                pontoColeta.getContato(),
-                pontoColeta.getHorarios(),
-                pontoColeta.getSituacao(),
-                pontoColeta.getRecolhimentoDomiciliar()
-        ));
+        return pontos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findByCep(String cep, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByCep(cep, pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
-        return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
-                pontoColeta.getId(),
-                pontoColeta.getNome(),
-                pontoColeta.getCep(),
-                pontoColeta.getMunicipio(),
-                pontoColeta.getUf(),
-                pontoColeta.getBairro(),
-                pontoColeta.getLogradouro(),
-                pontoColeta.getNumero(),
-                pontoColeta.getComplemento(),
-                pontoColeta.getContato(),
-                pontoColeta.getHorarios(),
-                pontoColeta.getSituacao(),
-                pontoColeta.getRecolhimentoDomiciliar()
-        ));
+        return pontos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findByMunicipio(String municipio, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByMunicipioIgnoreCase(municipio, pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
-        return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
-                pontoColeta.getId(),
-                pontoColeta.getNome(),
-                pontoColeta.getCep(),
-                pontoColeta.getMunicipio(),
-                pontoColeta.getUf(),
-                pontoColeta.getBairro(),
-                pontoColeta.getLogradouro(),
-                pontoColeta.getNumero(),
-                pontoColeta.getComplemento(),
-                pontoColeta.getContato(),
-                pontoColeta.getHorarios(),
-                pontoColeta.getSituacao(),
-                pontoColeta.getRecolhimentoDomiciliar()
-        ));
+        return pontos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findByUf(String uf, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByUf(uf.toUpperCase(), pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
-        return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
-                pontoColeta.getId(),
-                pontoColeta.getNome(),
-                pontoColeta.getCep(),
-                pontoColeta.getMunicipio(),
-                pontoColeta.getUf(),
-                pontoColeta.getBairro(),
-                pontoColeta.getLogradouro(),
-                pontoColeta.getNumero(),
-                pontoColeta.getComplemento(),
-                pontoColeta.getContato(),
-                pontoColeta.getHorarios(),
-                pontoColeta.getSituacao(),
-                pontoColeta.getRecolhimentoDomiciliar()
-        ));
+        return pontos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findByBairro(String bairro, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByBairro(bairro, pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
-        return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
-                pontoColeta.getId(),
-                pontoColeta.getNome(),
-                pontoColeta.getCep(),
-                pontoColeta.getMunicipio(),
-                pontoColeta.getUf(),
-                pontoColeta.getBairro(),
-                pontoColeta.getLogradouro(),
-                pontoColeta.getNumero(),
-                pontoColeta.getComplemento(),
-                pontoColeta.getContato(),
-                pontoColeta.getHorarios(),
-                pontoColeta.getSituacao(),
-                pontoColeta.getRecolhimentoDomiciliar()
-        ));
+        return pontos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findBySituacao(SituacaoPonto situacaodto, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findBySituacao(situacaodto, pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
-        return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
-                pontoColeta.getId(),
-                pontoColeta.getNome(),
-                pontoColeta.getCep(),
-                pontoColeta.getMunicipio(),
-                pontoColeta.getUf(),
-                pontoColeta.getBairro(),
-                pontoColeta.getLogradouro(),
-                pontoColeta.getNumero(),
-                pontoColeta.getComplemento(),
-                pontoColeta.getContato(),
-                pontoColeta.getHorarios(),
-                pontoColeta.getSituacao(),
-                pontoColeta.getRecolhimentoDomiciliar()
-        ));
+        return pontos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> findByRecolhimentoDomiciliar(Boolean recolhimentoDomiciliar, Pageable pageable) {
         Page<PontoColeta> pontos = rep.findByRecolhimentoDomiciliar(recolhimentoDomiciliar, pageable);
-        if (pontos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Ponto de coleta não encontrado");
-        }
-        return pontos.map(pontoColeta -> new PontoColetaResponseDTO(
-                pontoColeta.getId(),
-                pontoColeta.getNome(),
-                pontoColeta.getCep(),
-                pontoColeta.getMunicipio(),
-                pontoColeta.getUf(),
-                pontoColeta.getBairro(),
-                pontoColeta.getLogradouro(),
-                pontoColeta.getNumero(),
-                pontoColeta.getComplemento(),
-                pontoColeta.getContato(),
-                pontoColeta.getHorarios(),
-                pontoColeta.getSituacao(),
-                pontoColeta.getRecolhimentoDomiciliar()
-        ));
+        return pontos.map(this::converterParaDTO);
     }
     @Transactional
     public PontoColetaResponseDTO salvarPontoColeta(PontoColetaRequestDTO pontodto) {
@@ -231,21 +89,7 @@ public class PontoColetaService {
                 .situacao(SituacaoPonto.ATIVO)
                 .recolhimentoDomiciliar(pontodto.recolhimentoDomiciliar())
                 .build());
-        return new PontoColetaResponseDTO(
-                ponto.getId(),
-                ponto.getNome(),
-                ponto.getCep(),
-                ponto.getMunicipio(),
-                ponto.getUf(),
-                ponto.getBairro(),
-                ponto.getLogradouro(),
-                ponto.getNumero(),
-                ponto.getComplemento(),
-                ponto.getContato(),
-                ponto.getHorarios(),
-                ponto.getSituacao(),
-                ponto.getRecolhimentoDomiciliar()
-        );
+        return converterParaDTO(ponto);
     }
     @Transactional
     public PontoColetaResponseDTO atualizarPontoColeta(Integer id, PontoColetaRequestDTO pontodto){
@@ -262,21 +106,7 @@ public class PontoColetaService {
         ponto.setHorarios(pontodto.horarios());
         ponto.setRecolhimentoDomiciliar(pontodto.recolhimentoDomiciliar());
         PontoColeta pontoSalvo = rep.save(ponto);
-        return new PontoColetaResponseDTO(
-                pontoSalvo.getId(),
-                pontoSalvo.getNome(),
-                pontoSalvo.getCep(),
-                pontoSalvo.getMunicipio(),
-                pontoSalvo.getUf(),
-                pontoSalvo.getBairro(),
-                pontoSalvo.getLogradouro(),
-                pontoSalvo.getNumero(),
-                pontoSalvo.getComplemento(),
-                pontoSalvo.getContato(),
-                pontoSalvo.getHorarios(),
-                pontoSalvo.getSituacao(),
-                pontoSalvo.getRecolhimentoDomiciliar()
-        );
+        return converterParaDTO(pontoSalvo);
     }
     @Transactional
     public PontoColetaResponseDTO alterarSituacao(Integer id, AlterarSituacaoPontoRequestDTO situacaodto) {
@@ -296,21 +126,7 @@ public class PontoColetaService {
         }
         ponto.setSituacao(situacaodto.situacao());
         PontoColeta pontoSalvo = rep.save(ponto);
-        return new PontoColetaResponseDTO(
-                pontoSalvo.getId(),
-                pontoSalvo.getNome(),
-                pontoSalvo.getCep(),
-                pontoSalvo.getMunicipio(),
-                pontoSalvo.getUf(),
-                pontoSalvo.getBairro(),
-                pontoSalvo.getLogradouro(),
-                pontoSalvo.getNumero(),
-                pontoSalvo.getComplemento(),
-                pontoSalvo.getContato(),
-                pontoSalvo.getHorarios(),
-                pontoSalvo.getSituacao(),
-                pontoSalvo.getRecolhimentoDomiciliar()
-        );
+        return converterParaDTO(pontoSalvo);
     }
     //apaga se nao tiver associacoes (ou seja, so pra testar)
     @Transactional
@@ -328,5 +144,23 @@ public class PontoColetaService {
             throw new RegraNegocioException("Não é possível excluir o ponto, pois existem solicitações associadas a ele.");
         }
         rep.delete(ponto);
+    }
+
+    public PontoColetaResponseDTO converterParaDTO(PontoColeta ponto) {
+        return new PontoColetaResponseDTO(
+                ponto.getId(),
+                ponto.getNome(),
+                ponto.getCep(),
+                ponto.getMunicipio(),
+                ponto.getUf(),
+                ponto.getBairro(),
+                ponto.getLogradouro(),
+                ponto.getNumero(),
+                ponto.getComplemento(),
+                ponto.getContato(),
+                ponto.getHorarios(),
+                ponto.getSituacao(),
+                ponto.getRecolhimentoDomiciliar()
+        );
     }
 }

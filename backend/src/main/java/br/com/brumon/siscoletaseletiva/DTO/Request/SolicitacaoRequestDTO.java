@@ -11,9 +11,6 @@ public record SolicitacaoRequestDTO(
         @NotNull
         Integer idPonto,
         @NotBlank
-        @Size(max = 50)
-        String protocoloUnico,
-        @NotBlank
         @Size(max = 150)
         String copiaLogradouro,
         @NotBlank
@@ -38,6 +35,8 @@ public record SolicitacaoRequestDTO(
         LocalDateTime dataAgendamento,
         @Size(max = 255)
         String observacoes,
+        @NotNull
+        Boolean recolhimentoDomiciliar,
         @NotEmpty
         List<@Valid ItemSolicitacaoRequestDTO> itens
 ) {

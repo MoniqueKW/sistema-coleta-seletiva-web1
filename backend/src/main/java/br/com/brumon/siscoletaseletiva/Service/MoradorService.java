@@ -8,10 +8,11 @@ import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.Exception.RegraNegocioException;
 import br.com.brumon.siscoletaseletiva.Repository.MoradorRepository;
 import br.com.brumon.siscoletaseletiva.Repository.SolicitacaoRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class MoradorService {
@@ -21,63 +22,30 @@ public class MoradorService {
         this.rep = rep;
         this.repSolicitacao = repSolicitacao;
     }
-
-    public List<MoradorResponseDTO> findAll() {
-        List<Morador> lista = rep.findAll();
-        if (lista.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Nenhum morador cadastrado");
-        }
-        return lista.stream()
-                .map(morador -> new MoradorResponseDTO(
-                    morador.getId(),
-                    morador.getNome(),
-                    morador.getEmail(),
-                    morador.getTelefone()
-                ))
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<MoradorResponseDTO> findAll(Pageable pageable) {
+        Page<Morador> lista = rep.findAll(pageable);
+        return lista.map(this::converterParaDTO);
     }
-
+    @Transactional(readOnly = true)
     public MoradorResponseDTO findById(Integer id) {
         Morador morador = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
-        return new MoradorResponseDTO(
-                morador.getId(),
-                morador.getNome(),
-                morador.getEmail(),
-                morador.getTelefone()
-        );
+        return converterParaDTO(morador);
     }
-
-    public List<MoradorResponseDTO> findByNome(String nome) {
-        List<Morador> lista = rep.findByNomeContainingIgnoreCase(nome);
-        if (lista.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Morador não encontrado");
-        }
-        return lista.stream()
-                .map(morador -> new MoradorResponseDTO(
-                        morador.getId(),
-                        morador.getNome(),
-                        morador.getEmail(),
-                        morador.getTelefone()
-                ))
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<MoradorResponseDTO> findByNome(String nome, Pageable pageable) {
+        Page<Morador> lista = rep.findByNomeContainingIgnoreCase(nome, pageable);
+        return lista.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public MoradorResponseDTO findByEmail(String email) {
         Morador morador = rep.findByEmail(email).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
-        return new MoradorResponseDTO(
-                morador.getId(),
-                morador.getNome(),
-                morador.getEmail(),
-                morador.getTelefone()
-        );
+        return converterParaDTO(morador);
     }
+    @Transactional(readOnly = true)
     public MoradorResponseDTO findByTelefone(String telefone) {
         Morador morador = rep.findByTelefone(telefone).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
-        return new MoradorResponseDTO(
-                morador.getId(),
-                morador.getNome(),
-                morador.getEmail(),
-                morador.getTelefone()
-        );
+        return converterParaDTO(morador);
     }
     @Transactional
     public MoradorResponseDTO salvarMorador(MoradorRequestDTO moradordto) {
@@ -91,12 +59,7 @@ public class MoradorService {
                 .email(emailPadrao)
                 .telefone(moradordto.telefone())
                 .build());
-        return new MoradorResponseDTO(
-                morador.getId(),
-                morador.getNome(),
-                morador.getEmail(),
-                morador.getTelefone()
-        );
+        return converterParaDTO(morador);
     }
     @Transactional
         public MoradorResponseDTO atualizarMorador(MoradorRequestDTO moradordto, Integer id) {
@@ -109,12 +72,7 @@ public class MoradorService {
             morador.setEmail(emailPadrao);
             morador.setTelefone(moradordto.telefone());
             Morador moradorSalvo = rep.save(morador);
-            return new MoradorResponseDTO(
-                    moradorSalvo.getId(),
-                    moradorSalvo.getNome(),
-                    moradorSalvo.getEmail(),
-                    moradorSalvo.getTelefone()
-            );
+            return converterParaDTO(moradorSalvo);
     }
     //so deleta se nao tiver nenhuma solicitacao vinculada
     @Transactional
@@ -129,5 +87,14 @@ public class MoradorService {
             );
         }
         rep.delete(morador);
+    }
+
+    public MoradorResponseDTO converterParaDTO(Morador morador) {
+        return new MoradorResponseDTO(
+                morador.getId(),
+                morador.getNome(),
+                morador.getEmail(),
+                morador.getTelefone()
+        );
     }
 }

@@ -15,7 +15,7 @@ import br.com.brumon.siscoletaseletiva.Repository.ItemSolicitacaoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialAceitoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.MaterialRepository;
 import br.com.brumon.siscoletaseletiva.Repository.PontoColetaRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,31 +40,15 @@ public class MaterialAceitoService {
         this.repPonto = repPonto;
         this.repItemSolicitacao = repItemSolicitacao;
     }
+    @Transactional(readOnly = true)
     public Page<MaterialAceitoResponseDTO> findAll(Pageable pageable) {
-        Page<MaterialAceito> materialAceitos = rep.findAll(pageable);
-        if (materialAceitos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Não há materiais aceitos cadastrados");
-        }
-        return materialAceitos.map(materialAceito -> new MaterialAceitoResponseDTO(
-                materialAceito.getPontoColeta().getId(),
-                materialAceito.getMaterial().getId(),
-                materialAceito.getMaterial().getNome(),
-                materialAceito.getObservacoes(),
-                materialAceito.getLimiteOpcional()
-        ));
+        Page<MaterialAceito> materiaisAceitos = rep.findAll(pageable);
+        return materiaisAceitos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
     public Page<MaterialAceitoResponseDTO> findByIdPonto(Integer idPonto, Pageable pageable) {
-        Page<MaterialAceito> materialAceitos = rep.findByPontoColeta_Id(idPonto, pageable);
-        if (materialAceitos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Não há materiais aceitos cadastrados para o ponto de coleta informado");
-        }
-        return materialAceitos.map(materialAceito -> new MaterialAceitoResponseDTO(
-                materialAceito.getPontoColeta().getId(),
-                materialAceito.getMaterial().getId(),
-                materialAceito.getMaterial().getNome(),
-                materialAceito.getObservacoes(),
-                materialAceito.getLimiteOpcional()
-        ));
+        Page<MaterialAceito> materiaisAceitos = rep.findByPontoColeta_Id(idPonto, pageable);
+        return materiaisAceitos.map(this::converterParaDTO);
     }
     @Transactional
     public MaterialAceitoResponseDTO associarMaterial(Integer idPonto, MaterialAceitoRequestDTO dto) {
@@ -89,13 +73,7 @@ public class MaterialAceitoService {
                 .observacoes(dto.observacoes())
                 .limiteOpcional(dto.limiteOpcional())
                 .build());
-        return new MaterialAceitoResponseDTO(
-                materialAceito.getPontoColeta().getId(),
-                materialAceito.getMaterial().getId(),
-                materialAceito.getMaterial().getNome(),
-                materialAceito.getObservacoes(),
-                materialAceito.getLimiteOpcional()
-        );
+        return converterParaDTO(materialAceito);
     }
     @Transactional
     public MaterialAceitoResponseDTO atualizarMaterialAceito(Integer idPonto,
@@ -106,13 +84,7 @@ public class MaterialAceitoService {
         materialAceito.setObservacoes(dto.observacoes());
         materialAceito.setLimiteOpcional(dto.limiteOpcional());
         MaterialAceito salvo = rep.save(materialAceito);
-        return new MaterialAceitoResponseDTO(
-                salvo.getPontoColeta().getId(),
-                salvo.getMaterial().getId(),
-                salvo.getMaterial().getNome(),
-                salvo.getObservacoes(),
-                salvo.getLimiteOpcional()
-        );
+        return converterParaDTO(salvo);
     }
     @Transactional
     public void deleteByPontoColeta_IdAndMaterial_Id(Integer idPonto, Integer idMaterial) {
@@ -149,5 +121,15 @@ public class MaterialAceitoService {
             throw new RecursoNaoEncontradoException("Associação de material não encontrada");
         }
         return associarMaterial(idPonto, dto);
+    }
+
+    public MaterialAceitoResponseDTO converterParaDTO(MaterialAceito materialAceito) {
+        return new MaterialAceitoResponseDTO(
+                materialAceito.getPontoColeta().getId(),
+                materialAceito.getMaterial().getId(),
+                materialAceito.getMaterial().getNome(),
+                materialAceito.getObservacoes(),
+                materialAceito.getLimiteOpcional()
+        );
     }
 }
