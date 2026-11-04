@@ -32,53 +32,23 @@ public class MaterialService {
     }
     @Transactional(readOnly = true)
     public Page<MaterialResponseDTO> findAll(Pageable pageable) {
-        Page<Material> page = rep.findAll(pageable);
-        return page.map(material -> new MaterialResponseDTO(
-                material.getId(),
-                material.getNome(),
-                        material.getUnidade(),
-                        material.getDescricao(),
-                        material.getOrientacao(),
-                        material.getSituacao())
-                );
+        Page<Material> materiais = rep.findAll(pageable);
+        return materiais.map(this::converterParaDTO);
     }
     @Transactional(readOnly = true)
     public MaterialResponseDTO findByNome(String nome) {
         Material material = rep.findByNomeContainingIgnoreCase(nome).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
-        return new MaterialResponseDTO(
-                material.getId(),
-                material.getNome(),
-                material.getUnidade(),
-                material.getDescricao(),
-                material.getOrientacao(),
-                material.getSituacao()
-        );
+        return converterParaDTO(material);
     }
     @Transactional(readOnly = true)
     public MaterialResponseDTO findById(Integer id) {
         Material material = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
-        return new MaterialResponseDTO(
-                material.getId(),
-                material.getNome(),
-                material.getUnidade(),
-                material.getDescricao(),
-                material.getOrientacao(),
-                material.getSituacao()
-        );
+        return converterParaDTO(material);
     }
     @Transactional(readOnly = true)
-    public List<MaterialResponseDTO> findBySituacao(SituacaoMaterial situacao) {
-        List<Material> lista = rep.findBySituacao(situacao);
-        return lista.stream()
-                .map(material -> new MaterialResponseDTO(
-                        material.getId(),
-                        material.getNome(),
-                        material.getUnidade(),
-                        material.getDescricao(),
-                        material.getOrientacao(),
-                        material.getSituacao()
-                ))
-                .toList();
+    public Page<MaterialResponseDTO> findBySituacao(SituacaoMaterial situacao, Pageable pageable) {
+        Page<Material> materiais = rep.findBySituacao(situacao, pageable);
+        return materiais.map(this::converterParaDTO);
     }
     @Transactional
     public MaterialResponseDTO salvarMaterial(MaterialRequestDTO materialdto) {
@@ -92,15 +62,9 @@ public class MaterialService {
                 .orientacao(materialdto.orientacao())
                 .situacao(SituacaoMaterial.ATIVO)
                 .build());
-        return new MaterialResponseDTO(
-                material.getId(),
-                material.getNome(),
-                material.getUnidade(),
-                material.getDescricao(),
-                material.getOrientacao(),
-                material.getSituacao()
-        );
+        return converterParaDTO(material);
     }
+
     @Transactional
     public MaterialResponseDTO atualizarMaterial(MaterialRequestDTO materialdto, Integer id) {
         Material material = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
@@ -112,30 +76,17 @@ public class MaterialService {
         material.setDescricao(materialdto.descricao());
         material.setOrientacao(materialdto.orientacao());
         Material materialSalvo = rep.save(material);
-        return new MaterialResponseDTO(
-                materialSalvo.getId(),
-                materialSalvo.getNome(),
-                materialSalvo.getUnidade(),
-                materialSalvo.getDescricao(),
-                materialSalvo.getOrientacao(),
-                materialSalvo.getSituacao()
-        );
+        return converterParaDTO(materialSalvo);
     }
     @Transactional
     public MaterialResponseDTO alterarSituacao(Integer id, AlterarSituacaoMaterialRequestDTO situacaodto){
         Material material = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
         material.setSituacao(situacaodto.situacao());
         Material materialSalvo = rep.save(material);
-        return new MaterialResponseDTO(
-                materialSalvo.getId(),
-                materialSalvo.getNome(),
-                materialSalvo.getUnidade(),
-                materialSalvo.getDescricao(),
-                materialSalvo.getOrientacao(),
-                materialSalvo.getSituacao()
-        );
+        return converterParaDTO(material);
     }
-    //apaga se nao tiver associacoes (ou seja, so pra testar)
+    //apaga se nao tiver associacoes (ou seja, so pra testar, ja que quase sempre
+    // vai ter associacao a Ponto e/ou Solicitacao)
     @Transactional
     public void deleteById(Integer idMaterial) {
         Material material = rep.findById(idMaterial)
@@ -149,5 +100,15 @@ public class MaterialService {
             throw new RegraNegocioException("Não é possível excluir o material, pois existem solicitações associadas a ele.");
         }
         rep.delete(material);
+    }
+    public MaterialResponseDTO converterParaDTO(Material material) {
+        return new MaterialResponseDTO(
+                material.getId(),
+                material.getNome(),
+                material.getDescricao(),
+                material.getUnidade(),
+                material.getOrientacao(),
+                material.getSituacao()
+        );
     }
 }

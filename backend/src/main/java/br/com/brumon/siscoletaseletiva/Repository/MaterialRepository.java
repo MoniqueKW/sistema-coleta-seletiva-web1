@@ -2,6 +2,8 @@ package br.com.brumon.siscoletaseletiva.Repository;
 
 import br.com.brumon.siscoletaseletiva.Entity.Material;
 import br.com.brumon.siscoletaseletiva.Enum.SituacaoMaterial;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +13,6 @@ import java.util.Optional;
 @Repository
 public interface MaterialRepository extends JpaRepository<Material, Integer> {
     Optional<Material> findByNomeContainingIgnoreCase(String nome);
-    List<Material> findBySituacao(SituacaoMaterial situacao);
+    Page<Material> findBySituacao(SituacaoMaterial situacao, Pageable pageable);
     boolean existsByNome(String nome);
 }

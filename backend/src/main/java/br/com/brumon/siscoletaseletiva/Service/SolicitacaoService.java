@@ -548,7 +548,7 @@ public class SolicitacaoService {
     //nessa conversao para dto, pego uma lista de ItemSolicitacao e atribuo a ela
     //o a lista atributo Itens da solicitacao, depois de fazer a conversão com stream,
     // uso essa lista para retornar ela junto com os outros campos da SolicitacaoResponseDTO
-    private SolicitacaoResponseDTO converterParaDTO(Solicitacao solicitacao) {
+    public SolicitacaoResponseDTO converterParaDTO(Solicitacao solicitacao) {
         List<ItemSolicitacaoResponseDTO> itens = solicitacao.getItens()
                 .stream()
                 .map(item -> new ItemSolicitacaoResponseDTO(
@@ -584,7 +584,7 @@ public class SolicitacaoService {
     }
     // Fiz esse metodo para gerar um protocolo unico para cada
     // solicitação, usando UUID, passivel a alteracoes
-    private String gerarProtocolo() {
+    public String gerarProtocolo() {
         String protocolo;
         do {
             protocolo = "SC-" + UUID.randomUUID()

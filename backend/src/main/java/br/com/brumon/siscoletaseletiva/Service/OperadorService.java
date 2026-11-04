@@ -26,36 +26,20 @@ public class OperadorService {
     @Transactional(readOnly = true)
     public Page<OperadorResponseDTO> findAll(Pageable pageable) {
         Page<Operador> operadores = rep.findAll(pageable);
-        return operadores
-                .map(operador -> new OperadorResponseDTO(
-                        operador.getId(),
-                        operador.getPontoColeta().getId(),
-                        operador.getNome(),
-                        operador.getEmail()
-                ));
+        return operadores.map(this::converterParaDTO);
     }
 
     @Transactional(readOnly = true)
     public OperadorResponseDTO findById(Integer id) {
         Operador operador = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não " +
                 "encontrado"));
-        return new OperadorResponseDTO(
-                operador.getId(),
-                operador.getPontoColeta().getId(),
-                operador.getNome(),
-                operador.getEmail()
-        );
+        return converterParaDTO(operador);
     }
 
     @Transactional(readOnly = true)
     public Page<OperadorResponseDTO> findByPontoColetaId(Integer idPonto, Pageable pageable) {
         Page<Operador> operadores = rep.findByPontoColeta_Id(idPonto, pageable);
-        return operadores.map(operador -> new OperadorResponseDTO(
-                operador.getId(),
-                operador.getPontoColeta().getId(),
-                operador.getNome(),
-                operador.getEmail()
-        ));
+        return operadores.map(this::converterParaDTO);
     }
 
     @Transactional
@@ -72,12 +56,7 @@ public class OperadorService {
                 .nome(dto.nome())
                 .email(emailPadrao)
                 .build());
-        return new OperadorResponseDTO(
-                operador.getId(),
-                operador.getPontoColeta().getId(),
-                operador.getNome(),
-                operador.getEmail()
-        );
+        return converterParaDTO(operador);
     }
 
     @Transactional
@@ -94,12 +73,7 @@ public class OperadorService {
         operador.setNome(dto.nome());
         operador.setEmail(emailPadrao);
         Operador atualizado = rep.save(operador);
-        return new OperadorResponseDTO(
-                atualizado.getId(),
-                atualizado.getPontoColeta().getId(),
-                atualizado.getNome(),
-                atualizado.getEmail()
-        );
+        return converterParaDTO(atualizado);
     }
 
     @Transactional
@@ -115,5 +89,13 @@ public class OperadorService {
             );
         }
         rep.delete(operador);
+    }
+    public OperadorResponseDTO converterParaDTO(Operador operador) {
+        return new OperadorResponseDTO(
+                operador.getId(),
+                operador.getPontoColeta().getId(),
+                operador.getNome(),
+                operador.getEmail()
+        );
     }
 }

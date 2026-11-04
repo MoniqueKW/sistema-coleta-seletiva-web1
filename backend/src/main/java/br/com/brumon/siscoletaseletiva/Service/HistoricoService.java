@@ -30,60 +30,24 @@ public class HistoricoService {
     @Transactional(readOnly = true)
     public Page<HistoricoResponseDTO> findAll(Pageable pageable) {
         Page<Historico> historicos = rep.findAll(pageable);
-        return historicos.map(historico -> new HistoricoResponseDTO(
-                historico.getId(),
-                historico.getSolicitacao().getId(),
-                historico.getSituacaoAnterior(),
-                historico.getSituacaoNova(),
-                historico.getData(),
-                historico.getResponsavel().getNome(),
-                historico.getMotivo(),
-                historico.getInfoTentativa()
-        ));
+        return historicos.map(this::converterParaDTO);
     }
 
     @Transactional(readOnly = true)
     public HistoricoResponseDTO findById(Integer id) {
         Historico historico = rep.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Histórico não encontrado"));
-        return new HistoricoResponseDTO(
-                historico.getId(),
-                historico.getSolicitacao().getId(),
-                historico.getSituacaoAnterior(),
-                historico.getSituacaoNova(),
-                historico.getData(),
-                historico.getResponsavel().getNome(),
-                historico.getMotivo(),
-                historico.getInfoTentativa()
-        );
+        return converterParaDTO(historico);
     }
     @Transactional(readOnly = true)
     public Page<HistoricoResponseDTO> findByResponsavelId(Integer idOperador, Pageable pageable) {
         Page<Historico> historicos = rep.findByResponsavel_Id(idOperador, pageable);
-        return historicos.map(historico -> new HistoricoResponseDTO(
-                historico.getId(),
-                historico.getSolicitacao().getId(),
-                historico.getSituacaoAnterior(),
-                historico.getSituacaoNova(),
-                historico.getData(),
-                historico.getResponsavel().getNome(),
-                historico.getMotivo(),
-                historico.getInfoTentativa()
-        ));
+        return historicos.map(this::converterParaDTO);
     }
     @Transactional(readOnly = true)
     public Page<HistoricoResponseDTO> findBySolicitacaoId(Integer idSolicitacao, Pageable pageable) {
         Page<Historico> historicos = rep.findBySolicitacao_IdOrderByDataAsc(idSolicitacao, pageable);
-        return historicos.map(historico -> new HistoricoResponseDTO(
-                historico.getId(),
-                historico.getSolicitacao().getId(),
-                historico.getSituacaoAnterior(),
-                historico.getSituacaoNova(),
-                historico.getData(),
-                historico.getResponsavel().getNome(),
-                historico.getMotivo(),
-                historico.getInfoTentativa()
-        ));
+        return historicos.map(this::converterParaDTO);
     }
     public void registrarHistorico(Integer idSolicitacao, String situacaoAnterior,
                                    String situacaoNova, Integer idOperador,
@@ -105,5 +69,18 @@ public class HistoricoService {
                 .infoTentativa(infoTentativa)
                 .build();
         rep.save(historico);
+    }
+
+    public HistoricoResponseDTO converterParaDTO(Historico historico) {
+        return new HistoricoResponseDTO(
+                historico.getId(),
+                historico.getSolicitacao().getId(),
+                historico.getSituacaoAnterior(),
+                historico.getSituacaoNova(),
+                historico.getData(),
+                historico.getResponsavel().getNome(),
+                historico.getMotivo(),
+                historico.getInfoTentativa()
+        );
     }
 }
