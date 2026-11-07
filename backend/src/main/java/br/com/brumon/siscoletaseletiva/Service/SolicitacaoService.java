@@ -218,8 +218,7 @@ public class SolicitacaoService {
 
 
     @Transactional
-    public SolicitacaoResponseDTO atualizarSolicitacao (Integer id, SolicitacaoUpdateRequestDTO solicitacaodto,
-                                                        Integer idOperador) {
+    public SolicitacaoResponseDTO atualizarSolicitacao (Integer id, SolicitacaoUpdateRequestDTO solicitacaodto) {
         Solicitacao solicitacao = rep.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
         if (solicitacao.getSituacao() != SituacaoSolicitacao.SOLICITADA) {
@@ -343,11 +342,13 @@ public class SolicitacaoService {
                 solicitacao.getId(),
                 situacaoAntiga.name(),
                 solicitacao.getSituacao().name(),
-                idOperador,
+                null,
                 "Solicitação atualizada",
                 null);
+
         return converterParaDTO(solicitacao);
     }
+
     @Transactional
     public SolicitacaoResponseDTO agendarSolicitacao (Integer id, AgendamentoRequestDTO agendamentodto, Integer idOperador) {
         Solicitacao solicitacao = rep.findById(id)
