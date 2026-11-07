@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface HistoricoRepository extends JpaRepository<Historico, Integer> {
     Page<Historico> findBySolicitacao_IdOrderByDataAsc(Integer idSolicitacao, Pageable pageable);
     Page<Historico> findByResponsavel_Id(Integer idOperador, Pageable pageable);
+    boolean existsByResponsavel_Id(Integer idOperador);
 }

@@ -7,6 +7,7 @@ import br.com.brumon.siscoletaseletiva.Entity.PontoColeta;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoDuplicadoException;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.Exception.RegraNegocioException;
+import br.com.brumon.siscoletaseletiva.Repository.HistoricoRepository;
 import br.com.brumon.siscoletaseletiva.Repository.OperadorRepository;
 import br.com.brumon.siscoletaseletiva.Repository.PontoColetaRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +19,12 @@ import org.springframework.stereotype.Service;
 public class OperadorService {
     private final OperadorRepository rep;
     private final PontoColetaRepository pontoRep;
-    public OperadorService(OperadorRepository rep, PontoColetaRepository pontoRep) {
+    private final HistoricoRepository historicoRep;
+
+    public OperadorService(OperadorRepository rep, PontoColetaRepository pontoRep, HistoricoRepository historicoRep) {
         this.rep = rep;
         this.pontoRep = pontoRep;
+        this.historicoRep = historicoRep;
     }
 
     @Transactional(readOnly = true)
@@ -76,20 +80,22 @@ public class OperadorService {
         return converterParaDTO(atualizado);
     }
 
+    //Todo operador está sempre vinculado a um ponto de coleta como estabelecido na entidade.
     @Transactional
     public void deleteById(Integer id) {
         Operador operador = rep.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException(
                         "Operador não encontrado."
                 ));
-        //verificacao se ta vinculado a algum ponto
-        if (operador.getPontoColeta() != null) {
+
+        if (historicoRep.existsByResponsavel_Id(id)) {
             throw new RegraNegocioException(
-                    "Não é possível excluir o operador enquanto ele estiver vinculado a um ponto de coleta."
+                    "Não é possível excluir o operador, pois ele possui registros vinculados no histórico de solicitações."
             );
         }
         rep.delete(operador);
     }
+
     public OperadorResponseDTO converterParaDTO(Operador operador) {
         return new OperadorResponseDTO(
                 operador.getId(),
@@ -98,4 +104,5 @@ public class OperadorService {
                 operador.getEmail()
         );
     }
+
 }

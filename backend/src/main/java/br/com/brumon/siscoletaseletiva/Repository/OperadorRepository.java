@@ -1,14 +1,11 @@
 package br.com.brumon.siscoletaseletiva.Repository;
 
 import br.com.brumon.siscoletaseletiva.Entity.Operador;
-import br.com.brumon.siscoletaseletiva.Enum.SituacaoPonto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
