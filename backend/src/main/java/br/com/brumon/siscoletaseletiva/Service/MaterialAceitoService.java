@@ -7,6 +7,7 @@ import br.com.brumon.siscoletaseletiva.Entity.Material;
 import br.com.brumon.siscoletaseletiva.Entity.MaterialAceito;
 import br.com.brumon.siscoletaseletiva.Entity.MaterialAceitoId;
 import br.com.brumon.siscoletaseletiva.Entity.PontoColeta;
+import br.com.brumon.siscoletaseletiva.Enum.SituacaoMaterial;
 import br.com.brumon.siscoletaseletiva.Enum.SituacaoSolicitacao;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoDuplicadoException;
 import br.com.brumon.siscoletaseletiva.Exception.RecursoNaoEncontradoException;
@@ -52,12 +53,16 @@ public class MaterialAceitoService {
     }
     @Transactional
     public MaterialAceitoResponseDTO associarMaterial(Integer idPonto, MaterialAceitoRequestDTO dto) {
-        PontoColeta ponto = repPonto.findById(idPonto).orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
-        Material material = repMaterial.findById(dto.idMaterial()).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
+        PontoColeta ponto = repPonto.findById(idPonto)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
+        Material material = repMaterial.findById(dto.idMaterial())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
+
         if (rep.existsByPontoColeta_IdAndMaterial_Id(idPonto, dto.idMaterial())) {
             throw new RecursoDuplicadoException("O material informado já está associado ao ponto de coleta");
         }
-        if (material.getSituacao().equals("Inativo")) {
+        //O Enum não pode ser comparado com string usando .equals, sempre resulta em falso.
+        if (material.getSituacao() == SituacaoMaterial.INATIVO) {
             throw new RegraNegocioException("O material informado está inativo e não pode ser associado ao ponto de coleta");
         }
         //usando BigDecimal.Zero pq não dá para comparar BigDecimal com Int. Como no DTO
@@ -67,14 +72,18 @@ public class MaterialAceitoService {
         if(dto.limiteOpcional() != null && dto.limiteOpcional().compareTo(BigDecimal.ZERO) <= 0) {
             throw new RegraNegocioException("O limite opcional deve ser maior que zero");
         }
+
         MaterialAceito materialAceito = rep.save(MaterialAceito.builder()
+                .id(new MaterialAceitoId(idPonto, material.getId())) //Precisa da chave composta
                 .pontoColeta(ponto)
                 .material(material)
                 .observacoes(dto.observacoes())
                 .limiteOpcional(dto.limiteOpcional())
                 .build());
+
         return converterParaDTO(materialAceito);
     }
+
     @Transactional
     public MaterialAceitoResponseDTO atualizarMaterialAceito(Integer idPonto,
                                                              Integer idMaterial,
@@ -110,18 +119,20 @@ public class MaterialAceitoService {
     //Com isso, consegue alterar um materialAceito associado a um ponto de coleta, mesmo que o material seja
     // diferente do original. A ideia é que o usuário possa alterar a associação para outro material,
     // caso queira.
-    @Transactional
-    public MaterialAceitoResponseDTO alterarAssociacao(Integer idPonto, Integer idMaterial, MaterialAceitoRequestDTO dto) {
-        if(dto.idMaterial() == idMaterial) {
-            throw new RecursoDuplicadoException("Não é possível alterar a associação para o mesmo material. Informe um material diferente.");
-        }
-        if(rep.existsByPontoColeta_IdAndMaterial_Id(idPonto, idMaterial)) {
-            deleteByPontoColeta_IdAndMaterial_Id(idPonto, idMaterial);
-        } else {
-            throw new RecursoNaoEncontradoException("Associação de material não encontrada");
-        }
-        return associarMaterial(idPonto, dto);
-    }
+    //@Transactional
+    //public MaterialAceitoResponseDTO alterarAssociacao(Integer idPonto, Integer idMaterial, MaterialAceitoRequestDTO dto) {
+    //    if(dto.idMaterial() == idMaterial) {
+    //        throw new RecursoDuplicadoException("Não é possível alterar a associação para o mesmo material. Informe um material diferente.");
+    //    }
+    //    if(rep.existsByPontoColeta_IdAndMaterial_Id(idPonto, idMaterial)) {
+    //        deleteByPontoColeta_IdAndMaterial_Id(idPonto, idMaterial);
+    //    } else {
+    //        throw new RecursoNaoEncontradoException("Associação de material não encontrada");
+    //    }
+    //    return associarMaterial(idPonto, dto);
+    //}
+    //Nos testes a ideai desse método trocava o material de uma vaga que era ocupada por outro, o que quebra
+    // o histórico de solicitações que já foram concluídas antes.
 
     public MaterialAceitoResponseDTO converterParaDTO(MaterialAceito materialAceito) {
         return new MaterialAceitoResponseDTO(
