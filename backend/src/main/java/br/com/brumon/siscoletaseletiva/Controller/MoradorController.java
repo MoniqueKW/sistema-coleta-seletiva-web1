@@ -28,12 +28,14 @@ public class MoradorController {
 
     @GetMapping
     public ResponseEntity<Page<MoradorResponseDTO>> listarMoradores(
+            //o sistema não vai dar erro se a pessoa não enviar nenhum nome.
             @RequestParam(required = false) String nome,
             Pageable pageable) {
         if (nome != null && !nome.isBlank()) {
             return ResponseEntity.ok(moradorServ.findByNome(nome, pageable));
         }
         return ResponseEntity.ok(moradorServ.findAll(pageable));
+        //retorna uma lista paginada com todos os moradores cadastrados.
     }
 
     @GetMapping("/{id}")
