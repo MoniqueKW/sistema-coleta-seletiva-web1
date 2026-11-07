@@ -16,8 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class MaterialService {
     private final MaterialRepository rep;
@@ -30,26 +28,31 @@ public class MaterialService {
         this.repItemSolicitacao = repItemSolicitacao;
         this.repMaterialAceito = repMaterialAceito;
     }
+
     @Transactional(readOnly = true)
     public Page<MaterialResponseDTO> findAll(Pageable pageable) {
         Page<Material> materiais = rep.findAll(pageable);
         return materiais.map(this::converterParaDTO);
     }
+
     @Transactional(readOnly = true)
-    public MaterialResponseDTO findByNome(String nome) {
-        Material material = rep.findByNomeContainingIgnoreCase(nome).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
-        return converterParaDTO(material);
+    public Page<MaterialResponseDTO> findByNome(String nome, Pageable pageable) {
+        Page<Material> materiais = rep.findByNomeContainingIgnoreCase(nome, pageable);
+        return materiais.map(this::converterParaDTO);
     }
+
     @Transactional(readOnly = true)
     public MaterialResponseDTO findById(Integer id) {
         Material material = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
         return converterParaDTO(material);
     }
+
     @Transactional(readOnly = true)
     public Page<MaterialResponseDTO> findBySituacao(SituacaoMaterial situacao, Pageable pageable) {
         Page<Material> materiais = rep.findBySituacao(situacao, pageable);
         return materiais.map(this::converterParaDTO);
     }
+
     @Transactional
     public MaterialResponseDTO salvarMaterial(MaterialRequestDTO materialdto) {
         if (rep.existsByNome(materialdto.nome())) {
@@ -68,16 +71,21 @@ public class MaterialService {
     @Transactional
     public MaterialResponseDTO atualizarMaterial(MaterialRequestDTO materialdto, Integer id) {
         Material material = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
-        if (!material.getNome().equalsIgnoreCase(materialdto.nome()) && rep.findByNomeContainingIgnoreCase(materialdto.nome()).isPresent()) {
+
+        // Verifica se o nome foi alterado E se o novo nome já existe exatamente igual no banco
+        if (!material.getNome().equalsIgnoreCase(materialdto.nome()) && rep.existsByNomeIgnoreCase(materialdto.nome())) {
             throw new RecursoDuplicadoException("Material com nome já cadastrado. Este material já existe.");
         }
+
         material.setNome(materialdto.nome());
         material.setUnidade(materialdto.unidade());
         material.setDescricao(materialdto.descricao());
         material.setOrientacao(materialdto.orientacao());
+
         Material materialSalvo = rep.save(material);
         return converterParaDTO(materialSalvo);
     }
+
     @Transactional
     public MaterialResponseDTO alterarSituacao(Integer id, AlterarSituacaoMaterialRequestDTO situacaodto){
         Material material = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
@@ -85,6 +93,7 @@ public class MaterialService {
         Material materialSalvo = rep.save(material);
         return converterParaDTO(material);
     }
+
     //apaga se nao tiver associacoes (ou seja, so pra testar, ja que quase sempre
     // vai ter associacao a Ponto e/ou Solicitacao)
     @Transactional
@@ -101,6 +110,7 @@ public class MaterialService {
         }
         rep.delete(material);
     }
+
     public MaterialResponseDTO converterParaDTO(Material material) {
         return new MaterialResponseDTO(
                 material.getId(),
