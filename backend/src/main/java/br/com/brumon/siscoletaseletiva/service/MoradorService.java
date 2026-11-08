@@ -1,11 +1,14 @@
 package br.com.brumon.siscoletaseletiva.service;
 
 import br.com.brumon.siscoletaseletiva.dto.request.MoradorRequestDTO;
+import br.com.brumon.siscoletaseletiva.dto.response.MaterialResponseDTO;
 import br.com.brumon.siscoletaseletiva.dto.response.MoradorResponseDTO;
+import br.com.brumon.siscoletaseletiva.model.entity.Material;
 import br.com.brumon.siscoletaseletiva.model.entity.Morador;
 import br.com.brumon.siscoletaseletiva.exception.RecursoDuplicadoException;
 import br.com.brumon.siscoletaseletiva.exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.exception.RegraNegocioException;
+import br.com.brumon.siscoletaseletiva.model.enums.SituacaoMaterial;
 import br.com.brumon.siscoletaseletiva.repository.MoradorRepository;
 import br.com.brumon.siscoletaseletiva.repository.SolicitacaoRepository;
 import org.springframework.data.domain.Page;
@@ -42,14 +45,8 @@ public class MoradorService {
         Morador morador = rep.findByEmail(email).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
         return converterParaDTO(morador);
     }
-    @Transactional(readOnly = true)
-    public MoradorResponseDTO findByTelefone(String telefone) {
-        Morador morador = rep.findByTelefone(telefone).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
-        return converterParaDTO(morador);
-    }
     @Transactional
     public MoradorResponseDTO salvarMorador(MoradorRequestDTO moradordto) {
-        //ver em relaçao ao RN de "validar nomes certos"
         String emailPadrao = moradordto.email().trim().toLowerCase();
         if(rep.existsByEmail(emailPadrao)) {
             throw new RecursoDuplicadoException("Morador com email já cadastrado");
@@ -96,5 +93,15 @@ public class MoradorService {
                 morador.getEmail(),
                 morador.getTelefone()
         );
+    }
+
+    public Page<MoradorResponseDTO> filtrar(String nome, Pageable pageable) {
+        boolean temNome = nome != null && !nome.isBlank();
+        if (temNome) {
+            Page<Morador> moradores = rep.findByNomeContainingIgnoreCase(nome, pageable);
+            return moradores.map(this::converterParaDTO);
+        }
+
+        return rep.findAll(pageable).map(this::converterParaDTO);
     }
 }

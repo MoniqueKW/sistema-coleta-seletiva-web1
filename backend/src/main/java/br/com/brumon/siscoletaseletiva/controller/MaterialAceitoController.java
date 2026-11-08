@@ -28,7 +28,8 @@ public class MaterialAceitoController {
         MaterialAceitoResponseDTO associacaoCriada = materialAceitoServ.associarMaterial(idPonto, dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(associacaoCriada);
     }
-
+    //usando o findByIdPonto como findAll pq as consultas sempre vão ser em
+    //relação a um ponto (materiais aceitos de um ponto)
     @GetMapping
     public ResponseEntity<Page<MaterialAceitoResponseDTO>> findAll(
             @PathVariable Integer idPonto,

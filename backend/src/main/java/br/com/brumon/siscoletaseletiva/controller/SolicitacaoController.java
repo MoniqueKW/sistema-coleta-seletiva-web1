@@ -35,42 +35,8 @@ public class SolicitacaoController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataInicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataFim,
             Pageable pageable) {
-
-        if (idMorador != null && idPonto != null) {
-            return ResponseEntity.ok(solicitacaoServ.findByPontoColetaIdAndMoradorId(idPonto, idMorador, pageable));
-        }
-        if (idPonto != null && situacao != null && dataInicio != null && dataFim != null) {
-            return ResponseEntity.ok(solicitacaoServ.findByPontoColetaIdAndSituacaoAndDataCriacaoBetween(idPonto, situacao, dataInicio, dataFim, pageable));
-        }
-        if (idPonto != null && dataInicio != null && dataFim != null) {
-            return ResponseEntity.ok(solicitacaoServ.findByPontoColetaIdAndDataCriacaoBetween(idPonto, dataInicio, dataFim, pageable));
-        }
-        if (idPonto != null && situacao != null) {
-            return ResponseEntity.ok(solicitacaoServ.findByPontoColetaIdAndSituacao(idPonto, situacao, pageable));
-        }
-        if (idPonto != null) {
-            return ResponseEntity.ok(solicitacaoServ.findByPontoColetaId(idPonto, pageable));
-        }
-        if (idMorador != null && situacao != null && dataInicio != null && dataFim != null) {
-            return ResponseEntity.ok(solicitacaoServ.findByMoradorIdAndSituacaoAndDataCriacaoBetween(idMorador, situacao, dataInicio, dataFim, pageable));
-        }
-        if (idMorador != null && dataInicio != null && dataFim != null) {
-            return ResponseEntity.ok(solicitacaoServ.findByMoradorIdAndDataCriacaoBetween(idMorador, dataInicio, dataFim, pageable));
-        }
-        if (idMorador != null && situacao != null) {
-            return ResponseEntity.ok(solicitacaoServ.findByMoradorIdAndSituacao(idMorador, situacao, pageable));
-        }
-        if (idMorador != null) {
-            return ResponseEntity.ok(solicitacaoServ.findByMoradorId(idMorador, pageable));
-        }
-        if (situacao != null) {
-            return ResponseEntity.ok(solicitacaoServ.findBySituacao(situacao, pageable));
-        }
-        if (dataInicio != null && dataFim != null) {
-            return ResponseEntity.ok(solicitacaoServ.findByDataCriacaoBetween(dataInicio, dataFim, pageable));
-        }
-
-        return ResponseEntity.ok(solicitacaoServ.findAll(pageable));
+        return ResponseEntity.ok(solicitacaoServ.findAll(idMorador, idPonto, situacao,
+                dataInicio, dataFim, pageable));
     }
 
     @GetMapping("/{id}")

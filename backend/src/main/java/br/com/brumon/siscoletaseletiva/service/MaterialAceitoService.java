@@ -42,11 +42,6 @@ public class MaterialAceitoService {
         this.repItemSolicitacao = repItemSolicitacao;
     }
     @Transactional(readOnly = true)
-    public Page<MaterialAceitoResponseDTO> findAll(Pageable pageable) {
-        Page<MaterialAceito> materiaisAceitos = rep.findAll(pageable);
-        return materiaisAceitos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
     public Page<MaterialAceitoResponseDTO> findByIdPonto(Integer idPonto, Pageable pageable) {
         Page<MaterialAceito> materiaisAceitos = rep.findByPontoColeta_Id(idPonto, pageable);
         return materiaisAceitos.map(this::converterParaDTO);

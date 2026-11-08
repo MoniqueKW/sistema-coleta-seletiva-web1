@@ -11,6 +11,8 @@ import br.com.brumon.siscoletaseletiva.exception.RegraNegocioException;
 import br.com.brumon.siscoletaseletiva.repository.MaterialAceitoRepository;
 import br.com.brumon.siscoletaseletiva.repository.PontoColetaRepository;
 import br.com.brumon.siscoletaseletiva.repository.SolicitacaoRepository;
+import br.com.brumon.siscoletaseletiva.specification.PontoColetaSpecification;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,49 +31,22 @@ public class PontoColetaService {
         this.repMaterialAceito = repMaterialAceito;
     }
     @Transactional(readOnly = true)
-    public Page<PontoColetaResponseDTO> findAll(Pageable pageable) {
-        Page<PontoColeta> pontos = rep.findAll(pageable);
+    public Page<PontoColetaResponseDTO> findAll(String nome, String municipio,
+                                                String bairro, SituacaoPonto situacao,
+                                                Boolean recolhimento, Pageable pageable) {
+        Specification<PontoColeta> filtros = Specification.allOf(
+                PontoColetaSpecification.comNome(nome),
+                PontoColetaSpecification.comMunicipio(municipio),
+                PontoColetaSpecification.comBairro(bairro),
+                PontoColetaSpecification.comSituacao(situacao),
+                PontoColetaSpecification.comRecolhimento(recolhimento));
+        Page<PontoColeta> pontos = rep.findAll(filtros, pageable);
         return pontos.map(this::converterParaDTO);
     }
     @Transactional(readOnly = true)
     public PontoColetaResponseDTO findById(Integer id) {
         PontoColeta ponto = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
         return converterParaDTO(ponto);
-    }
-    @Transactional(readOnly = true)
-    public Page<PontoColetaResponseDTO> findByNome(String nome, Pageable pageable) {
-        Page<PontoColeta> pontos = rep.findByNomeContainingIgnoreCase(nome, pageable);
-        return pontos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<PontoColetaResponseDTO> findByCep(String cep, Pageable pageable) {
-        Page<PontoColeta> pontos = rep.findByCep(cep, pageable);
-        return pontos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<PontoColetaResponseDTO> findByMunicipio(String municipio, Pageable pageable) {
-        Page<PontoColeta> pontos = rep.findByMunicipioIgnoreCase(municipio, pageable);
-        return pontos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<PontoColetaResponseDTO> findByUf(String uf, Pageable pageable) {
-        Page<PontoColeta> pontos = rep.findByUf(uf.toUpperCase(), pageable);
-        return pontos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<PontoColetaResponseDTO> findByBairro(String bairro, Pageable pageable) {
-        Page<PontoColeta> pontos = rep.findByBairro(bairro, pageable);
-        return pontos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<PontoColetaResponseDTO> findBySituacao(SituacaoPonto situacaodto, Pageable pageable) {
-        Page<PontoColeta> pontos = rep.findBySituacao(situacaodto, pageable);
-        return pontos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<PontoColetaResponseDTO> findByRecolhimentoDomiciliar(Boolean recolhimentoDomiciliar, Pageable pageable) {
-        Page<PontoColeta> pontos = rep.findByRecolhimentoDomiciliar(recolhimentoDomiciliar, pageable);
-        return pontos.map(this::converterParaDTO);
     }
     @Transactional
     public PontoColetaResponseDTO salvarPontoColeta(PontoColetaRequestDTO pontodto) {

@@ -29,16 +29,19 @@ public class MoradorController {
             //o sistema não vai dar erro se a pessoa não enviar nenhum nome.
             @RequestParam(required = false) String nome,
             Pageable pageable) {
-        if (nome != null && !nome.isBlank()) {
-            return ResponseEntity.ok(moradorServ.findByNome(nome, pageable));
-        }
-        return ResponseEntity.ok(moradorServ.findAll(pageable));
+        return ResponseEntity.ok(moradorServ.filtrar(nome, pageable));
         //retorna uma lista paginada com todos os moradores cadastrados.
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MoradorResponseDTO> findById(@PathVariable Integer id) {
         MoradorResponseDTO morador = moradorServ.findById(id);
+        return ResponseEntity.ok(morador);
+    }
+
+    @GetMapping("/por-email")
+    public ResponseEntity<MoradorResponseDTO> findByEmail(@RequestParam String email) {
+        MoradorResponseDTO morador = moradorServ.findByEmail(email);
         return ResponseEntity.ok(morador);
     }
 

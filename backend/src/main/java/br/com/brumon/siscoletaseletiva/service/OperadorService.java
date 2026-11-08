@@ -45,6 +45,12 @@ public class OperadorService {
         Page<Operador> operadores = rep.findByPontoColeta_Id(idPonto, pageable);
         return operadores.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
+    public OperadorResponseDTO findByEmail(String email) {
+        Operador operador = rep.findByEmail(email)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+        return converterParaDTO(operador);
+    }
 
     @Transactional
     public OperadorResponseDTO salvarOperador(OperadorRequestDTO dto) {
@@ -105,4 +111,21 @@ public class OperadorService {
         );
     }
 
+    public Page<OperadorResponseDTO> filtrar(Integer idPonto, String nome, Pageable pageable) {
+        boolean temPonto = idPonto != null;
+        boolean temNome = nome != null && !nome.isBlank();
+        if (temPonto && temNome) {
+            return rep.findByPontoColeta_IdAndNomeContainingIgnoreCase(idPonto, nome, pageable)
+                    .map(this::converterParaDTO);
+        }
+        if (temPonto) {
+            return rep.findByPontoColeta_Id(idPonto, pageable)
+                    .map(this::converterParaDTO);
+        }
+        if (temNome) {
+            return rep.findByNomeContainingIgnoreCase(nome, pageable)
+                    .map(this::converterParaDTO);
+        }
+        return rep.findAll(pageable).map(this::converterParaDTO);
+    }
 }

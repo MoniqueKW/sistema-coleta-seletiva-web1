@@ -31,16 +31,8 @@ public class MaterialController {
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) SituacaoMaterial situacao,
             Pageable pageable) {
-
-        //Verifica qual filtro foi enviado
-        if (nome != null && !nome.isBlank()) {
-            return ResponseEntity.ok(materialServ.findByNome(nome, pageable));
-        } else if (situacao != null) {
-            return ResponseEntity.ok(materialServ.findBySituacao(situacao, pageable));
-        }
-
-        //Para lista todos os materiais paginados
-        return ResponseEntity.ok(materialServ.findAll(pageable));
+        //Verifica qual filtro foi enviado no metodo filtrar no service de material
+        return ResponseEntity.ok(materialServ.filtrar(nome, situacao, pageable));
     }
 
     @GetMapping("/{id}")

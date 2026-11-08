@@ -25,17 +25,7 @@ public class HistoricoController {
             @RequestParam(required = false) Integer idOperador,
             @RequestParam(required = false) Integer idSolicitacao,
             Pageable pageable) {
-        if (idOperador != null && idSolicitacao != null) {
-            return ResponseEntity.ok(historicoServ.findBySolicitacaoIdAndOperadorId(
-                    idSolicitacao, idOperador, pageable));
-        }
-        if (idSolicitacao != null) {
-            return ResponseEntity.ok(historicoServ.findBySolicitacaoId(idSolicitacao, pageable));
-        }
-        if (idOperador != null) {
-            return ResponseEntity.ok(historicoServ.findByOperadorId(idOperador, pageable));
-        }
-        return ResponseEntity.ok(historicoServ.findAll(pageable));
+        return ResponseEntity.ok(historicoServ.filtrar(idOperador, idSolicitacao, pageable));
     }
 
     @GetMapping("/{id}")

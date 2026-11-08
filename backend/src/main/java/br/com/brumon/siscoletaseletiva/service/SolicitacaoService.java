@@ -10,9 +10,11 @@ import br.com.brumon.siscoletaseletiva.model.enums.SituacaoSolicitacao;
 import br.com.brumon.siscoletaseletiva.exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.exception.RegraNegocioException;
 import br.com.brumon.siscoletaseletiva.repository.*;
+import br.com.brumon.siscoletaseletiva.specification.SolicitacaoSpecification;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -47,8 +49,14 @@ public class SolicitacaoService {
         this.repOperador = repOperador;
     }
     @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findAll(Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findAll(pageable);
+    public Page<SolicitacaoResponseDTO> findAll(Integer idMorador, Integer idPonto, SituacaoSolicitacao situacao,
+                                                LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable) {
+        Specification<Solicitacao> filtros = Specification.allOf(
+                SolicitacaoSpecification.comMorador(idMorador),
+                SolicitacaoSpecification.comPontoColeta(idPonto),
+                SolicitacaoSpecification.comSituacao(situacao),
+                SolicitacaoSpecification.criadaEntre(dataInicio, dataFim));
+        Page<Solicitacao> solicitacoes = rep.findAll(filtros, pageable);
         return solicitacoes.map(this::converterParaDTO);
     }
     @Transactional(readOnly = true)
@@ -72,69 +80,6 @@ public class SolicitacaoService {
                         item.getQtdEfetiva()
                 ))
                 .toList();
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findBySituacao(SituacaoSolicitacao situacao, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findBySituacao(situacao, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByPontoColetaIdAndMoradorId(Integer idPonto, Integer idMorador, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByPontoColeta_IdAndMorador_Id(idPonto, idMorador, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByPontoColetaId(Integer idPonto, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByPontoColeta_Id(idPonto, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByPontoColetaIdAndSituacaoAndDataCriacaoBetween(Integer idPonto, SituacaoSolicitacao situacao,
-                                                                                            LocalDateTime dataInicio,
-                                                                                            LocalDateTime dataFim,
-                                                                                            Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByPontoColeta_IdAndSituacaoAndDataCriacaoBetween(idPonto,
-                situacao,
-                dataInicio, dataFim, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByPontoColetaIdAndDataCriacaoBetween(Integer idPonto, LocalDateTime dataInicio,
-                                                                                 LocalDateTime dataFim, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByPontoColeta_IdAndDataCriacaoBetween(idPonto, dataInicio, dataFim, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByPontoColetaIdAndSituacao(Integer idPonto, SituacaoSolicitacao situacao, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByPontoColeta_IdAndSituacao(idPonto, situacao, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByMoradorId(Integer idMorador, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByMorador_Id(idMorador, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByMoradorIdAndSituacao(Integer idMorador, SituacaoSolicitacao situacao, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByMorador_IdAndSituacao(idMorador, situacao, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByMoradorIdAndSituacaoAndDataCriacaoBetween(Integer idMorador, SituacaoSolicitacao situacao,
-                                                                                   LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByMorador_IdAndSituacaoAndDataCriacaoBetween(idMorador, situacao, dataInicio, dataFim, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByMoradorIdAndDataCriacaoBetween(Integer idMorador, LocalDateTime dataInicio,
-                                                                             LocalDateTime dataFim, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByMorador_IdAndDataCriacaoBetween(idMorador, dataInicio, dataFim, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByDataCriacaoBetween(LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByDataCriacaoBetween(dataInicio, dataFim, pageable);
-        return solicitacoes.map(this::converterParaDTO);
     }
     @Transactional(readOnly = true)
     public SolicitacaoResponseDTO findByProtocoloUnico(String protocolo) {

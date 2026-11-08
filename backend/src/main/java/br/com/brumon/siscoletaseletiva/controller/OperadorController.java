@@ -29,18 +29,21 @@ public class OperadorController {
     @GetMapping
     public ResponseEntity<Page<OperadorResponseDTO>> findAll(
             @RequestParam(required = false) Integer idPonto,
+            @RequestParam(required = false) String nome,
             Pageable pageable) {
-        //Para filtrar por ponto de coleta
-        if (idPonto != null) {
-            return ResponseEntity.ok(operadorServ.findByPontoColetaId(idPonto, pageable));
-        }
-        //Para listar todos os operadores de forma paginada
-        return ResponseEntity.ok(operadorServ.findAll(pageable));
+        //Para filtrar casoa tenha o id pontocoleta, nesse caso simples dava para
+        //fazer aqui mesmo, mas para padronizaar melhor manter o metodo filtrar no service
+        return ResponseEntity.ok(operadorServ.filtrar(idPonto, nome, pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OperadorResponseDTO> findById(@PathVariable Integer id) {
         OperadorResponseDTO operador = operadorServ.findById(id);
+        return ResponseEntity.ok(operador);
+    }
+    @GetMapping("/por-email")
+    public ResponseEntity<OperadorResponseDTO> findByEmail(@RequestParam String email) {
+        OperadorResponseDTO operador = operadorServ.findByEmail(email);
         return ResponseEntity.ok(operador);
     }
 

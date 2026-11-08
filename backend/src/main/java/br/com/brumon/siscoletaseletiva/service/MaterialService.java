@@ -121,4 +121,20 @@ public class MaterialService {
                 material.getSituacao()
         );
     }
+
+    public Page<MaterialResponseDTO> filtrar(String nome, SituacaoMaterial situacao, Pageable pageable) {
+        boolean temNome = nome != null && !nome.isBlank();
+        boolean temSituacao = situacao != null;
+        if (temNome) {
+            Page<Material> materiais = rep.findByNomeContainingIgnoreCase(nome, pageable);
+                    return materiais.map(this::converterParaDTO);
+        }
+
+        if (temSituacao) {
+            Page<Material> materiais = rep.findBySituacao(situacao, pageable);
+                    return materiais.map(this::converterParaDTO);
+        }
+
+        return rep.findAll(pageable).map(this::converterParaDTO);
+    }
 }

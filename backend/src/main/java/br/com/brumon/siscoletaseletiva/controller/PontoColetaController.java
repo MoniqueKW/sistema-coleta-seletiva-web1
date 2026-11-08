@@ -3,6 +3,7 @@ package br.com.brumon.siscoletaseletiva.controller;
 import br.com.brumon.siscoletaseletiva.dto.request.AlterarSituacaoPontoRequestDTO;
 import br.com.brumon.siscoletaseletiva.dto.request.PontoColetaRequestDTO;
 import br.com.brumon.siscoletaseletiva.dto.response.PontoColetaResponseDTO;
+import br.com.brumon.siscoletaseletiva.model.enums.SituacaoPonto;
 import br.com.brumon.siscoletaseletiva.service.PontoColetaService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -32,19 +33,11 @@ public class PontoColetaController {
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String municipio,
             @RequestParam(required = false) String bairro,
+            @RequestParam(required = false) SituacaoPonto situacao,
+            @RequestParam(required = false) Boolean recolhimentoDomiciliar,
             Pageable pageable) {
 
-        //Verifica e chama o método correspondente no Service
-        if (nome != null && !nome.isBlank()) {
-            return ResponseEntity.ok(pontoColetaServ.findByNome(nome, pageable));
-        } else if (municipio != null && !municipio.isBlank()) {
-            return ResponseEntity.ok(pontoColetaServ.findByMunicipio(municipio, pageable));
-        } else if (bairro != null && !bairro.isBlank()) {
-            return ResponseEntity.ok(pontoColetaServ.findByBairro(bairro, pageable));
-        }
-
-        //Sem filtro, lista todos.
-        return ResponseEntity.ok(pontoColetaServ.findAll(pageable));
+        return ResponseEntity.ok(pontoColetaServ.findAll(nome, municipio, bairro, situacao, pageable));
     }
 
     @GetMapping("/{id}")
