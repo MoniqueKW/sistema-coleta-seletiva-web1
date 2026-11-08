@@ -3,6 +3,9 @@ package br.com.brumon.siscoletaseletiva.service;
 import br.com.brumon.siscoletaseletiva.dto.request.*;
 import br.com.brumon.siscoletaseletiva.dto.response.ItemSolicitacaoResponseDTO;
 import br.com.brumon.siscoletaseletiva.dto.response.SolicitacaoResponseDTO;
+import br.com.brumon.siscoletaseletiva.exception.ConflitoConcorrenciaException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import br.com.brumon.siscoletaseletiva.model.entity.*;
 import br.com.brumon.siscoletaseletiva.model.enums.SituacaoMaterial;
 import br.com.brumon.siscoletaseletiva.model.enums.SituacaoPonto;
@@ -11,6 +14,7 @@ import br.com.brumon.siscoletaseletiva.exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.exception.RegraNegocioException;
 import br.com.brumon.siscoletaseletiva.repository.*;
 import br.com.brumon.siscoletaseletiva.specification.SolicitacaoSpecification;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +36,8 @@ public class SolicitacaoService {
     private final MaterialRepository repMaterial;
     private final OperadorRepository repOperador;
     private final MaterialAceitoRepository repMaterialAceito;
+    @PersistenceContext
+    private EntityManager entityManager;
     public SolicitacaoService(SolicitacaoRepository rep,
                               ItemSolicitacaoRepository repItemSolicitacao,
                               HistoricoService serviceHistorico,
@@ -196,6 +202,16 @@ public class SolicitacaoService {
         if (solicitacao.getSituacao() != SituacaoSolicitacao.SOLICITADA) {
             throw new RegraNegocioException("A solicitação não pode ser atualizada, pois não está mais na situação SOLICITADA.");
         }
+        //verifica se a versao enviada é de fato a atual da solicitacao
+        if(!solicitacaodto.versao().equals(solicitacao.getVersao())) {
+            throw new ConflitoConcorrenciaException(
+                    "A solicitação foi modificada por outra operação. Recarregue os dados e tente novamente.");
+        }
+        // isso força o Hibernate a incrementar a versão da Solicitação no final da transação,
+        // mesmo que o usuário só tenha alterado a lista de itens, ou seja, se não alterou nenhum campo
+        // de solicitação, só a lista de itemSolicitacao. Dessa forma, ainda assim, o hibernate incrementa
+        // a versão da solicitação, impedindo que dois usuarios mexam na mesma versão.
+        entityManager.lock(solicitacao, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
         //verifica a veracidade do operador se esse nao for nulo
         if (idOperador != null) {
             Operador operador = repOperador.findById(idOperador)

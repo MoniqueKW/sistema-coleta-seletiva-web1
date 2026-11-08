@@ -40,6 +40,16 @@ public class GlobalExceptionHandler {
         return criarResposta(HttpStatus.CONFLICT, "BUSINESS_CONFLICT", exception.getMessage(), Map.of());
     }
 
+    @ExceptionHandler(ConflitoConcorrenciaException.class)
+    public ResponseEntity<ApiErroResponse> tratarConflitoConcorrencia(
+            ConflitoConcorrenciaException exception) {
+        return criarResposta(HttpStatus.CONFLICT,
+                "CONCURRENT_MODIFICATION",
+                exception.getMessage(),
+                Map.of()
+        );
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErroResponse> tratarArgumentoNaoValido(MethodArgumentNotValidException exception) {
         Map<String, String> fieldErrors = new LinkedHashMap<>();
