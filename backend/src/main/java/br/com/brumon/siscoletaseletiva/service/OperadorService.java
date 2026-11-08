@@ -88,7 +88,7 @@ public class OperadorService {
                         "Operador não encontrado."
                 ));
 
-        if (historicoRep.existsByResponsavel_Id(id)) {
+        if (historicoRep.existsByOperador_Id(id)) {
             throw new RegraNegocioException(
                     "Não é possível excluir o operador, pois ele possui registros vinculados no histórico de solicitações."
             );

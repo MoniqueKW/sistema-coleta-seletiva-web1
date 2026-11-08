@@ -40,8 +40,8 @@ public class HistoricoService {
         return converterParaDTO(historico);
     }
     @Transactional(readOnly = true)
-    public Page<HistoricoResponseDTO> findByResponsavelId(Integer idOperador, Pageable pageable) {
-        Page<Historico> historicos = rep.findByResponsavel_Id(idOperador, pageable);
+    public Page<HistoricoResponseDTO> findByOperadorId(Integer idOperador, Pageable pageable) {
+        Page<Historico> historicos = rep.findByOperador_Id(idOperador, pageable);
         return historicos.map(this::converterParaDTO);
     }
     @Transactional(readOnly = true)
@@ -49,24 +49,43 @@ public class HistoricoService {
         Page<Historico> historicos = rep.findBySolicitacao_IdOrderByDataAsc(idSolicitacao, pageable);
         return historicos.map(this::converterParaDTO);
     }
+    @Transactional(readOnly = true)
+    public Page<HistoricoResponseDTO> findBySolicitacaoIdAndOperadorId(
+            Integer idSolicitacao, Integer idOperador, Pageable pageable) {
+        Page<Historico> historicos = rep.findBySolicitacao_IdAndOperador_IdOrderByDataAsc(
+                idSolicitacao, idOperador, pageable);
+        return historicos.map(this::converterParaDTO);
+    }
+    @Transactional(readOnly = true)
+    public Page<HistoricoResponseDTO> findBySolicitacaoIdAndResponsavel(
+            Integer idSolicitacao, String nomeResponsavel, Pageable pageable) {
+        Page<Historico> historicos = rep.findBySolicitacao_IdAndResponsavel(
+                idSolicitacao, nomeResponsavel, pageable);
+        return historicos.map(this::converterParaDTO);
+    }
+
     public void registrarHistorico(Integer idSolicitacao, String situacaoAnterior,
                                    String situacaoNova, Integer idOperador,
                                    String motivo, String infoTentativa) {
         Solicitacao solicitacao = repSolicitacao.findById(idSolicitacao)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
-        Operador operador = repOperador.findById(idOperador)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
-        if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
-            throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
+        Operador operador = null;
+        String nomeResponsavel;
+        if (idOperador != null) {
+            operador = repOperador.findById(idOperador).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+            nomeResponsavel = operador.getNome();
+        } else {
+            nomeResponsavel = solicitacao.getMorador().getNome();
         }
         Historico historico = Historico.builder()
                 .solicitacao(solicitacao)
                 .situacaoAnterior(situacaoAnterior)
                 .situacaoNova(situacaoNova)
-                .responsavel(operador)
+                .responsavel(nomeResponsavel)
                 .motivo(motivo)
                 .data(LocalDateTime.now())
                 .infoTentativa(infoTentativa)
+                .operador(operador)
                 .build();
         rep.save(historico);
     }
@@ -78,7 +97,7 @@ public class HistoricoService {
                 historico.getSituacaoAnterior(),
                 historico.getSituacaoNova(),
                 historico.getData(),
-                historico.getResponsavel().getNome(),
+                historico.getResponsavel(),
                 historico.getMotivo(),
                 historico.getInfoTentativa()
         );

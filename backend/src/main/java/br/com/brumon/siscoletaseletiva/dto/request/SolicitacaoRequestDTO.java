@@ -31,8 +31,6 @@ public record SolicitacaoRequestDTO(
         @NotBlank
         @Size(max = 10)
         String copiaCep,
-        @Future
-        LocalDateTime dataAgendamento,
         @Size(max = 255)
         String observacoes,
         @NotNull
