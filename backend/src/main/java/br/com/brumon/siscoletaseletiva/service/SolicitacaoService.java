@@ -37,7 +37,7 @@ public class SolicitacaoService {
     private final OperadorRepository repOperador;
     private final MaterialAceitoRepository repMaterialAceito;
     @PersistenceContext
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
     public SolicitacaoService(SolicitacaoRepository rep,
                               ItemSolicitacaoRepository repItemSolicitacao,
                               HistoricoService serviceHistorico,
@@ -45,7 +45,8 @@ public class SolicitacaoService {
                               PontoColetaRepository repPonto,
                               MaterialRepository repMaterial,
                               MaterialAceitoRepository repMaterialAceito,
-                              OperadorRepository repOperador) {
+                              OperadorRepository repOperador,
+                              EntityManager entityManager) {
         this.rep = rep;
         this.repItemSolicitacao = repItemSolicitacao;
         this.serviceHistorico = serviceHistorico;
@@ -54,6 +55,7 @@ public class SolicitacaoService {
         this.repMaterial = repMaterial;
         this.repMaterialAceito = repMaterialAceito;
         this.repOperador = repOperador;
+        this.entityManager = entityManager;
     }
     @Transactional(readOnly = true)
     public Page<SolicitacaoResponseDTO> listar(Integer idMorador, Integer idPonto, SituacaoSolicitacao situacao,
@@ -339,7 +341,6 @@ public class SolicitacaoService {
                 idOperador,
                 "Solicitação atualizada",
                 null);
-
         return converterParaDTO(solicitacao);
     }
 
