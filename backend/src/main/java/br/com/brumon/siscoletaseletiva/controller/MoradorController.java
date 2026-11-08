@@ -5,6 +5,7 @@ import br.com.brumon.siscoletaseletiva.dto.response.MoradorResponseDTO;
 import br.com.brumon.siscoletaseletiva.service.MoradorService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,12 @@ public class MoradorController {
             //o sistema não vai dar erro se a pessoa não enviar nenhum nome.
             @RequestParam(required = false) String nome,
             Pageable pageable) {
-        return ResponseEntity.ok(moradorServ.filtrar(nome, pageable));
+        Pageable limitacaoFixa = PageRequest.of(
+                pageable.getPageNumber(),
+                Math.min(pageable.getPageSize(), 100),
+                pageable.getSort()
+        );
+        return ResponseEntity.ok(moradorServ.filtrar(nome, limitacaoFixa));
         //retorna uma lista paginada com todos os moradores cadastrados.
     }
 

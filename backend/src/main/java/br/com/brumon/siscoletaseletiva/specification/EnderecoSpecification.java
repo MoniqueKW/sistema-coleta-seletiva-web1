@@ -9,12 +9,10 @@ public class EnderecoSpecification {
 
     private EnderecoSpecification() {
     }
-
     public static Specification<Endereco> comMorador(Integer idMorador) {
         return (root, query, criteriaBuilder) ->
                 idMorador == null ? null : criteriaBuilder.equal(root.get("morador").get("id"), idMorador);
     }
-
     //CEP é comparado de forma exata.
     public static Specification<Endereco> comCep(String cep) {
         return (root, query, criteriaBuilder) ->
@@ -25,15 +23,12 @@ public class EnderecoSpecification {
     public static Specification<Endereco> comUf(String uf) {
         return contem("uf", uf);
     }
-
     public static Specification<Endereco> comMunicipio(String municipio) {
         return contem("municipio", municipio);
     }
-
     public static Specification<Endereco> comBairro(String bairro) {
         return contem("bairro", bairro);
     }
-
     public static Specification<Endereco> comLogradouro(String logradouro) {
         return contem("logradouro", logradouro);
     }

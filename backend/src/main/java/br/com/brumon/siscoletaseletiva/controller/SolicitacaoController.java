@@ -10,6 +10,7 @@ import br.com.brumon.siscoletaseletiva.model.enums.SituacaoSolicitacao;
 import br.com.brumon.siscoletaseletiva.service.SolicitacaoService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -35,8 +36,13 @@ public class SolicitacaoController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataInicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataFim,
             Pageable pageable) {
+        Pageable limitacaoFixa = PageRequest.of(
+                pageable.getPageNumber(),
+                Math.min(pageable.getPageSize(), 100),
+                pageable.getSort()
+        );
         return ResponseEntity.ok(solicitacaoServ.findAll(idMorador, idPonto, situacao,
-                dataInicio, dataFim, pageable));
+                dataInicio, dataFim, limitacaoFixa));
     }
 
     @GetMapping("/{id}")

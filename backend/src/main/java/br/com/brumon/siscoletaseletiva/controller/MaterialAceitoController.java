@@ -6,6 +6,7 @@ import br.com.brumon.siscoletaseletiva.dto.response.MaterialAceitoResponseDTO;
 import br.com.brumon.siscoletaseletiva.service.MaterialAceitoService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,12 @@ public class MaterialAceitoController {
     public ResponseEntity<Page<MaterialAceitoResponseDTO>> findAll(
             @PathVariable Integer idPonto,
             Pageable pageable) {
-        return ResponseEntity.ok(materialAceitoServ.findByIdPonto(idPonto, pageable));
+        Pageable limitacaoFixa = PageRequest.of(
+                pageable.getPageNumber(),
+                Math.min(pageable.getPageSize(), 100),
+                pageable.getSort()
+        );
+        return ResponseEntity.ok(materialAceitoServ.findByIdPonto(idPonto, limitacaoFixa));
     }
 
     @PutMapping("/{idMaterial}")

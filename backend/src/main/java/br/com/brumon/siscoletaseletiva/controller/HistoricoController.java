@@ -3,6 +3,7 @@ package br.com.brumon.siscoletaseletiva.controller;
 import br.com.brumon.siscoletaseletiva.dto.response.HistoricoResponseDTO;
 import br.com.brumon.siscoletaseletiva.service.HistoricoService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +26,12 @@ public class HistoricoController {
             @RequestParam(required = false) Integer idOperador,
             @RequestParam(required = false) Integer idSolicitacao,
             Pageable pageable) {
-        return ResponseEntity.ok(historicoServ.filtrar(idOperador, idSolicitacao, pageable));
+        Pageable limitacaoFixa = PageRequest.of(
+                pageable.getPageNumber(),
+                Math.min(pageable.getPageSize(), 100),
+                pageable.getSort()
+        );
+        return ResponseEntity.ok(historicoServ.filtrar(idOperador, idSolicitacao, limitacaoFixa));
     }
 
     @GetMapping("/{id}")

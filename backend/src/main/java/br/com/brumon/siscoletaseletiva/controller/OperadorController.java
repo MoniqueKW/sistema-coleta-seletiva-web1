@@ -5,6 +5,7 @@ import br.com.brumon.siscoletaseletiva.dto.response.OperadorResponseDTO;
 import br.com.brumon.siscoletaseletiva.service.OperadorService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,9 +32,14 @@ public class OperadorController {
             @RequestParam(required = false) Integer idPonto,
             @RequestParam(required = false) String nome,
             Pageable pageable) {
-        //Para filtrar casoa tenha o id pontocoleta, nesse caso simples dava para
-        //fazer aqui mesmo, mas para padronizaar melhor manter o metodo filtrar no service
-        return ResponseEntity.ok(operadorServ.filtrar(idPonto, nome, pageable));
+        Pageable limitacaoFixa = PageRequest.of(
+                pageable.getPageNumber(),
+                Math.min(pageable.getPageSize(), 100),
+                pageable.getSort()
+        );
+        //Para filtrar caso tenha o id pontocoleta, nesse caso simples dava para
+        //fazer aqui mesmo, mas para padronizar melhor manter o metodo filtrar no service
+        return ResponseEntity.ok(operadorServ.filtrar(idPonto, nome, limitacaoFixa));
     }
 
     @GetMapping("/{id}")

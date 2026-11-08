@@ -7,6 +7,7 @@ import br.com.brumon.siscoletaseletiva.model.enums.SituacaoPonto;
 import br.com.brumon.siscoletaseletiva.service.PontoColetaService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,8 +37,13 @@ public class PontoColetaController {
             @RequestParam(required = false) SituacaoPonto situacao,
             @RequestParam(required = false) Boolean recolhimentoDomiciliar,
             Pageable pageable) {
-
-        return ResponseEntity.ok(pontoColetaServ.findAll(nome, municipio, bairro, situacao, pageable));
+        Pageable limitacaoFixa = PageRequest.of(
+                pageable.getPageNumber(),
+                Math.min(pageable.getPageSize(), 100),
+                pageable.getSort()
+        );
+        return ResponseEntity.ok(pontoColetaServ.findAll(nome, municipio, bairro, situacao, recolhimentoDomiciliar,
+                limitacaoFixa));
     }
 
     @GetMapping("/{id}")
