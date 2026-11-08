@@ -330,7 +330,7 @@ public class SolicitacaoService {
             throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
         }
         solicitacao.setRecolhimentoDomiciliar(recDomiciliarFinal);
-        rep.save(solicitacao);
+        rep.saveAndFlush(solicitacao);
         SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
         serviceHistorico.registrarHistorico(
                 solicitacao.getId(),
