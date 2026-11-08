@@ -26,7 +26,7 @@ public class MoradorController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<MoradorResponseDTO>> findAll(
+    public ResponseEntity<Page<MoradorResponseDTO>> listar(
             //o sistema não vai dar erro se a pessoa não enviar nenhum nome.
             @RequestParam(required = false) String nome,
             Pageable pageable) {
@@ -35,7 +35,7 @@ public class MoradorController {
                 Math.min(pageable.getPageSize(), 100),
                 pageable.getSort()
         );
-        return ResponseEntity.ok(moradorServ.filtrar(nome, limitacaoFixa));
+        return ResponseEntity.ok(moradorServ.listar(nome, limitacaoFixa));
         //retorna uma lista paginada com todos os moradores cadastrados.
     }
 

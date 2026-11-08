@@ -18,7 +18,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Service
@@ -49,8 +50,8 @@ public class SolicitacaoService {
         this.repOperador = repOperador;
     }
     @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findAll(Integer idMorador, Integer idPonto, SituacaoSolicitacao situacao,
-                                                LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable) {
+    public Page<SolicitacaoResponseDTO> listar(Integer idMorador, Integer idPonto, SituacaoSolicitacao situacao,
+                                               OffsetDateTime dataInicio, OffsetDateTime dataFim, Pageable pageable) {
         Specification<Solicitacao> filtros = Specification.allOf(
                 SolicitacaoSpecification.comMorador(idMorador),
                 SolicitacaoSpecification.comPontoColeta(idPonto),
@@ -164,7 +165,7 @@ public class SolicitacaoService {
                 .copiaUf(solicitacaodto.copiaUf())
                 .copiaCep(solicitacaodto.copiaCep())
                 .situacao(SituacaoSolicitacao.SOLICITADA)
-                .dataCriacao(LocalDateTime.now())
+                .dataCriacao(OffsetDateTime.now(ZoneOffset.UTC))
                 .observacoes(solicitacaodto.observacoes())
                 .recolhimentoDomiciliar(solicitacaodto.recolhimentoDomiciliar())
                 //nao escrevemos .version() pq o hibernate vai controlar
@@ -333,7 +334,7 @@ public class SolicitacaoService {
         if (solicitacao.getSituacao() != SituacaoSolicitacao.SOLICITADA) {
             throw new RegraNegocioException("A solicitação não pode ser agendada, pois não está mais na situação SOLICITADA.");
         }
-        if (agendamentodto.dataAgendamento() == null || !agendamentodto.dataAgendamento().isAfter(LocalDateTime.now())) {
+        if (agendamentodto.dataAgendamento() == null || !agendamentodto.dataAgendamento().isAfter(OffsetDateTime.now())) {
             throw new RegraNegocioException("A data do agendamento deve ser futura.");
         }
         Operador operador = repOperador.findById(idOperador)
@@ -484,7 +485,7 @@ public class SolicitacaoService {
         repItemSolicitacao.saveAll(itensValidados);
         SituacaoSolicitacao situacaoAnterior = solicitacao.getSituacao();
         solicitacao.setSituacao(SituacaoSolicitacao.CONCLUIDA);
-        solicitacao.setDataConclusao(LocalDateTime.now());
+        solicitacao.setDataConclusao(OffsetDateTime.now(ZoneOffset.UTC));
         rep.save(solicitacao);
         serviceHistorico.registrarHistorico(
                 solicitacao.getId(),
@@ -509,7 +510,7 @@ public class SolicitacaoService {
         if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
             throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
         }
-        if (agendamentodto.dataAgendamento() == null || !agendamentodto.dataAgendamento().isAfter(LocalDateTime.now())) {
+        if (agendamentodto.dataAgendamento() == null || !agendamentodto.dataAgendamento().isAfter(OffsetDateTime.now())) {
             throw new RegraNegocioException("A nova data do agendamento deve ser futura.");
         }
         if (motivo == null || motivo.isBlank()) {

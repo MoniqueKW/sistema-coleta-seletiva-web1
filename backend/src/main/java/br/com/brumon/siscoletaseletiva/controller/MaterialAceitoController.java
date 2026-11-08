@@ -32,7 +32,7 @@ public class MaterialAceitoController {
     //usando o findByIdPonto como findAll pq as consultas sempre vão ser em
     //relação a um ponto (materiais aceitos de um ponto)
     @GetMapping
-    public ResponseEntity<Page<MaterialAceitoResponseDTO>> findAll(
+    public ResponseEntity<Page<MaterialAceitoResponseDTO>> listar(
             @PathVariable Integer idPonto,
             Pageable pageable) {
         Pageable limitacaoFixa = PageRequest.of(

@@ -28,7 +28,7 @@ public class MaterialController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<MaterialResponseDTO>> findAll(
+    public ResponseEntity<Page<MaterialResponseDTO>> listar(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) SituacaoMaterial situacao,
             Pageable pageable) {
@@ -38,7 +38,7 @@ public class MaterialController {
                 pageable.getSort()
         );
         //Verifica qual filtro foi enviado no metodo filtrar no service de material
-        return ResponseEntity.ok(materialServ.filtrar(nome, situacao, limitacaoFixa));
+        return ResponseEntity.ok(materialServ.listar(nome, situacao, limitacaoFixa));
     }
 
     @GetMapping("/{id}")

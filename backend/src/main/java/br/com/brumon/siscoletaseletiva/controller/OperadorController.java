@@ -28,7 +28,7 @@ public class OperadorController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<OperadorResponseDTO>> findAll(
+    public ResponseEntity<Page<OperadorResponseDTO>> listar(
             @RequestParam(required = false) Integer idPonto,
             @RequestParam(required = false) String nome,
             Pageable pageable) {
@@ -39,7 +39,7 @@ public class OperadorController {
         );
         //Para filtrar caso tenha o id pontocoleta, nesse caso simples dava para
         //fazer aqui mesmo, mas para padronizar melhor manter o metodo filtrar no service
-        return ResponseEntity.ok(operadorServ.filtrar(idPonto, nome, limitacaoFixa));
+        return ResponseEntity.ok(operadorServ.listar(idPonto, nome, limitacaoFixa));
     }
 
     @GetMapping("/{id}")

@@ -3,7 +3,7 @@ package br.com.brumon.siscoletaseletiva.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Builder
 @NoArgsConstructor
@@ -25,7 +25,7 @@ public class Historico {
     @Column(name = "situacao_nova", length = 50, nullable = false)
     private String situacaoNova;
     @Column(name = "data", nullable = false, insertable = false, updatable = false)
-    private LocalDateTime data;
+    private OffsetDateTime data;
     // Guarda o nome de quem realizou a ação; a relação com operador é opcional.
     @Column(name = "responsavel", nullable = false, length = 150)
     private String responsavel;

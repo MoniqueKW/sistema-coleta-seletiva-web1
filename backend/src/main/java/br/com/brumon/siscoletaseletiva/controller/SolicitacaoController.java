@@ -17,7 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
@@ -29,19 +29,19 @@ public class SolicitacaoController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<SolicitacaoResponseDTO>> findAll(
+    public ResponseEntity<Page<SolicitacaoResponseDTO>> listar(
             @RequestParam(required = false) Integer idMorador,
             @RequestParam(required = false) Integer idPonto,
             @RequestParam(required = false) SituacaoSolicitacao situacao,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataInicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataFim,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dataInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dataFim,
             Pageable pageable) {
         Pageable limitacaoFixa = PageRequest.of(
                 pageable.getPageNumber(),
                 Math.min(pageable.getPageSize(), 100),
                 pageable.getSort()
         );
-        return ResponseEntity.ok(solicitacaoServ.findAll(idMorador, idPonto, situacao,
+        return ResponseEntity.ok(solicitacaoServ.listar(idMorador, idPonto, situacao,
                 dataInicio, dataFim, limitacaoFixa));
     }
 
@@ -133,7 +133,8 @@ public class SolicitacaoController {
             @RequestParam String motivo,
             @RequestParam String infoTentativa,
             @RequestBody @Valid AgendamentoRequestDTO dto) {
-        SolicitacaoResponseDTO solicitacaoReagendada = solicitacaoServ.reagendarSolicitacao(id, motivo, infoTentativa, dto, idOperador);
+        SolicitacaoResponseDTO solicitacaoReagendada = solicitacaoServ.reagendarSolicitacao(id, motivo, infoTentativa,
+                dto, idOperador);
         return ResponseEntity.ok(solicitacaoReagendada);
     }
 }

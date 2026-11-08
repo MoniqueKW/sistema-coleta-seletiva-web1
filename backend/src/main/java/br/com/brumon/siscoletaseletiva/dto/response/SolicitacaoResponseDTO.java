@@ -2,7 +2,7 @@ package br.com.brumon.siscoletaseletiva.dto.response;
 
 import br.com.brumon.siscoletaseletiva.model.enums.SituacaoSolicitacao;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public record SolicitacaoResponseDTO(
@@ -18,9 +18,9 @@ public record SolicitacaoResponseDTO(
         String copiaCep,
         String copiaComplemento,
         SituacaoSolicitacao situacao,
-        LocalDateTime dataCriacao,
-        LocalDateTime dataAgendamento,
-        LocalDateTime dataConclusao,
+        OffsetDateTime dataCriacao,
+        OffsetDateTime dataAgendamento,
+        OffsetDateTime dataConclusao,
         String observacoes,
         Boolean receolhimentoDomiciliar,
         Integer versao,

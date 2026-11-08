@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +28,7 @@ public class EnderecoController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<EnderecoResponseDTO>> findAll(
+    public ResponseEntity<Page<EnderecoResponseDTO>> listar(
             @RequestParam(required = false) Integer idMorador,
             @RequestParam(required = false) String cep,
             @RequestParam(required = false) String uf,
@@ -44,7 +43,7 @@ public class EnderecoController {
                 pageable.getSort()
         );
         //Para retornar todos os endereços paginados
-        return ResponseEntity.ok(enderecoService.findAll(idMorador, cep, uf, municipio, bairro, logradouro, limitacaoFixa));
+        return ResponseEntity.ok(enderecoService.listar(idMorador, cep, uf, municipio, bairro, logradouro, limitacaoFixa));
     }
 
     @GetMapping("/{id}")

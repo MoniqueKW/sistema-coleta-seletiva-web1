@@ -31,9 +31,9 @@ public class PontoColetaService {
         this.repMaterialAceito = repMaterialAceito;
     }
     @Transactional(readOnly = true)
-    public Page<PontoColetaResponseDTO> findAll(String nome, String municipio,
-                                                String bairro, SituacaoPonto situacao,
-                                                Boolean recolhimento, Pageable pageable) {
+    public Page<PontoColetaResponseDTO> listar(String nome, String municipio,
+                                               String bairro, SituacaoPonto situacao,
+                                               Boolean recolhimento, Pageable pageable) {
         Specification<PontoColeta> filtros = Specification.allOf(
                 PontoColetaSpecification.comNome(nome),
                 PontoColetaSpecification.comMunicipio(municipio),

@@ -23,8 +23,8 @@ public class EnderecoService {
     }
     //Todos os filtros enviados são combinados (AND); os que vierem nulos ou em branco são ignorados.
     @Transactional(readOnly = true)
-    public Page<EnderecoResponseDTO> findAll(Integer idMorador, String cep, String uf, String municipio,
-                                             String bairro, String logradouro, Pageable pageable) {
+    public Page<EnderecoResponseDTO> listar(Integer idMorador, String cep, String uf, String municipio,
+                                            String bairro, String logradouro, Pageable pageable) {
         Specification<Endereco> filtros = Specification.allOf(
                 EnderecoSpecification.comMorador(idMorador),
                 EnderecoSpecification.comCep(cep),

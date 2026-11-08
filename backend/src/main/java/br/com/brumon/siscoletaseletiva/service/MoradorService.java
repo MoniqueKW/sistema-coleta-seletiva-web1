@@ -1,14 +1,11 @@
 package br.com.brumon.siscoletaseletiva.service;
 
 import br.com.brumon.siscoletaseletiva.dto.request.MoradorRequestDTO;
-import br.com.brumon.siscoletaseletiva.dto.response.MaterialResponseDTO;
 import br.com.brumon.siscoletaseletiva.dto.response.MoradorResponseDTO;
-import br.com.brumon.siscoletaseletiva.model.entity.Material;
 import br.com.brumon.siscoletaseletiva.model.entity.Morador;
 import br.com.brumon.siscoletaseletiva.exception.RecursoDuplicadoException;
 import br.com.brumon.siscoletaseletiva.exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.exception.RegraNegocioException;
-import br.com.brumon.siscoletaseletiva.model.enums.SituacaoMaterial;
 import br.com.brumon.siscoletaseletiva.repository.MoradorRepository;
 import br.com.brumon.siscoletaseletiva.repository.SolicitacaoRepository;
 import org.springframework.data.domain.Page;
@@ -26,20 +23,21 @@ public class MoradorService {
         this.repSolicitacao = repSolicitacao;
     }
     @Transactional(readOnly = true)
-    public Page<MoradorResponseDTO> findAll(Pageable pageable) {
-        Page<Morador> lista = rep.findAll(pageable);
-        return lista.map(this::converterParaDTO);
+    public Page<MoradorResponseDTO> listar(String nome, Pageable pageable) {
+        boolean temNome = nome != null && !nome.isBlank();
+        if (temNome) {
+            Page<Morador> moradores = rep.findByNomeContainingIgnoreCase(nome, pageable);
+            return moradores.map(this::converterParaDTO);
+        }
+
+        return rep.findAll(pageable).map(this::converterParaDTO);
     }
     @Transactional(readOnly = true)
     public MoradorResponseDTO findById(Integer id) {
         Morador morador = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
         return converterParaDTO(morador);
     }
-    @Transactional(readOnly = true)
-    public Page<MoradorResponseDTO> findByNome(String nome, Pageable pageable) {
-        Page<Morador> lista = rep.findByNomeContainingIgnoreCase(nome, pageable);
-        return lista.map(this::converterParaDTO);
-    }
+
     @Transactional(readOnly = true)
     public MoradorResponseDTO findByEmail(String email) {
         Morador morador = rep.findByEmail(email).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
@@ -95,13 +93,4 @@ public class MoradorService {
         );
     }
 
-    public Page<MoradorResponseDTO> filtrar(String nome, Pageable pageable) {
-        boolean temNome = nome != null && !nome.isBlank();
-        if (temNome) {
-            Page<Morador> moradores = rep.findByNomeContainingIgnoreCase(nome, pageable);
-            return moradores.map(this::converterParaDTO);
-        }
-
-        return rep.findAll(pageable).map(this::converterParaDTO);
-    }
 }

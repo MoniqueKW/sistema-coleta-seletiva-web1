@@ -3,7 +3,7 @@ package br.com.brumon.siscoletaseletiva.model.entity;
 import br.com.brumon.siscoletaseletiva.model.enums.SituacaoSolicitacao;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,11 +46,12 @@ public class Solicitacao {
     @Column(name = "situacao", length = 20, nullable = false)
     private SituacaoSolicitacao situacao = SituacaoSolicitacao.SOLICITADA;
     @Column(name = "data_criacao", insertable = false, updatable = false, nullable = false)
-    private LocalDateTime dataCriacao;
+    //usando o offset para respeitar o requisito de fuso e offset
+    private OffsetDateTime dataCriacao;
     @Column(name = "data_agendamento")
-    private LocalDateTime dataAgendamento;
+    private OffsetDateTime dataAgendamento;
     @Column(name = "data_conclusao")
-    private LocalDateTime dataConclusao;
+    private OffsetDateTime dataConclusao;
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
     // adicionei para cumprir a RN01 do projeto, onde deixa a entender que um morador

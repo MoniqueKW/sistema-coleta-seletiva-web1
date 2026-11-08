@@ -30,7 +30,7 @@ public class PontoColetaController {
 
     //@RequestParam(required = false): permite que a requisição venha com ou sem filtros.
     @GetMapping
-    public ResponseEntity<Page<PontoColetaResponseDTO>> findAll(
+    public ResponseEntity<Page<PontoColetaResponseDTO>> listar(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String municipio,
             @RequestParam(required = false) String bairro,
@@ -42,7 +42,7 @@ public class PontoColetaController {
                 Math.min(pageable.getPageSize(), 100),
                 pageable.getSort()
         );
-        return ResponseEntity.ok(pontoColetaServ.findAll(nome, municipio, bairro, situacao, recolhimentoDomiciliar,
+        return ResponseEntity.ok(pontoColetaServ.listar(nome, municipio, bairro, situacao, recolhimentoDomiciliar,
                 limitacaoFixa));
     }
 

@@ -13,7 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @Service
 public class HistoricoService {
@@ -27,33 +28,30 @@ public class HistoricoService {
         this.repOperador = repOperador;
     }
     @Transactional(readOnly = true)
-    public Page<HistoricoResponseDTO> findAll(Pageable pageable) {
-        Page<Historico> historicos = rep.findAll(pageable);
-        return historicos.map(this::converterParaDTO);
-    }
+    public Page<HistoricoResponseDTO> listar(Integer idOperador, Integer idSolicitacao, Pageable pageable) {
+        boolean temIdOperador = idOperador != null;
+        boolean temIdSolicitacao = idSolicitacao != null;
+        if(temIdOperador && temIdSolicitacao) {
+            Page<Historico> historicos = rep.findBySolicitacao_IdAndOperador_IdOrderByDataAsc(idSolicitacao, idOperador, pageable);
+            return historicos.map(this::converterParaDTO);
+        }
+        if (temIdOperador) {
+            Page<Historico> historicos = rep.findByOperador_IdOrderByDataAsc(idOperador, pageable);
+            return historicos.map(this::converterParaDTO);
+        }
 
+        if (temIdSolicitacao) {
+            Page<Historico> historicos = rep.findBySolicitacao_IdOrderByDataAsc(idSolicitacao, pageable);
+            return historicos.map(this::converterParaDTO);
+        }
+
+        return rep.findAll(pageable).map(this::converterParaDTO);
+    }
     @Transactional(readOnly = true)
     public HistoricoResponseDTO findById(Integer id) {
         Historico historico = rep.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Histórico não encontrado"));
         return converterParaDTO(historico);
-    }
-    @Transactional(readOnly = true)
-    public Page<HistoricoResponseDTO> findByOperadorId(Integer idOperador, Pageable pageable) {
-        Page<Historico> historicos = rep.findByOperador_IdOrderByDataAsc(idOperador, pageable);
-        return historicos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<HistoricoResponseDTO> findBySolicitacaoId(Integer idSolicitacao, Pageable pageable) {
-        Page<Historico> historicos = rep.findBySolicitacao_IdOrderByDataAsc(idSolicitacao, pageable);
-        return historicos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<HistoricoResponseDTO> findBySolicitacaoIdAndOperadorId(
-            Integer idSolicitacao, Integer idOperador, Pageable pageable) {
-        Page<Historico> historicos = rep.findBySolicitacao_IdAndOperador_IdOrderByDataAsc(
-                idSolicitacao, idOperador, pageable);
-        return historicos.map(this::converterParaDTO);
     }
     public void registrarHistorico(Integer idSolicitacao, String situacaoAnterior,
                                    String situacaoNova, Integer idOperador,
@@ -74,7 +72,7 @@ public class HistoricoService {
                 .situacaoNova(situacaoNova)
                 .responsavel(nomeResponsavel)
                 .motivo(motivo)
-                .data(LocalDateTime.now())
+                .data(OffsetDateTime.now(ZoneOffset.UTC))
                 .infoTentativa(infoTentativa)
                 .operador(operador)
                 .build();
@@ -92,24 +90,5 @@ public class HistoricoService {
                 historico.getMotivo(),
                 historico.getInfoTentativa()
         );
-    }
-    public Page<HistoricoResponseDTO> filtrar(Integer idOperador, Integer idSolicitacao, Pageable pageable) {
-        boolean temIdOperador = idOperador != null;
-        boolean temIdSolicitacao = idSolicitacao != null;
-        if(temIdOperador && temIdSolicitacao) {
-            Page<Historico> historicos = rep.findBySolicitacao_IdAndOperador_IdOrderByDataAsc(idSolicitacao, idOperador, pageable);
-            return historicos.map(this::converterParaDTO);
-        }
-        if (temIdOperador) {
-            Page<Historico> historicos = rep.findByOperador_IdOrderByDataAsc(idOperador, pageable);
-            return historicos.map(this::converterParaDTO);
-        }
-
-        if (temIdSolicitacao) {
-            Page<Historico> historicos = rep.findBySolicitacao_IdOrderByDataAsc(idSolicitacao, pageable);
-            return historicos.map(this::converterParaDTO);
-        }
-
-        return rep.findAll(pageable).map(this::converterParaDTO);
     }
 }
