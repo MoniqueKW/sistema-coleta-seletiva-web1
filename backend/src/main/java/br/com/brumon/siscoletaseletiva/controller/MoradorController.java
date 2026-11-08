@@ -5,6 +5,7 @@ import br.com.brumon.siscoletaseletiva.dto.response.MoradorResponseDTO;
 import br.com.brumon.siscoletaseletiva.service.MoradorService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,20 +26,28 @@ public class MoradorController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<MoradorResponseDTO>> findAll(
+    public ResponseEntity<Page<MoradorResponseDTO>> listar(
             //o sistema não vai dar erro se a pessoa não enviar nenhum nome.
             @RequestParam(required = false) String nome,
             Pageable pageable) {
-        if (nome != null && !nome.isBlank()) {
-            return ResponseEntity.ok(moradorServ.findByNome(nome, pageable));
-        }
-        return ResponseEntity.ok(moradorServ.findAll(pageable));
+        Pageable limitacaoFixa = PageRequest.of(
+                pageable.getPageNumber(),
+                Math.min(pageable.getPageSize(), 100),
+                pageable.getSort()
+        );
+        return ResponseEntity.ok(moradorServ.listar(nome, limitacaoFixa));
         //retorna uma lista paginada com todos os moradores cadastrados.
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MoradorResponseDTO> findById(@PathVariable Integer id) {
         MoradorResponseDTO morador = moradorServ.findById(id);
+        return ResponseEntity.ok(morador);
+    }
+
+    @GetMapping("/por-email")
+    public ResponseEntity<MoradorResponseDTO> findByEmail(@RequestParam String email) {
+        MoradorResponseDTO morador = moradorServ.findByEmail(email);
         return ResponseEntity.ok(morador);
     }
 

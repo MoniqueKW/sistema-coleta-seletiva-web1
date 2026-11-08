@@ -28,29 +28,27 @@ public class MaterialService {
         this.repItemSolicitacao = repItemSolicitacao;
         this.repMaterialAceito = repMaterialAceito;
     }
-
     @Transactional(readOnly = true)
-    public Page<MaterialResponseDTO> findAll(Pageable pageable) {
-        Page<Material> materiais = rep.findAll(pageable);
-        return materiais.map(this::converterParaDTO);
-    }
+    public Page<MaterialResponseDTO> listar(String nome, SituacaoMaterial situacao, Pageable pageable) {
+        boolean temNome = nome != null && !nome.isBlank();
+        boolean temSituacao = situacao != null;
+        if (temNome) {
+            Page<Material> materiais = rep.findByNomeContainingIgnoreCase(nome, pageable);
+            return materiais.map(this::converterParaDTO);
+        }
 
-    @Transactional(readOnly = true)
-    public Page<MaterialResponseDTO> findByNome(String nome, Pageable pageable) {
-        Page<Material> materiais = rep.findByNomeContainingIgnoreCase(nome, pageable);
-        return materiais.map(this::converterParaDTO);
+        if (temSituacao) {
+            Page<Material> materiais = rep.findBySituacao(situacao, pageable);
+            return materiais.map(this::converterParaDTO);
+        }
+
+        return rep.findAll(pageable).map(this::converterParaDTO);
     }
 
     @Transactional(readOnly = true)
     public MaterialResponseDTO findById(Integer id) {
         Material material = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Material não encontrado"));
         return converterParaDTO(material);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<MaterialResponseDTO> findBySituacao(SituacaoMaterial situacao, Pageable pageable) {
-        Page<Material> materiais = rep.findBySituacao(situacao, pageable);
-        return materiais.map(this::converterParaDTO);
     }
 
     @Transactional
@@ -121,4 +119,5 @@ public class MaterialService {
                 material.getSituacao()
         );
     }
+
 }

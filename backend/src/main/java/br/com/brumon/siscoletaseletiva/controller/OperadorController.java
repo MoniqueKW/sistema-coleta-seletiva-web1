@@ -5,6 +5,7 @@ import br.com.brumon.siscoletaseletiva.dto.response.OperadorResponseDTO;
 import br.com.brumon.siscoletaseletiva.service.OperadorService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,20 +28,28 @@ public class OperadorController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<OperadorResponseDTO>> findAll(
+    public ResponseEntity<Page<OperadorResponseDTO>> listar(
             @RequestParam(required = false) Integer idPonto,
+            @RequestParam(required = false) String nome,
             Pageable pageable) {
-        //Para filtrar por ponto de coleta
-        if (idPonto != null) {
-            return ResponseEntity.ok(operadorServ.findByPontoColetaId(idPonto, pageable));
-        }
-        //Para listar todos os operadores de forma paginada
-        return ResponseEntity.ok(operadorServ.findAll(pageable));
+        Pageable limitacaoFixa = PageRequest.of(
+                pageable.getPageNumber(),
+                Math.min(pageable.getPageSize(), 100),
+                pageable.getSort()
+        );
+        //Para filtrar caso tenha o id pontocoleta, nesse caso simples dava para
+        //fazer aqui mesmo, mas para padronizar melhor manter o metodo filtrar no service
+        return ResponseEntity.ok(operadorServ.listar(idPonto, nome, limitacaoFixa));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OperadorResponseDTO> findById(@PathVariable Integer id) {
         OperadorResponseDTO operador = operadorServ.findById(id);
+        return ResponseEntity.ok(operador);
+    }
+    @GetMapping("/por-email")
+    public ResponseEntity<OperadorResponseDTO> findByEmail(@RequestParam String email) {
+        OperadorResponseDTO operador = operadorServ.findByEmail(email);
         return ResponseEntity.ok(operador);
     }
 

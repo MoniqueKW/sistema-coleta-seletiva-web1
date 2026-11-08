@@ -28,9 +28,22 @@ public class OperadorService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OperadorResponseDTO> findAll(Pageable pageable) {
-        Page<Operador> operadores = rep.findAll(pageable);
-        return operadores.map(this::converterParaDTO);
+    public Page<OperadorResponseDTO> listar(Integer idPonto, String nome, Pageable pageable) {
+        boolean temPonto = idPonto != null;
+        boolean temNome = nome != null && !nome.isBlank();
+        if (temPonto && temNome) {
+            return rep.findByPontoColeta_IdAndNomeContainingIgnoreCase(idPonto, nome, pageable)
+                    .map(this::converterParaDTO);
+        }
+        if (temPonto) {
+            return rep.findByPontoColeta_Id(idPonto, pageable)
+                    .map(this::converterParaDTO);
+        }
+        if (temNome) {
+            return rep.findByNomeContainingIgnoreCase(nome, pageable)
+                    .map(this::converterParaDTO);
+        }
+        return rep.findAll(pageable).map(this::converterParaDTO);
     }
 
     @Transactional(readOnly = true)
@@ -41,9 +54,10 @@ public class OperadorService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OperadorResponseDTO> findByPontoColetaId(Integer idPonto, Pageable pageable) {
-        Page<Operador> operadores = rep.findByPontoColeta_Id(idPonto, pageable);
-        return operadores.map(this::converterParaDTO);
+    public OperadorResponseDTO findByEmail(String email) {
+        Operador operador = rep.findByEmail(email)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+        return converterParaDTO(operador);
     }
 
     @Transactional
@@ -88,7 +102,7 @@ public class OperadorService {
                         "Operador não encontrado."
                 ));
 
-        if (historicoRep.existsByResponsavel_Id(id)) {
+        if (historicoRep.existsByOperador_Id(id)) {
             throw new RegraNegocioException(
                     "Não é possível excluir o operador, pois ele possui registros vinculados no histórico de solicitações."
             );
@@ -104,5 +118,4 @@ public class OperadorService {
                 operador.getEmail()
         );
     }
-
 }

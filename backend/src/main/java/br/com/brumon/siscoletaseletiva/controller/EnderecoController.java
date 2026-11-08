@@ -5,6 +5,7 @@ import br.com.brumon.siscoletaseletiva.dto.response.EnderecoResponseDTO;
 import br.com.brumon.siscoletaseletiva.service.EnderecoService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class EnderecoController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<EnderecoResponseDTO>> findAll(
+    public ResponseEntity<Page<EnderecoResponseDTO>> listar(
             @RequestParam(required = false) Integer idMorador,
             @RequestParam(required = false) String cep,
             @RequestParam(required = false) String uf,
@@ -35,24 +36,14 @@ public class EnderecoController {
             @RequestParam(required = false) String bairro,
             @RequestParam(required = false) String logradouro,
             Pageable pageable) {
-
-        //Verifica os filtros passados na URL na ordem de maior prioridade
-        if (idMorador != null) {
-            return ResponseEntity.ok(enderecoService.findByMoradorId(idMorador, pageable));
-        } else if (cep != null && !cep.isBlank()) {
-            return ResponseEntity.ok(enderecoService.findByCep(cep, pageable));
-        } else if (logradouro != null && !logradouro.isBlank()) {
-            return ResponseEntity.ok(enderecoService.findByLogradouro(logradouro, pageable));
-        } else if (bairro != null && !bairro.isBlank()) {
-            return ResponseEntity.ok(enderecoService.findByBairro(bairro, pageable));
-        } else if (municipio != null && !municipio.isBlank()) {
-            return ResponseEntity.ok(enderecoService.findByMunicipio(municipio, pageable));
-        } else if (uf != null && !uf.isBlank()) {
-            return ResponseEntity.ok(enderecoService.findByUf(uf, pageable));
-        }
-
+        // Se o usuário pediu 20, usa 20. Se pediu 500, limita a 100.
+        Pageable limitacaoFixa = PageRequest.of(
+                pageable.getPageNumber(),
+                Math.min(pageable.getPageSize(), 100),
+                pageable.getSort()
+        );
         //Para retornar todos os endereços paginados
-        return ResponseEntity.ok(enderecoService.findAll(pageable));
+        return ResponseEntity.ok(enderecoService.listar(idMorador, cep, uf, municipio, bairro, logradouro, limitacaoFixa));
     }
 
     @GetMapping("/{id}")

@@ -6,6 +6,8 @@ import br.com.brumon.siscoletaseletiva.model.entity.Endereco;
 import br.com.brumon.siscoletaseletiva.exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.repository.EnderecoRepository;
 import br.com.brumon.siscoletaseletiva.repository.MoradorRepository;
+import br.com.brumon.siscoletaseletiva.specification.EnderecoSpecification;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,46 +21,26 @@ public class EnderecoService {
         this.rep = rep;
         this.repMorador = repMorador;
     }
+    //Todos os filtros enviados são combinados (AND); os que vierem nulos ou em branco são ignorados.
     @Transactional(readOnly = true)
-    public Page<EnderecoResponseDTO> findAll(Pageable pageable) {
-        Page<Endereco> enderecos = rep.findAll(pageable);
+    public Page<EnderecoResponseDTO> listar(Integer idMorador, String cep, String uf, String municipio,
+                                            String bairro, String logradouro, Pageable pageable) {
+        Specification<Endereco> filtros = Specification.allOf(
+                EnderecoSpecification.comMorador(idMorador),
+                EnderecoSpecification.comCep(cep),
+                EnderecoSpecification.comUf(uf),
+                EnderecoSpecification.comMunicipio(municipio),
+                EnderecoSpecification.comBairro(bairro),
+                EnderecoSpecification.comLogradouro(logradouro));
+        Page<Endereco> enderecos = rep.findAll(filtros, pageable);
         return enderecos.map(this::converterParaDTO);
     }
+
     @Transactional(readOnly = true)
     public EnderecoResponseDTO findById(Integer id) {
         Endereco endereco = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Endereço não " +
                 "encontrado"));
         return converterParaDTO(endereco);
-    }
-    @Transactional(readOnly = true)
-    public Page<EnderecoResponseDTO> findByMoradorId(Integer idMorador, Pageable pageable) {
-        Page<Endereco> enderecos = rep.findByMorador_Id(idMorador, pageable);
-        return enderecos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<EnderecoResponseDTO> findByCep(String cep, Pageable pageable) {
-        Page<Endereco> enderecos = rep.findByCep(cep, pageable);
-        return enderecos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<EnderecoResponseDTO> findByUf(String uf, Pageable pageable) {
-        Page<Endereco> enderecos = rep.findByUfContainingIgnoreCase(uf, pageable);
-        return enderecos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<EnderecoResponseDTO> findByMunicipio(String municipio, Pageable pageable) {
-        Page<Endereco> enderecos = rep.findByMunicipioContainingIgnoreCase(municipio, pageable);
-        return enderecos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<EnderecoResponseDTO> findByBairro(String bairro, Pageable pageable) {
-        Page<Endereco> enderecos = rep.findByBairroContainingIgnoreCase(bairro, pageable);
-        return enderecos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<EnderecoResponseDTO> findByLogradouro(String logradouro, Pageable pageable) {
-        Page<Endereco> enderecos = rep.findByLogradouroContainingIgnoreCase(logradouro, pageable);
-        return enderecos.map(this::converterParaDTO);
     }
     @Transactional
     public EnderecoResponseDTO salvarEndereco(EnderecoRequestDTO enderecodto) {

@@ -3,7 +3,7 @@ package br.com.brumon.siscoletaseletiva.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Builder
 @NoArgsConstructor
@@ -25,15 +25,17 @@ public class Historico {
     @Column(name = "situacao_nova", length = 50, nullable = false)
     private String situacaoNova;
     @Column(name = "data", nullable = false, insertable = false, updatable = false)
-    private LocalDateTime data;
-    //Decidimos usar Operador para representar quem foi diretamente o responsável
-    //por cada alteração no histórico, podendo ser nulo caso tenha sido alterado por
-    //um morador, assim como diz nos requisitos
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_operador")
-    private Operador responsavel;
+    private OffsetDateTime data;
+    // Guarda o nome de quem realizou a ação; a relação com operador é opcional.
+    @Column(name = "responsavel", nullable = false, length = 150)
+    private String responsavel;
     @Column(name = "motivo", columnDefinition = "TEXT")
     private String motivo;
     @Column(name = "info_tentativa", columnDefinition = "TEXT")
     private String infoTentativa;
+    //decidimos implementar isso para ver diretamente o id do operador
+    //responsavel
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_operador")
+    private Operador operador;
 }

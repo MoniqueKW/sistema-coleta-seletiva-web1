@@ -11,6 +11,5 @@ import java.util.Optional;
 public interface MoradorRepository extends JpaRepository<Morador, Integer> {
     Page<Morador> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
     Optional<Morador> findByEmail(String email);
-    Optional<Morador> findByTelefone(String telefone);
     boolean existsByEmail(String email);
 }

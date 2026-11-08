@@ -42,11 +42,6 @@ public class MaterialAceitoService {
         this.repItemSolicitacao = repItemSolicitacao;
     }
     @Transactional(readOnly = true)
-    public Page<MaterialAceitoResponseDTO> findAll(Pageable pageable) {
-        Page<MaterialAceito> materiaisAceitos = rep.findAll(pageable);
-        return materiaisAceitos.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
     public Page<MaterialAceitoResponseDTO> findByIdPonto(Integer idPonto, Pageable pageable) {
         Page<MaterialAceito> materiaisAceitos = rep.findByPontoColeta_Id(idPonto, pageable);
         return materiaisAceitos.map(this::converterParaDTO);
@@ -115,24 +110,6 @@ public class MaterialAceitoService {
         }
         rep.delete(materialAceito);
     }
-
-    //Com isso, consegue alterar um materialAceito associado a um ponto de coleta, mesmo que o material seja
-    // diferente do original. A ideia é que o usuário possa alterar a associação para outro material,
-    // caso queira.
-    //@Transactional
-    //public MaterialAceitoResponseDTO alterarAssociacao(Integer idPonto, Integer idMaterial, MaterialAceitoRequestDTO dto) {
-    //    if(dto.idMaterial() == idMaterial) {
-    //        throw new RecursoDuplicadoException("Não é possível alterar a associação para o mesmo material. Informe um material diferente.");
-    //    }
-    //    if(rep.existsByPontoColeta_IdAndMaterial_Id(idPonto, idMaterial)) {
-    //        deleteByPontoColeta_IdAndMaterial_Id(idPonto, idMaterial);
-    //    } else {
-    //        throw new RecursoNaoEncontradoException("Associação de material não encontrada");
-    //    }
-    //    return associarMaterial(idPonto, dto);
-    //}
-    //Nos testes a ideai desse método trocava o material de uma vaga que era ocupada por outro, o que quebra
-    // o histórico de solicitações que já foram concluídas antes.
 
     public MaterialAceitoResponseDTO converterParaDTO(MaterialAceito materialAceito) {
         return new MaterialAceitoResponseDTO(

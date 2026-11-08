@@ -23,33 +23,28 @@ public class MoradorService {
         this.repSolicitacao = repSolicitacao;
     }
     @Transactional(readOnly = true)
-    public Page<MoradorResponseDTO> findAll(Pageable pageable) {
-        Page<Morador> lista = rep.findAll(pageable);
-        return lista.map(this::converterParaDTO);
+    public Page<MoradorResponseDTO> listar(String nome, Pageable pageable) {
+        boolean temNome = nome != null && !nome.isBlank();
+        if (temNome) {
+            Page<Morador> moradores = rep.findByNomeContainingIgnoreCase(nome, pageable);
+            return moradores.map(this::converterParaDTO);
+        }
+
+        return rep.findAll(pageable).map(this::converterParaDTO);
     }
     @Transactional(readOnly = true)
     public MoradorResponseDTO findById(Integer id) {
         Morador morador = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
         return converterParaDTO(morador);
     }
-    @Transactional(readOnly = true)
-    public Page<MoradorResponseDTO> findByNome(String nome, Pageable pageable) {
-        Page<Morador> lista = rep.findByNomeContainingIgnoreCase(nome, pageable);
-        return lista.map(this::converterParaDTO);
-    }
+
     @Transactional(readOnly = true)
     public MoradorResponseDTO findByEmail(String email) {
         Morador morador = rep.findByEmail(email).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
         return converterParaDTO(morador);
     }
-    @Transactional(readOnly = true)
-    public MoradorResponseDTO findByTelefone(String telefone) {
-        Morador morador = rep.findByTelefone(telefone).orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
-        return converterParaDTO(morador);
-    }
     @Transactional
     public MoradorResponseDTO salvarMorador(MoradorRequestDTO moradordto) {
-        //ver em relaçao ao RN de "validar nomes certos"
         String emailPadrao = moradordto.email().trim().toLowerCase();
         if(rep.existsByEmail(emailPadrao)) {
             throw new RecursoDuplicadoException("Morador com email já cadastrado");
@@ -97,4 +92,5 @@ public class MoradorService {
                 morador.getTelefone()
         );
     }
+
 }

@@ -7,6 +7,7 @@ import br.com.brumon.siscoletaseletiva.model.enums.SituacaoMaterial;
 import br.com.brumon.siscoletaseletiva.service.MaterialService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,20 +28,17 @@ public class MaterialController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<MaterialResponseDTO>> findAll(
+    public ResponseEntity<Page<MaterialResponseDTO>> listar(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) SituacaoMaterial situacao,
             Pageable pageable) {
-
-        //Verifica qual filtro foi enviado
-        if (nome != null && !nome.isBlank()) {
-            return ResponseEntity.ok(materialServ.findByNome(nome, pageable));
-        } else if (situacao != null) {
-            return ResponseEntity.ok(materialServ.findBySituacao(situacao, pageable));
-        }
-
-        //Para lista todos os materiais paginados
-        return ResponseEntity.ok(materialServ.findAll(pageable));
+        Pageable limitacaoFixa = PageRequest.of(
+                pageable.getPageNumber(),
+                Math.min(pageable.getPageSize(), 100),
+                pageable.getSort()
+        );
+        //Verifica qual filtro foi enviado no metodo filtrar no service de material
+        return ResponseEntity.ok(materialServ.listar(nome, situacao, limitacaoFixa));
     }
 
     @GetMapping("/{id}")

@@ -2,7 +2,6 @@ package br.com.brumon.siscoletaseletiva.dto.request;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public record SolicitacaoRequestDTO(
@@ -31,8 +30,6 @@ public record SolicitacaoRequestDTO(
         @NotBlank
         @Size(max = 10)
         String copiaCep,
-        @Future
-        LocalDateTime dataAgendamento,
         @Size(max = 255)
         String observacoes,
         @NotNull

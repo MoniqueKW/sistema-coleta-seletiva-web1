@@ -3,9 +3,11 @@ package br.com.brumon.siscoletaseletiva.controller;
 import br.com.brumon.siscoletaseletiva.dto.request.AlterarSituacaoPontoRequestDTO;
 import br.com.brumon.siscoletaseletiva.dto.request.PontoColetaRequestDTO;
 import br.com.brumon.siscoletaseletiva.dto.response.PontoColetaResponseDTO;
+import br.com.brumon.siscoletaseletiva.model.enums.SituacaoPonto;
 import br.com.brumon.siscoletaseletiva.service.PontoColetaService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,23 +30,20 @@ public class PontoColetaController {
 
     //@RequestParam(required = false): permite que a requisição venha com ou sem filtros.
     @GetMapping
-    public ResponseEntity<Page<PontoColetaResponseDTO>> findAll(
+    public ResponseEntity<Page<PontoColetaResponseDTO>> listar(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String municipio,
             @RequestParam(required = false) String bairro,
+            @RequestParam(required = false) SituacaoPonto situacao,
+            @RequestParam(required = false) Boolean recolhimentoDomiciliar,
             Pageable pageable) {
-
-        //Verifica e chama o método correspondente no Service
-        if (nome != null && !nome.isBlank()) {
-            return ResponseEntity.ok(pontoColetaServ.findByNome(nome, pageable));
-        } else if (municipio != null && !municipio.isBlank()) {
-            return ResponseEntity.ok(pontoColetaServ.findByMunicipio(municipio, pageable));
-        } else if (bairro != null && !bairro.isBlank()) {
-            return ResponseEntity.ok(pontoColetaServ.findByBairro(bairro, pageable));
-        }
-
-        //Sem filtro, lista todos.
-        return ResponseEntity.ok(pontoColetaServ.findAll(pageable));
+        Pageable limitacaoFixa = PageRequest.of(
+                pageable.getPageNumber(),
+                Math.min(pageable.getPageSize(), 100),
+                pageable.getSort()
+        );
+        return ResponseEntity.ok(pontoColetaServ.listar(nome, municipio, bairro, situacao, recolhimentoDomiciliar,
+                limitacaoFixa));
     }
 
     @GetMapping("/{id}")

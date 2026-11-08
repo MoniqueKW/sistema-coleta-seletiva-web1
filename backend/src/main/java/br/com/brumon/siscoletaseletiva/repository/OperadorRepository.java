@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface OperadorRepository extends JpaRepository<Operador, Integer> {
     Page<Operador> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
     Optional<Operador> findByEmail(String email);
+    Page<Operador> findByPontoColeta_IdAndNomeContainingIgnoreCase(Integer idPonto, String nome, Pageable pageable);
     Page<Operador> findByPontoColeta_Id(Integer idPonto, Pageable pageable);
     boolean existsByEmail(String email);
 }

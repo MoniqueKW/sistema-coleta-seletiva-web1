@@ -6,6 +6,7 @@ import br.com.brumon.siscoletaseletiva.dto.response.MaterialAceitoResponseDTO;
 import br.com.brumon.siscoletaseletiva.service.MaterialAceitoService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,12 +29,18 @@ public class MaterialAceitoController {
         MaterialAceitoResponseDTO associacaoCriada = materialAceitoServ.associarMaterial(idPonto, dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(associacaoCriada);
     }
-
+    //usando o findByIdPonto como findAll pq as consultas sempre vão ser em
+    //relação a um ponto (materiais aceitos de um ponto)
     @GetMapping
-    public ResponseEntity<Page<MaterialAceitoResponseDTO>> findAll(
+    public ResponseEntity<Page<MaterialAceitoResponseDTO>> listar(
             @PathVariable Integer idPonto,
             Pageable pageable) {
-        return ResponseEntity.ok(materialAceitoServ.findByIdPonto(idPonto, pageable));
+        Pageable limitacaoFixa = PageRequest.of(
+                pageable.getPageNumber(),
+                Math.min(pageable.getPageSize(), 100),
+                pageable.getSort()
+        );
+        return ResponseEntity.ok(materialAceitoServ.findByIdPonto(idPonto, limitacaoFixa));
     }
 
     @PutMapping("/{idMaterial}")

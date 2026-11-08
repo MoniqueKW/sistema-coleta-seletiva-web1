@@ -3,6 +3,9 @@ package br.com.brumon.siscoletaseletiva.service;
 import br.com.brumon.siscoletaseletiva.dto.request.*;
 import br.com.brumon.siscoletaseletiva.dto.response.ItemSolicitacaoResponseDTO;
 import br.com.brumon.siscoletaseletiva.dto.response.SolicitacaoResponseDTO;
+import br.com.brumon.siscoletaseletiva.exception.ConflitoConcorrenciaException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import br.com.brumon.siscoletaseletiva.model.entity.*;
 import br.com.brumon.siscoletaseletiva.model.enums.SituacaoMaterial;
 import br.com.brumon.siscoletaseletiva.model.enums.SituacaoPonto;
@@ -10,13 +13,17 @@ import br.com.brumon.siscoletaseletiva.model.enums.SituacaoSolicitacao;
 import br.com.brumon.siscoletaseletiva.exception.RecursoNaoEncontradoException;
 import br.com.brumon.siscoletaseletiva.exception.RegraNegocioException;
 import br.com.brumon.siscoletaseletiva.repository.*;
+import br.com.brumon.siscoletaseletiva.specification.SolicitacaoSpecification;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Service
@@ -27,8 +34,10 @@ public class SolicitacaoService {
     private final MoradorRepository repMorador;
     private final PontoColetaRepository repPonto;
     private final MaterialRepository repMaterial;
-    private final MaterialAceitoRepository repMaterialAceito;
     private final OperadorRepository repOperador;
+    private final MaterialAceitoRepository repMaterialAceito;
+    @PersistenceContext
+    private EntityManager entityManager;
     public SolicitacaoService(SolicitacaoRepository rep,
                               ItemSolicitacaoRepository repItemSolicitacao,
                               HistoricoService serviceHistorico,
@@ -47,8 +56,14 @@ public class SolicitacaoService {
         this.repOperador = repOperador;
     }
     @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findAll(Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findAll(pageable);
+    public Page<SolicitacaoResponseDTO> listar(Integer idMorador, Integer idPonto, SituacaoSolicitacao situacao,
+                                               OffsetDateTime dataInicio, OffsetDateTime dataFim, Pageable pageable) {
+        Specification<Solicitacao> filtros = Specification.allOf(
+                SolicitacaoSpecification.comMorador(idMorador),
+                SolicitacaoSpecification.comPontoColeta(idPonto),
+                SolicitacaoSpecification.comSituacao(situacao),
+                SolicitacaoSpecification.criadaEntre(dataInicio, dataFim));
+        Page<Solicitacao> solicitacoes = rep.findAll(filtros, pageable);
         return solicitacoes.map(this::converterParaDTO);
     }
     @Transactional(readOnly = true)
@@ -56,68 +71,22 @@ public class SolicitacaoService {
         Solicitacao solicitacao = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
         return converterParaDTO(solicitacao);
     }
+
     @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findBySituacao(SituacaoSolicitacao situacao, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findBySituacao(situacao, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByPontoColetaIdAndMoradorId(Integer idPonto, Integer idMorador, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByPontoColeta_IdAndMorador_Id(idPonto, idMorador, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByPontoColetaId(Integer idPonto, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByPontoColeta_Id(idPonto, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByPontoColetaIdAndSituacaoAndDataCriacaoBetween(Integer idPonto, SituacaoSolicitacao situacao,
-                                                                                            LocalDateTime dataInicio,
-                                                                                            LocalDateTime dataFim,
-                                                                                            Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByPontoColeta_IdAndSituacaoAndDataCriacaoBetween(idPonto,
-                situacao,
-                dataInicio, dataFim, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByPontoColetaIdAndDataCriacaoBetween(Integer idPonto, LocalDateTime dataInicio,
-                                                                                 LocalDateTime dataFim, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByPontoColeta_IdAndDataCriacaoBetween(idPonto, dataInicio, dataFim, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByPontoColetaIdAndSituacao(Integer idPonto, SituacaoSolicitacao situacao, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByPontoColeta_IdAndSituacao(idPonto, situacao, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByMoradorId(Integer idMorador, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByMorador_Id(idMorador, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByMoradorIdAndSituacao(Integer idMorador, SituacaoSolicitacao situacao, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByMorador_IdAndSituacao(idMorador, situacao, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByMoradorIdAndSituacaoAndDataCriacaoBetween(Integer idMorador, SituacaoSolicitacao situacao,
-                                                                                   LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByMorador_IdAndSituacaoAndDataCriacaoBetween(idMorador, situacao, dataInicio, dataFim, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByMoradorIdAndDataCriacaoBetween(Integer idMorador, LocalDateTime dataInicio,
-                                                                             LocalDateTime dataFim, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByMorador_IdAndDataCriacaoBetween(idMorador, dataInicio, dataFim, pageable);
-        return solicitacoes.map(this::converterParaDTO);
-    }
-    @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> findByDataCriacaoBetween(LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable) {
-        Page<Solicitacao> solicitacoes = rep.findByDataCriacaoBetween(dataInicio, dataFim, pageable);
-        return solicitacoes.map(this::converterParaDTO);
+    public List<ItemSolicitacaoResponseDTO> findItensBySolicitacaoId(Integer idSolicitacao) {
+        rep.findById(idSolicitacao)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
+        return repItemSolicitacao.findBySolicitacao_Id(idSolicitacao)
+                .stream()
+                .map(item -> new ItemSolicitacaoResponseDTO(
+                        item.getSolicitacao().getId(),
+                        item.getMaterial().getId(),
+                        item.getMaterial().getNome(),
+                        item.getCopiaUnidade(),
+                        item.getQtdEstimada(),
+                        item.getQtdEfetiva()
+                ))
+                .toList();
     }
     @Transactional(readOnly = true)
     public SolicitacaoResponseDTO findByProtocoloUnico(String protocolo) {
@@ -127,7 +96,7 @@ public class SolicitacaoService {
     }
 
     @Transactional
-    public SolicitacaoResponseDTO salvarSolicitacao(SolicitacaoRequestDTO solicitacaodto) {
+    public SolicitacaoResponseDTO salvarSolicitacao(SolicitacaoRequestDTO solicitacaodto, Integer idOperador) {
         Morador morador = repMorador.findById(solicitacaodto.idMorador())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
         PontoColeta ponto = repPonto.findById(solicitacaodto.idPonto())
@@ -182,6 +151,14 @@ public class SolicitacaoService {
                     .build();
             itensValidados.add(item);
         }
+        //verifica a veracidade de operador se caso o id nao for nulo
+        if (idOperador != null) {
+            Operador operador = repOperador.findById(idOperador)
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+            if (!operador.getPontoColeta().getId().equals(ponto.getId())) {
+                throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
+            }
+        }
         Solicitacao solicitacao = rep.save(Solicitacao.builder()
                 .morador(morador)
                 .pontoColeta(ponto)
@@ -194,7 +171,7 @@ public class SolicitacaoService {
                 .copiaUf(solicitacaodto.copiaUf())
                 .copiaCep(solicitacaodto.copiaCep())
                 .situacao(SituacaoSolicitacao.SOLICITADA)
-                .dataCriacao(LocalDateTime.now())
+                .dataCriacao(OffsetDateTime.now(ZoneOffset.UTC))
                 .observacoes(solicitacaodto.observacoes())
                 .recolhimentoDomiciliar(solicitacaodto.recolhimentoDomiciliar())
                 //nao escrevemos .version() pq o hibernate vai controlar
@@ -210,29 +187,46 @@ public class SolicitacaoService {
                 solicitacao.getId(),
                 null,
                 solicitacao.getSituacao().name(),
-                null,
+                idOperador,
                 "Solicitação criada",
                 null);
         return converterParaDTO(solicitacao);
     }
 
-
+    //atualizacao nao muda situacao, so muda os dados dela antes dela sair de "SOLICITADA"
     @Transactional
-    public SolicitacaoResponseDTO atualizarSolicitacao (Integer id, SolicitacaoUpdateRequestDTO solicitacaodto) {
+    public SolicitacaoResponseDTO atualizarSolicitacao (Integer id, SolicitacaoUpdateRequestDTO solicitacaodto,
+                                                        Integer idOperador) {
         Solicitacao solicitacao = rep.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
         if (solicitacao.getSituacao() != SituacaoSolicitacao.SOLICITADA) {
             throw new RegraNegocioException("A solicitação não pode ser atualizada, pois não está mais na situação SOLICITADA.");
         }
+        //verifica se a versao enviada é de fato a atual da solicitacao
+        if(!solicitacaodto.versao().equals(solicitacao.getVersao())) {
+            throw new ConflitoConcorrenciaException(
+                    "A solicitação foi modificada por outra operação. Recarregue os dados e tente novamente.");
+        }
+        // isso força o Hibernate a incrementar a versão da Solicitação no final da transação,
+        // mesmo que o usuário só tenha alterado a lista de itens, ou seja, se não alterou nenhum campo
+        // de solicitação, só a lista de itemSolicitacao. Dessa forma, ainda assim, o hibernate incrementa
+        // a versão da solicitação, impedindo que dois usuarios mexam na mesma versão.
+        entityManager.lock(solicitacao, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+        //verifica a veracidade do operador se esse nao for nulo
+        if (idOperador != null) {
+            Operador operador = repOperador.findById(idOperador)
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+            if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
+                throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
+            }
+        }
         //usei ternario para poupar linha em vez de inicializar a variavel como null e fazer if else
         PontoColeta ponto = solicitacaodto.idPonto() != null ? repPonto.findById(solicitacaodto.idPonto())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado")) :
                 solicitacao.getPontoColeta();
-
-        //defino a situacao do recolhimentoDomiciliar aqui para usar duas vezes abaixo,
+        //defino a situacao do recolhimentoDomiciliar aqui para usar duas vezes abaixo
         Boolean recDomiciliarFinal = solicitacaodto.recolhimentoDomiciliar() != null
                 ? solicitacaodto.recolhimentoDomiciliar() : solicitacao.getRecolhimentoDomiciliar();
-
         //verificando se o pontoId gerado mais acima é igual ao antigo, se for diferente,
         //quer dizer então que o usuário passou um novo ponto, então é necessário validar as
         //coisas
@@ -342,7 +336,7 @@ public class SolicitacaoService {
                 solicitacao.getId(),
                 situacaoAntiga.name(),
                 solicitacao.getSituacao().name(),
-                null,
+                idOperador,
                 "Solicitação atualizada",
                 null);
 
@@ -356,13 +350,14 @@ public class SolicitacaoService {
         if (solicitacao.getSituacao() != SituacaoSolicitacao.SOLICITADA) {
             throw new RegraNegocioException("A solicitação não pode ser agendada, pois não está mais na situação SOLICITADA.");
         }
-        Operador operador = repOperador.findById(idOperador).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
-        if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
-            throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
-        }
-        if (agendamentodto.dataAgendamento() == null || !agendamentodto.dataAgendamento().isAfter(LocalDateTime.now())) {
+        if (agendamentodto.dataAgendamento() == null || !agendamentodto.dataAgendamento().isAfter(OffsetDateTime.now())) {
             throw new RegraNegocioException("A data do agendamento deve ser futura.");
         }
+        Operador operador = repOperador.findById(idOperador)
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+            if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
+                throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
+            }
         solicitacao.setDataAgendamento(agendamentodto.dataAgendamento());
         SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
         solicitacao.setSituacao(SituacaoSolicitacao.AGENDADA);
@@ -385,11 +380,12 @@ public class SolicitacaoService {
             throw new RegraNegocioException("A solicitação não pode ser recusada, pois não está mais na situação " +
                     "SOLICITADA.");
         }
-        Operador operador = repOperador.findById(idOperador).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+        if (motivo == null || motivo.isBlank()) {throw new RegraNegocioException("O motivo da recusa é obrigatório.");
+        }
+        Operador operador = repOperador.findById(idOperador)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
         if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
             throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
-        }
-        if (motivo == null || motivo.isBlank()) {throw new RegraNegocioException("O motivo da recusa é obrigatório.");
         }
         SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
         solicitacao.setSituacao(SituacaoSolicitacao.RECUSADA);
@@ -410,7 +406,8 @@ public class SolicitacaoService {
         if (solicitacao.getSituacao() != SituacaoSolicitacao.AGENDADA) {
             throw new RegraNegocioException("A solicitação não pode ser iniciada, pois não está mais na situação AGENDADA.");
         }
-        Operador operador = repOperador.findById(idOperador).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+        Operador operador = repOperador.findById(idOperador)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
         if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
             throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
         }
@@ -433,12 +430,16 @@ public class SolicitacaoService {
             throw new RegraNegocioException("A solicitação não pode ser cancelada, pois não está na situação " +
                     "SOLICITADA ou AGENDADA.");
         }
-        Operador operador = repOperador.findById(idOperador).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
-        if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
-            throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
-        }
+
         if (motivo == null || motivo.isBlank()) {
             throw new RegraNegocioException("O motivo do cancelamento é obrigatório.");
+        }
+        if (idOperador != null) {
+            Operador operador = repOperador.findById(idOperador)
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+            if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
+                throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
+            }
         }
         SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
         solicitacao.setSituacao(SituacaoSolicitacao.CANCELADA);
@@ -461,8 +462,9 @@ public class SolicitacaoService {
             throw new RegraNegocioException("A solicitação não pode ser concluída, pois não está na situação EM " +
                     "RECOLHIMENTO.");
         }
-        Operador operador = repOperador.findById(idOperador).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
-        if(!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
+        Operador operador = repOperador.findById(idOperador)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+        if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
             throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
         }
         if(conclusaodto.itens() == null || conclusaodto.itens().isEmpty()) {
@@ -499,7 +501,7 @@ public class SolicitacaoService {
         repItemSolicitacao.saveAll(itensValidados);
         SituacaoSolicitacao situacaoAnterior = solicitacao.getSituacao();
         solicitacao.setSituacao(SituacaoSolicitacao.CONCLUIDA);
-        solicitacao.setDataConclusao(LocalDateTime.now());
+        solicitacao.setDataConclusao(OffsetDateTime.now(ZoneOffset.UTC));
         rep.save(solicitacao);
         serviceHistorico.registrarHistorico(
                 solicitacao.getId(),
@@ -519,11 +521,12 @@ public class SolicitacaoService {
             throw new RegraNegocioException("A solicitação não pode ser reagendada, pois não está na situação " +
                     "EM RECOLHIMENTO ou AGENDADA.");
         }
-        Operador operador = repOperador.findById(idOperador).orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
+        Operador operador = repOperador.findById(idOperador)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
         if (!operador.getPontoColeta().getId().equals(solicitacao.getPontoColeta().getId())) {
             throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
         }
-        if (agendamentodto.dataAgendamento() == null || !agendamentodto.dataAgendamento().isAfter(LocalDateTime.now())) {
+        if (agendamentodto.dataAgendamento() == null || !agendamentodto.dataAgendamento().isAfter(OffsetDateTime.now())) {
             throw new RegraNegocioException("A nova data do agendamento deve ser futura.");
         }
         if (motivo == null || motivo.isBlank()) {
