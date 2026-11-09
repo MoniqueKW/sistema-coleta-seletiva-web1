@@ -14,6 +14,5 @@ public record MaterialAceitoUpdateRequestDTO(
     @Size(max = 255)
     String observacoes,
     @Positive
-    @Size(max = 255)
     BigDecimal limiteOpcional
     ){ }
