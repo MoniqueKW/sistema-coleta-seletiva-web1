@@ -216,10 +216,6 @@ public class SolicitacaoService {
             throw new ConflitoConcorrenciaException(
                     "A solicitação foi modificada por outra operação. Recarregue os dados e tente novamente.");
         }
-        // isso força o Hibernate a incrementar a versão da Solicitação no final da transação,
-        // mesmo que o usuário só tenha alterado a lista de itens, ou seja, se não alterou nenhum campo
-        // de solicitação, só a lista de itemSolicitacao. Dessa forma, ainda assim, o hibernate incrementa
-        // a versão da solicitação, impedindo que dois usuarios mexam na mesma versão.
         Endereco endereco = null;
         if (solicitacaodto.idEndereco() != null) {
             endereco = repEndereco.findById(solicitacaodto.idEndereco())
@@ -328,6 +324,10 @@ public class SolicitacaoService {
             throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
         }
         solicitacao.setRecolhimentoDomiciliar(recDomiciliarFinal);
+        // abaixo, isso força o Hibernate a incrementar a versão da Solicitação no final da transação,
+        // mesmo que o usuário só tenha alterado a lista de itens, ou seja, se não alterou nenhum campo
+        // de solicitação, só a lista de itemSolicitacao. Dessa forma, ainda assim, o hibernate incrementa
+        // a versão da solicitação, impedindo que dois usuarios mexam na mesma versão.
         Integer versaoAntes = solicitacao.getVersao();
         Solicitacao solicitacaoSalva = rep.saveAndFlush(solicitacao);
         if (solicitacaoSalva.getVersao().equals(versaoAntes)) {
