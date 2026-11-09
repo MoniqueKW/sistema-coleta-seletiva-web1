@@ -220,7 +220,6 @@ public class SolicitacaoService {
         // mesmo que o usuário só tenha alterado a lista de itens, ou seja, se não alterou nenhum campo
         // de solicitação, só a lista de itemSolicitacao. Dessa forma, ainda assim, o hibernate incrementa
         // a versão da solicitação, impedindo que dois usuarios mexam na mesma versão.
-        entityManager.lock(solicitacao, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
         Endereco endereco = null;
         if (solicitacaodto.idEndereco() != null) {
             endereco = repEndereco.findById(solicitacaodto.idEndereco())
@@ -329,7 +328,11 @@ public class SolicitacaoService {
             throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
         }
         solicitacao.setRecolhimentoDomiciliar(recDomiciliarFinal);
-        rep.saveAndFlush(solicitacao);
+        Integer versaoAntes = solicitacao.getVersao();
+        Solicitacao solicitacaoSalva = rep.saveAndFlush(solicitacao);
+        if (solicitacaoSalva.getVersao().equals(versaoAntes)) {
+            entityManager.lock(solicitacaoSalva, LockModeType.PESSIMISTIC_FORCE_INCREMENT);
+        }
         SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
         serviceHistorico.registrarHistorico(
                 solicitacao.getId(),
@@ -338,7 +341,7 @@ public class SolicitacaoService {
                 idOperador,
                 "Solicitação atualizada",
                 null);
-        return converterParaDTO(solicitacao);
+        return converterParaDTO(solicitacaoSalva);
     }
 
     @Transactional
@@ -359,7 +362,7 @@ public class SolicitacaoService {
         solicitacao.setDataAgendamento(agendamentodto.dataAgendamento());
         SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
         solicitacao.setSituacao(SituacaoSolicitacao.AGENDADA);
-        rep.save(solicitacao);
+        Solicitacao solicitacaoSalva = rep.saveAndFlush(solicitacao);
         serviceHistorico.registrarHistorico(
                 solicitacao.getId(),
                 situacaoAntiga.name(),
@@ -367,7 +370,7 @@ public class SolicitacaoService {
                 idOperador,
                 "Solicitação agendada",
                 null);
-        return converterParaDTO(solicitacao);
+        return converterParaDTO(solicitacaoSalva);
     }
 
     @Transactional
@@ -387,7 +390,7 @@ public class SolicitacaoService {
         }
         SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
         solicitacao.setSituacao(SituacaoSolicitacao.RECUSADA);
-        rep.save(solicitacao);
+        Solicitacao solicitacaoSalva = rep.saveAndFlush(solicitacao);
         serviceHistorico.registrarHistorico(
                 solicitacao.getId(),
                 situacaoAntiga.name(),
@@ -395,7 +398,7 @@ public class SolicitacaoService {
                 idOperador,
                 motivo,
                 null);
-        return converterParaDTO(solicitacao);
+        return converterParaDTO(solicitacaoSalva);
     }
 
     @Transactional
@@ -411,7 +414,7 @@ public class SolicitacaoService {
         }
         SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
         solicitacao.setSituacao(SituacaoSolicitacao.EM_RECOLHIMENTO);
-        rep.save(solicitacao);
+        Solicitacao solicitacaoSalva = rep.saveAndFlush(solicitacao);
         serviceHistorico.registrarHistorico(
                 solicitacao.getId(),
                 situacaoAntiga.name(),
@@ -419,7 +422,7 @@ public class SolicitacaoService {
                 idOperador,
                 "Solicitação iniciada (Em recolhimento)",
                 null);
-        return converterParaDTO(solicitacao);
+        return converterParaDTO(solicitacaoSalva);
     }
     @Transactional
     public SolicitacaoResponseDTO cancelarSolicitacao(Integer id, String motivo, Integer idOperador) {
@@ -441,7 +444,7 @@ public class SolicitacaoService {
         }
         SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
         solicitacao.setSituacao(SituacaoSolicitacao.CANCELADA);
-        rep.save(solicitacao);
+        Solicitacao solicitacaoSalva = rep.saveAndFlush(solicitacao);
         serviceHistorico.registrarHistorico(
                 solicitacao.getId(),
                 situacaoAntiga.name(),
@@ -449,7 +452,7 @@ public class SolicitacaoService {
                 idOperador,
                 motivo,
                 null);
-        return converterParaDTO(solicitacao);
+        return converterParaDTO(solicitacaoSalva);
     }
 
     @Transactional
@@ -500,7 +503,7 @@ public class SolicitacaoService {
         SituacaoSolicitacao situacaoAnterior = solicitacao.getSituacao();
         solicitacao.setSituacao(SituacaoSolicitacao.CONCLUIDA);
         solicitacao.setDataConclusao(OffsetDateTime.now(ZoneOffset.UTC));
-        rep.save(solicitacao);
+        Solicitacao solicitacaoSalva = rep.saveAndFlush(solicitacao);
         serviceHistorico.registrarHistorico(
                 solicitacao.getId(),
                 situacaoAnterior.name(),
@@ -508,7 +511,7 @@ public class SolicitacaoService {
                 idOperador,
                 "Solicitação concluída",
                 null);
-        return converterParaDTO(solicitacao);
+        return converterParaDTO(solicitacaoSalva);
     }
     @Transactional
     public SolicitacaoResponseDTO reagendarSolicitacao(Integer id, String motivo,
@@ -536,7 +539,7 @@ public class SolicitacaoService {
         SituacaoSolicitacao situacaoAntiga = solicitacao.getSituacao();
         solicitacao.setSituacao(SituacaoSolicitacao.AGENDADA);
         solicitacao.setDataAgendamento(agendamentodto.dataAgendamento());
-        rep.save(solicitacao);
+        Solicitacao solicitacaoSalva = rep.saveAndFlush(solicitacao);
         serviceHistorico.registrarHistorico(
                 solicitacao.getId(),
                 situacaoAntiga.name(),
@@ -544,7 +547,7 @@ public class SolicitacaoService {
                 idOperador,
                 motivo,
                 infoTentativa);
-        return converterParaDTO(solicitacao);
+        return converterParaDTO(solicitacaoSalva);
     }
 
     //nessa conversao para dto, pego uma lista de ItemSolicitacao e atribuo a ela
