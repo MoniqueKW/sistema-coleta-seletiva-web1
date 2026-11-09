@@ -21,6 +21,7 @@ public record EnderecoRequestDTO(
         String municipio,
         @NotBlank
         @Size(max = 2)
+        //tambem teria como deixar ser minusculo mas no service a gente colocaria para maiusculo
         @Pattern(regexp = "^[A-Z]{2}$", message = "UF deve conter exatamente 2 letras maiúsculas")
         String uf,
         @NotBlank

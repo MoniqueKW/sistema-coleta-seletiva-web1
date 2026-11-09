@@ -1,6 +1,7 @@
 package br.com.brumon.siscoletaseletiva.controller;
 
 import br.com.brumon.siscoletaseletiva.dto.request.EnderecoRequestDTO;
+import br.com.brumon.siscoletaseletiva.dto.request.EnderecoUpdateRequestDTO;
 import br.com.brumon.siscoletaseletiva.dto.response.EnderecoResponseDTO;
 import br.com.brumon.siscoletaseletiva.service.EnderecoService;
 import jakarta.validation.Valid;
@@ -55,7 +56,7 @@ public class EnderecoController {
     @PutMapping("/{id}")
     public ResponseEntity<EnderecoResponseDTO> atualizarEndereco(
             @PathVariable Integer id,
-            @RequestBody @Valid EnderecoRequestDTO dto) {
+            @RequestBody @Valid EnderecoUpdateRequestDTO dto) {
         EnderecoResponseDTO enderecoAtualizado = enderecoService.atualizarEndereco(id, dto);
         return ResponseEntity.ok(enderecoAtualizado);
     }

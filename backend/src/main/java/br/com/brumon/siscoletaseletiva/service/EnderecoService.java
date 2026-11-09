@@ -1,6 +1,7 @@
 package br.com.brumon.siscoletaseletiva.service;
 
 import br.com.brumon.siscoletaseletiva.dto.request.EnderecoRequestDTO;
+import br.com.brumon.siscoletaseletiva.dto.request.EnderecoUpdateRequestDTO;
 import br.com.brumon.siscoletaseletiva.dto.response.EnderecoResponseDTO;
 import br.com.brumon.siscoletaseletiva.model.entity.Endereco;
 import br.com.brumon.siscoletaseletiva.exception.RecursoNaoEncontradoException;
@@ -57,7 +58,7 @@ public class EnderecoService {
         return converterParaDTO(endereco);
     }
     @Transactional
-    public EnderecoResponseDTO atualizarEndereco(Integer id, EnderecoRequestDTO enderecodto) {
+    public EnderecoResponseDTO atualizarEndereco(Integer id, EnderecoUpdateRequestDTO enderecodto) {
         Endereco endereco = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Endereço não encontrado"));
         endereco.setLogradouro(enderecodto.logradouro());
         endereco.setNumero(enderecodto.numero());
