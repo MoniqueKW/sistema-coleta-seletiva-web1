@@ -49,10 +49,18 @@ public class MoradorService {
         if(rep.existsByEmail(emailPadrao)) {
             throw new RecursoDuplicadoException("Morador com email já cadastrado");
         }
+        String telefoneLimpo = moradordto.telefone().replaceAll("[()\\s-]", "");
+        if (!telefoneLimpo.startsWith("+55")) {
+            if (telefoneLimpo.startsWith("55")) {
+                telefoneLimpo = "+" + telefoneLimpo;
+            } else {
+                telefoneLimpo = "+55" + telefoneLimpo;
+            }
+        }
         Morador morador = rep.save(Morador.builder()
                 .nome(moradordto.nome())
                 .email(emailPadrao)
-                .telefone(moradordto.telefone())
+                .telefone(telefoneLimpo)
                 .build());
         return converterParaDTO(morador);
     }
@@ -63,9 +71,17 @@ public class MoradorService {
             if (!morador.getEmail().equals(emailPadrao) && rep.existsByEmail(emailPadrao)) {
                 throw new RecursoDuplicadoException("Já existe um morador cadastrado com este e-mail.");
             }
+        String telefoneLimpo = moradordto.telefone().replaceAll("[()\\s-]", "");
+            if (!telefoneLimpo.startsWith("+55")) {
+            if (telefoneLimpo.startsWith("55")) {
+                telefoneLimpo = "+" + telefoneLimpo;
+            } else {
+                telefoneLimpo = "+55" + telefoneLimpo;
+            }
+        }
             morador.setNome(moradordto.nome());
             morador.setEmail(emailPadrao);
-            morador.setTelefone(moradordto.telefone());
+            morador.setTelefone(telefoneLimpo);
             Morador moradorSalvo = rep.save(morador);
             return converterParaDTO(moradorSalvo);
     }

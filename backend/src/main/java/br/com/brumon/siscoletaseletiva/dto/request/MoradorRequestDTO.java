@@ -17,7 +17,7 @@ public record MoradorRequestDTO(
         String email,
         @Size(max = 20)
         @Pattern(
-                regexp = "^\\+?[1-9]{2}\\s?\\(?[1-9]{2}\\)?\\s?9?[0-9]{4}\\-?[0-9]{4}$",
+                regexp = "^$|^(?:\\+?55\\s?)?(?:\\(?([1-9]{2})\\)?)\\s?(?:9\\s?)?[0-9]{4}-?[0-9]{4}$",
                 message = "Formato de telefone inválido. Use o padrão com DDD."
         )
         String telefone
