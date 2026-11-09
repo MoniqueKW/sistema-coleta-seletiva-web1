@@ -9,6 +9,7 @@ public record HistoricoResponseDTO(
         String situacaoNova,
         OffsetDateTime data,
         String responsavel,
+        Integer idOperador,
         String motivo,
         String infoTentativa
 ) {

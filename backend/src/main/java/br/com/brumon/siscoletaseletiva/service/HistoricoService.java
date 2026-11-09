@@ -87,6 +87,9 @@ public class HistoricoService {
                 historico.getSituacaoNova(),
                 historico.getData(),
                 historico.getResponsavel(),
+                historico.getOperador() != null
+                        ? historico.getOperador().getId()
+                        : null,
                 historico.getMotivo(),
                 historico.getInfoTentativa()
         );
