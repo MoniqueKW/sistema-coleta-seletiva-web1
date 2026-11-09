@@ -11,21 +11,7 @@ import java.util.List;
 // ainda, depois, nao pode alterar mais nada a nao ser a situacao
 public record SolicitacaoUpdateRequestDTO(
         Integer idPonto,
-        @Size(max = 150)
-        String copiaLogradouro,
-        @Size(max = 20)
-        String copiaNumero,
-        @Size(max = 255)
-        String copiaComplemento,
-        @Size(max = 100)
-        String copiaBairro,
-        @Size(max = 100)
-        String copiaMunicipio,
-        @Size(max = 2)
-        @Pattern(regexp = "^[A-Z]{2}$", message = "UF deve conter exatamente 2 letras maiúsculas")
-        String copiaUf,
-        @Size(max = 10)
-        String copiaCep,
+        Integer idEndereco,
         @Size(max = 255)
         String observacoes,
         Boolean recolhimentoDomiciliar,

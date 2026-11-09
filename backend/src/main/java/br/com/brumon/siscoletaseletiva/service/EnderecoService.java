@@ -70,16 +70,6 @@ public class EnderecoService {
         Endereco enderecoSalvo = rep.save(endereco);
         return converterParaDTO(enderecoSalvo);
     }
-    @Transactional
-    public void deleteByMorador_id(Integer idMorador) {
-        if (!repMorador.existsById(idMorador)){
-            throw new RecursoNaoEncontradoException("Morador não encontrado");
-        }
-        if (!rep.existsByMorador_Id(idMorador)) {
-            throw new RecursoNaoEncontradoException("Endereco não encontrado para esse morador");
-        }
-        rep.deleteByMorador_Id(idMorador);
-    }
 
     public void deleteById(Integer id) {
        Endereco endereco = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Endereço não encontrado"));

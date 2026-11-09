@@ -78,7 +78,7 @@ public class SolicitacaoController {
             @PathVariable Integer id,
             @RequestParam(required = false) Integer idOperador,
             @RequestBody @Valid SolicitacaoUpdateRequestDTO dto) {
-        SolicitacaoResponseDTO solicitacaoAtualizada = solicitacaoServ.atualizarSolicitacao(id, dto, idOperador);
+        SolicitacaoResponseDTO solicitacaoAtualizada = solicitacaoServ.atualizarSolicitacao(id, idOperador, dto);
         return ResponseEntity.ok(solicitacaoAtualizada);
     }
 

@@ -36,6 +36,7 @@ public class SolicitacaoService {
     private final MaterialRepository repMaterial;
     private final OperadorRepository repOperador;
     private final MaterialAceitoRepository repMaterialAceito;
+    private final EnderecoRepository repEndereco;
     @PersistenceContext
     private final EntityManager entityManager;
     public SolicitacaoService(SolicitacaoRepository rep,
@@ -46,6 +47,7 @@ public class SolicitacaoService {
                               MaterialRepository repMaterial,
                               MaterialAceitoRepository repMaterialAceito,
                               OperadorRepository repOperador,
+                              EnderecoRepository repEndereco,
                               EntityManager entityManager) {
         this.rep = rep;
         this.repItemSolicitacao = repItemSolicitacao;
@@ -55,6 +57,7 @@ public class SolicitacaoService {
         this.repMaterial = repMaterial;
         this.repMaterialAceito = repMaterialAceito;
         this.repOperador = repOperador;
+        this.repEndereco = repEndereco;
         this.entityManager = entityManager;
     }
     @Transactional(readOnly = true)
@@ -101,12 +104,16 @@ public class SolicitacaoService {
     public SolicitacaoResponseDTO salvarSolicitacao(SolicitacaoRequestDTO solicitacaodto, Integer idOperador) {
         Morador morador = repMorador.findById(solicitacaodto.idMorador())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Morador não encontrado"));
+        Endereco enderecoMorador = repEndereco.findById(solicitacaodto.idEndereco())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Endereço não encontrado"));
+        if(!repEndereco.existsByMorador_Id(morador.getId())) {
+            throw new RegraNegocioException("Endereço não encontrado para o morador");
+        }
         PontoColeta ponto = repPonto.findById(solicitacaodto.idPonto())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
         if (ponto.getSituacao() != SituacaoPonto.ATIVO) {
             throw new RegraNegocioException("O ponto de coleta não está ativo.");
         }
-
         if (solicitacaodto.recolhimentoDomiciliar() && !ponto.getRecolhimentoDomiciliar()) {
             throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
         }
@@ -165,13 +172,13 @@ public class SolicitacaoService {
                 .morador(morador)
                 .pontoColeta(ponto)
                 .protocoloUnico(gerarProtocolo())
-                .copiaLogradouro(solicitacaodto.copiaLogradouro())
-                .copiaNumero(solicitacaodto.copiaNumero())
-                .copiaComplemento(solicitacaodto.copiaComplemento())
-                .copiaBairro(solicitacaodto.copiaBairro())
-                .copiaMunicipio(solicitacaodto.copiaMunicipio())
-                .copiaUf(solicitacaodto.copiaUf())
-                .copiaCep(solicitacaodto.copiaCep())
+                .copiaLogradouro(enderecoMorador.getLogradouro())
+                .copiaNumero(enderecoMorador.getNumero())
+                .copiaComplemento(enderecoMorador.getComplemento())
+                .copiaBairro(enderecoMorador.getBairro())
+                .copiaMunicipio(enderecoMorador.getMunicipio())
+                .copiaUf(enderecoMorador.getUf())
+                .copiaCep(enderecoMorador.getCep())
                 .situacao(SituacaoSolicitacao.SOLICITADA)
                 .dataCriacao(OffsetDateTime.now(ZoneOffset.UTC))
                 .observacoes(solicitacaodto.observacoes())
@@ -197,8 +204,8 @@ public class SolicitacaoService {
 
     //atualizacao nao muda situacao, so muda os dados dela antes dela sair de "SOLICITADA"
     @Transactional
-    public SolicitacaoResponseDTO atualizarSolicitacao (Integer id, SolicitacaoUpdateRequestDTO solicitacaodto,
-                                                        Integer idOperador) {
+    public SolicitacaoResponseDTO atualizarSolicitacao (Integer id, Integer idOperador,
+                                                        SolicitacaoUpdateRequestDTO solicitacaodto) {
         Solicitacao solicitacao = rep.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
         if (solicitacao.getSituacao() != SituacaoSolicitacao.SOLICITADA) {
@@ -214,6 +221,28 @@ public class SolicitacaoService {
         // de solicitação, só a lista de itemSolicitacao. Dessa forma, ainda assim, o hibernate incrementa
         // a versão da solicitação, impedindo que dois usuarios mexam na mesma versão.
         entityManager.lock(solicitacao, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+        Endereco endereco = null;
+        if (solicitacaodto.idEndereco() != null) {
+            endereco = repEndereco.findById(solicitacaodto.idEndereco())
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Endereço não encontrado"));
+            if (!endereco.getMorador().getId().equals(solicitacao.getMorador().getId())) {
+                throw new RegraNegocioException("Endereço não associado ao morador");
+            }
+        }
+        PontoColeta ponto = solicitacao.getPontoColeta();
+        if(solicitacaodto.idPonto() != null) {
+            ponto = repPonto.findById(solicitacaodto.idPonto())
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
+            //verificando se o ponto gerado acima é igual ao antigo, se for diferente,
+            //quer dizer então que o usuário passou um novo ponto, então é necessário validar as
+            //coisas
+            if (!ponto.getId().equals(solicitacao.getPontoColeta().getId())) {
+                if (ponto.getSituacao() != SituacaoPonto.ATIVO) {
+                    throw new RegraNegocioException("O ponto de coleta não está ativo.");
+                }
+            }
+            solicitacao.setPontoColeta(ponto);
+        }
         //verifica a veracidade do operador se esse nao for nulo
         if (idOperador != null) {
             Operador operador = repOperador.findById(idOperador)
@@ -222,26 +251,9 @@ public class SolicitacaoService {
                 throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
             }
         }
-        //usei ternario para poupar linha em vez de inicializar a variavel como null e fazer if else
-        PontoColeta ponto = solicitacaodto.idPonto() != null ? repPonto.findById(solicitacaodto.idPonto())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado")) :
-                solicitacao.getPontoColeta();
-        //defino a situacao do recolhimentoDomiciliar aqui para usar duas vezes abaixo
+        //defino a situacao do recolhimentoDomiciliar aqui para usar mais abaixo
         Boolean recDomiciliarFinal = solicitacaodto.recolhimentoDomiciliar() != null
                 ? solicitacaodto.recolhimentoDomiciliar() : solicitacao.getRecolhimentoDomiciliar();
-        //verificando se o pontoId gerado mais acima é igual ao antigo, se for diferente,
-        //quer dizer então que o usuário passou um novo ponto, então é necessário validar as
-        //coisas
-        if (!Objects.equals(ponto.getId(), solicitacao.getPontoColeta().getId())) {
-            if (ponto.getSituacao() != SituacaoPonto.ATIVO) {
-                throw new RegraNegocioException("O ponto de coleta não está ativo.");
-            }
-            // uso o Boolean.TRUE.equals para prevenir NullPointerException usando Boolean
-                if (Boolean.TRUE.equals(recDomiciliarFinal) && !Boolean.TRUE.equals(ponto.getRecolhimentoDomiciliar())) {
-                    throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
-                }
-        }
-        solicitacao.setPontoColeta(ponto);
         //colocando oq o usuario mandou na lista para essa nova lista abaixo, caso nao mandou nada,
         // a lista é preenchida com os itens que ja tavam antes
         List<ItemSolicitacaoRequestDTO> itensParaValidar;
@@ -303,32 +315,17 @@ public class SolicitacaoService {
                     repItemSolicitacao.save(item);
                 }
             }
-        if(solicitacaodto.copiaLogradouro() != null) {
-            solicitacao.setCopiaLogradouro(solicitacaodto.copiaLogradouro());
-        }
-        if(solicitacaodto.copiaNumero() != null) {
-            solicitacao.setCopiaNumero(solicitacaodto.copiaNumero());
-        }
-        if(solicitacaodto.copiaComplemento() != null) {
-            solicitacao.setCopiaComplemento(solicitacaodto.copiaComplemento());
-        }
-        if(solicitacaodto.copiaBairro() != null) {
-            solicitacao.setCopiaBairro(solicitacaodto.copiaBairro());
-        }
-        if(solicitacaodto.copiaMunicipio() != null) {
-            solicitacao.setCopiaMunicipio(solicitacaodto.copiaMunicipio());
-        }
-        if(solicitacaodto.copiaUf() != null) {
-            solicitacao.setCopiaUf(solicitacaodto.copiaUf());
-        }
-        if(solicitacaodto.copiaCep() != null) {
-            solicitacao.setCopiaCep(solicitacaodto.copiaCep());
-        }
-        if(solicitacaodto.observacoes() != null) {
-            solicitacao.setObservacoes(solicitacaodto.observacoes());
+        if (endereco != null) {
+            solicitacao.setCopiaLogradouro(endereco.getLogradouro());
+            solicitacao.setCopiaNumero(endereco.getNumero());
+            solicitacao.setCopiaComplemento(endereco.getComplemento());
+            solicitacao.setCopiaBairro(endereco.getBairro());
+            solicitacao.setCopiaMunicipio(endereco.getMunicipio());
+            solicitacao.setCopiaUf(endereco.getUf());
+            solicitacao.setCopiaCep(endereco.getCep());
         }
         //verifica se o ponto aceita recolhimento domiciliar se o usuario tiver mudado na solicitacao
-        if (Boolean.TRUE.equals(recDomiciliarFinal) && !Boolean.TRUE.equals(solicitacao.getPontoColeta().getRecolhimentoDomiciliar())) {
+        if (Boolean.TRUE.equals(recDomiciliarFinal) && !Boolean.TRUE.equals(ponto.getRecolhimentoDomiciliar())) {
             throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
         }
         solicitacao.setRecolhimentoDomiciliar(recDomiciliarFinal);
