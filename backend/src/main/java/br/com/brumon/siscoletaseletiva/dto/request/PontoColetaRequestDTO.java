@@ -30,7 +30,11 @@ public record PontoColetaRequestDTO(
         @NotBlank
         @Size(max = 10)
         String cep,
-        @Size(max = 255)
+        @Size(max = 20)
+        @Pattern(
+                regexp = "^$|^(?:\\+?55\\s?)?\\(?[1-9]{2}\\)?\\s?(?:9\\s?)?[0-9]{4}-?[0-9]{4}$",
+                message = "Formato de telefone inválido. Use o padrão com DDD completo (ex: 79 99999-9999)."
+        )
         String contato,
         @Size(max = 255)
         String horarios,

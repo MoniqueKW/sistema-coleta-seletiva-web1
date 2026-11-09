@@ -49,12 +49,12 @@ public class MoradorService {
         if(rep.existsByEmail(emailPadrao)) {
             throw new RecursoDuplicadoException("Morador com email já cadastrado");
         }
-        String telefoneLimpo = moradordto.telefone().replaceAll("[()\\s-]", "");
-        if (!telefoneLimpo.startsWith("+55")) {
-            if (telefoneLimpo.startsWith("55")) {
-                telefoneLimpo = "+" + telefoneLimpo;
-            } else {
-                telefoneLimpo = "+55" + telefoneLimpo;
+        String telefoneBruto = moradordto.telefone();
+        String telefoneLimpo = null;
+        if (telefoneBruto != null && !telefoneBruto.trim().isEmpty()) {
+            telefoneLimpo = telefoneBruto.replaceAll("[()\\s+\\-]", "");
+            if (telefoneLimpo.length() == 10 || telefoneLimpo.length() == 11) {
+                telefoneLimpo = "55" + telefoneLimpo;
             }
         }
         Morador morador = rep.save(Morador.builder()
@@ -71,12 +71,12 @@ public class MoradorService {
             if (!morador.getEmail().equals(emailPadrao) && rep.existsByEmail(emailPadrao)) {
                 throw new RecursoDuplicadoException("Já existe um morador cadastrado com este e-mail.");
             }
-        String telefoneLimpo = moradordto.telefone().replaceAll("[()\\s-]", "");
-            if (!telefoneLimpo.startsWith("+55")) {
-            if (telefoneLimpo.startsWith("55")) {
-                telefoneLimpo = "+" + telefoneLimpo;
-            } else {
-                telefoneLimpo = "+55" + telefoneLimpo;
+        String telefoneBruto = moradordto.telefone();
+        String telefoneLimpo = null;
+        if (telefoneBruto != null && !telefoneBruto.trim().isEmpty()) {
+            telefoneLimpo = telefoneBruto.replaceAll("[()\\s+\\-]", "");
+            if (telefoneLimpo.length() == 10 || telefoneLimpo.length() == 11) {
+                telefoneLimpo = "55" + telefoneLimpo;
             }
         }
             morador.setNome(moradordto.nome());

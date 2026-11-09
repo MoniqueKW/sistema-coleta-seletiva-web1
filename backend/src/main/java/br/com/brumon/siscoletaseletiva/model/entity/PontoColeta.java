@@ -32,7 +32,7 @@ public class PontoColeta {
     private String cep;
     @Column(name = "complemento")
     private String complemento;
-    @Column(name = "contato")
+    @Column(name = "contato", length = 20)
     private String contato;
     @Column(name = "horarios")
     private String horarios;

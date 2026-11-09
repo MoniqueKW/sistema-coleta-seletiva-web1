@@ -50,6 +50,14 @@ public class PontoColetaService {
     }
     @Transactional
     public PontoColetaResponseDTO salvarPontoColeta(PontoColetaRequestDTO pontodto) {
+        String contatoBruto = pontodto.contato();
+        String telefoneLimpo = null;
+        if (contatoBruto != null && !contatoBruto.trim().isEmpty()) {
+            telefoneLimpo = contatoBruto.replaceAll("[()\\s+\\-]", "");
+            if (telefoneLimpo.length() == 10 || telefoneLimpo.length() == 11) {
+                telefoneLimpo = "55" + telefoneLimpo;
+            }
+        }
         PontoColeta ponto = rep.save(PontoColeta.builder()
                 .nome(pontodto.nome())
                 .cep(pontodto.cep())
@@ -59,7 +67,7 @@ public class PontoColetaService {
                 .logradouro(pontodto.logradouro())
                 .numero(pontodto.numero())
                 .complemento(pontodto.complemento())
-                .contato(pontodto.contato())
+                .contato(telefoneLimpo)
                 .horarios(pontodto.horarios())
                 .situacao(SituacaoPonto.ATIVO)
                 .recolhimentoDomiciliar(pontodto.recolhimentoDomiciliar())
@@ -69,6 +77,14 @@ public class PontoColetaService {
     @Transactional
     public PontoColetaResponseDTO atualizarPontoColeta(Integer id, PontoColetaRequestDTO pontodto){
         PontoColeta ponto = rep.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
+        String contatoBruto = pontodto.contato();
+        String telefoneLimpo = null;
+        if (contatoBruto != null && !contatoBruto.trim().isEmpty()) {
+            telefoneLimpo = contatoBruto.replaceAll("[()\\s+\\-]", "");
+            if (telefoneLimpo.length() == 10 || telefoneLimpo.length() == 11) {
+                telefoneLimpo = "55" + telefoneLimpo;
+            }
+        }
         ponto.setNome(pontodto.nome());
         ponto.setCep(pontodto.cep());
         ponto.setMunicipio(pontodto.municipio());
@@ -77,7 +93,7 @@ public class PontoColetaService {
         ponto.setLogradouro(pontodto.logradouro());
         ponto.setNumero(pontodto.numero());
         ponto.setComplemento(pontodto.complemento());
-        ponto.setContato(pontodto.contato());
+        ponto.setContato(telefoneLimpo);
         ponto.setHorarios(pontodto.horarios());
         ponto.setRecolhimentoDomiciliar(pontodto.recolhimentoDomiciliar());
         PontoColeta pontoSalvo = rep.save(ponto);
