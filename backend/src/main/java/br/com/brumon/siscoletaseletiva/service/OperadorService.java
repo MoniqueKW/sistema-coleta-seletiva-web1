@@ -61,13 +61,13 @@ public class OperadorService {
     }
 
     @Transactional
-    public OperadorResponseDTO salvarOperador(OperadorRequestDTO dto) {
+    public OperadorResponseDTO salvarOperador(Integer idPonto, OperadorRequestDTO dto) {
         //deixa o email recebido em caixa baixa para evitar duplicidade de emails com letras maiusculas e minusculas
         String emailPadrao = dto.email().trim().toLowerCase();
         if (rep.existsByEmail(emailPadrao)) {
             throw new RecursoDuplicadoException("Já existe um operador cadastrado com este e-mail.");
         }
-        PontoColeta ponto = pontoRep.findById(dto.idPonto())
+        PontoColeta ponto = pontoRep.findById(idPonto)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
         Operador operador = rep.save(Operador.builder()
                 .pontoColeta(ponto)
@@ -78,14 +78,14 @@ public class OperadorService {
     }
 
     @Transactional
-    public OperadorResponseDTO atualizarOperador(Integer id, OperadorRequestDTO dto) {
+    public OperadorResponseDTO atualizarOperador(Integer idPonto, Integer id, OperadorRequestDTO dto) {
         Operador operador = rep.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Operador não encontrado"));
         String emailPadrao = dto.email().trim().toLowerCase();
         if (rep.existsByEmail(emailPadrao) && !operador.getEmail().equals(emailPadrao)) {
             throw new RecursoDuplicadoException("Já existe um operador cadastrado com este e-mail.");
         }
-        PontoColeta ponto = pontoRep.findById(dto.idPonto())
+        PontoColeta ponto = pontoRep.findById(idPonto)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Ponto de coleta não encontrado"));
         operador.setPontoColeta(ponto);
         operador.setNome(dto.nome());

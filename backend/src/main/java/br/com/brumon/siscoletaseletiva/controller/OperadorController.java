@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/operadores")
+@RequestMapping("/pontos/{idPonto}/operadores")
 public class OperadorController {
 
     private final OperadorService operadorServ;
@@ -22,14 +22,16 @@ public class OperadorController {
     }
 
     @PostMapping
-    public ResponseEntity<OperadorResponseDTO> criarOperador(@RequestBody @Valid OperadorRequestDTO dto) {
-        OperadorResponseDTO operadorCriado = operadorServ.salvarOperador(dto);
+    public ResponseEntity<OperadorResponseDTO> criarOperador(
+            @PathVariable Integer idPonto,
+            @RequestBody @Valid OperadorRequestDTO dto) {
+        OperadorResponseDTO operadorCriado = operadorServ.salvarOperador(idPonto, dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(operadorCriado);
     }
 
     @GetMapping
     public ResponseEntity<Page<OperadorResponseDTO>> listar(
-            @RequestParam(required = false) Integer idPonto,
+            @PathVariable Integer idPonto,
             @RequestParam(required = false) String nome,
             Pageable pageable) {
         Pageable limitacaoFixa = PageRequest.of(
@@ -55,9 +57,10 @@ public class OperadorController {
 
     @PutMapping("/{id}")
     public ResponseEntity<OperadorResponseDTO> atualizarOperador(
+            @PathVariable Integer idPonto,
             @PathVariable Integer id,
             @RequestBody @Valid OperadorRequestDTO dto) {
-        OperadorResponseDTO operadorAtualizado = operadorServ.atualizarOperador(id, dto);
+        OperadorResponseDTO operadorAtualizado = operadorServ.atualizarOperador(idPonto, id, dto);
         return ResponseEntity.ok(operadorAtualizado);
     }
 
