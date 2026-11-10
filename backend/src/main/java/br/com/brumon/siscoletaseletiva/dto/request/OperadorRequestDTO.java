@@ -12,7 +12,10 @@ public record OperadorRequestDTO(
         )
         String nome,
         @NotBlank
-        @Email
+        @Email(
+                regexp = "^(?!.*\\.\\.)[A-Za-z0-9](?:[A-Za-z0-9._%+-]*[A-Za-z0-9])?@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\\.)+[A-Za-z]{2,}$",
+                message = "Formato de e-mail inválido."
+        )
         @Size(max = 255)
         String email
 ) {
