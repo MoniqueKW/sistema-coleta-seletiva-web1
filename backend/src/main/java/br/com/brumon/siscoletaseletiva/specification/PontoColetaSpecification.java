@@ -1,7 +1,10 @@
 package br.com.brumon.siscoletaseletiva.specification;
 
+import br.com.brumon.siscoletaseletiva.model.entity.MaterialAceito;
 import br.com.brumon.siscoletaseletiva.model.entity.PontoColeta;
 import br.com.brumon.siscoletaseletiva.model.enums.SituacaoPonto;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 
 //Cada metodo abaixo é um filtro independente. Quando o parâmetro não foi enviado (ou veio em branco),
@@ -37,7 +40,20 @@ public class PontoColetaSpecification {
         return (root, query, criteriaBuilder) ->
                 (bairro == null || bairro.isBlank()) ? null : criteriaBuilder.equal(root.get("bairro"), bairro);
     }
-
+    //Pontos que aceitam o material informado (EXISTS na tabela de vínculos).
+    public static Specification<PontoColeta> comMaterialAceito(Integer idMaterial) {
+        return (root, query, criteriaBuilder) -> {
+            if (idMaterial == null) {
+                return null;
+            }
+            Subquery<Integer> vinculo = query.subquery(Integer.class);
+            Root<MaterialAceito> aceito = vinculo.from(MaterialAceito.class);
+            vinculo.select(aceito.get("id").get("idPonto"))
+                    .where(criteriaBuilder.equal(aceito.get("id").get("idPonto"), root.get("id")),
+                            criteriaBuilder.equal(aceito.get("id").get("idMaterial"), idMaterial));
+            return criteriaBuilder.exists(vinculo);
+        };
+    }
     //equivale ao antigo "ContainingIgnoreCase", busca parcial sem diferenciar maiúsculas de minúsculas.
     //os caracteres % e _ digitados pelo usuário são escapados para valerem como texto comum.
     public static Specification<PontoColeta> contem(String campo, String valor) {

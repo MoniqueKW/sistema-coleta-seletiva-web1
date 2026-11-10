@@ -33,13 +33,18 @@ public class PontoColetaService {
     @Transactional(readOnly = true)
     public Page<PontoColetaResponseDTO> listar(String nome, String municipio,
                                                String bairro, SituacaoPonto situacao,
-                                               Boolean recolhimento, Pageable pageable) {
+                                               Boolean recolhimento, Integer idMaterial,
+                                               Pageable pageable) {
+        //RF06: filtrar por material retorna somente pontos ativos, a nao ser que o usuario
+        //passe a situacao inativa como parametro
+        SituacaoPonto situacaoEfetiva = (idMaterial != null && situacao == null) ? SituacaoPonto.ATIVO : situacao;
         Specification<PontoColeta> filtros = Specification.allOf(
                 PontoColetaSpecification.comNome(nome),
                 PontoColetaSpecification.comMunicipio(municipio),
                 PontoColetaSpecification.comBairro(bairro),
-                PontoColetaSpecification.comSituacao(situacao),
-                PontoColetaSpecification.comRecolhimento(recolhimento));
+                PontoColetaSpecification.comSituacao(situacaoEfetiva),
+                PontoColetaSpecification.comRecolhimento(recolhimento),
+                PontoColetaSpecification.comMaterialAceito(idMaterial));
         Page<PontoColeta> pontos = rep.findAll(filtros, pageable);
         return pontos.map(this::converterParaDTO);
     }

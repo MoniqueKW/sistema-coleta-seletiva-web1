@@ -63,6 +63,8 @@ public class PontoColetaController {
             @RequestParam(required = false) SituacaoPonto situacao,
             @Parameter(description = "Filtra por pontos que fazem (true) ou não fazem (false) recolhimento domiciliar (opcional)")
             @RequestParam(required = false) Boolean recolhimentoDomiciliar,
+            @Parameter(description = "Id do material aceito pelo ponto (opcional). Retorna só pontos ativos, salvo se a situação for informada")
+            @RequestParam(required = false) Integer idMaterial,
             @ParameterObject Pageable pageable) {
         Pageable limitacaoFixa = PageRequest.of(
                 pageable.getPageNumber(),
@@ -70,7 +72,7 @@ public class PontoColetaController {
                 pageable.getSort()
         );
         return ResponseEntity.ok(pontoColetaServ.listar(nome, municipio, bairro, situacao, recolhimentoDomiciliar,
-                limitacaoFixa));
+                idMaterial, limitacaoFixa));
     }
     @Operation(summary = "Busca um ponto de coleta pelo id",
             description = "Retorna os dados do ponto de coleta.")
