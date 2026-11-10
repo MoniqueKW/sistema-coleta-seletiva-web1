@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -62,7 +63,7 @@ public class PontoColetaController {
             @RequestParam(required = false) SituacaoPonto situacao,
             @Parameter(description = "Filtra por pontos que fazem (true) ou não fazem (false) recolhimento domiciliar (opcional)")
             @RequestParam(required = false) Boolean recolhimentoDomiciliar,
-            Pageable pageable) {
+            @ParameterObject Pageable pageable) {
         Pageable limitacaoFixa = PageRequest.of(
                 pageable.getPageNumber(),
                 Math.min(pageable.getPageSize(), 100),
@@ -123,7 +124,7 @@ public class PontoColetaController {
         return ResponseEntity.ok(pontoAtualizado);
     }
     @Operation(summary = "Exclui um ponto de coleta",
-            description = "RN03. Só é possível excluir ponto sem materiais associados e sem solicitações, para preservar o histórico. Nos demais casos, inative o ponto.")
+            description = "Só é possível excluir ponto sem materiais associados e sem solicitações, para preservar o histórico. Nos demais casos, inative o ponto.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Ponto de coleta excluído"),
             @ApiResponse(responseCode = "404", description = "Ponto de coleta não encontrado",

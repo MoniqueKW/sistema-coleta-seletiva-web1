@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,7 +42,7 @@ public class HistoricoController {
             @RequestParam(required = false) Integer idOperador,
             @Parameter(description = "Id da solicitação (opcional)")
             @RequestParam(required = false) Integer idSolicitacao,
-            Pageable pageable) {
+            @ParameterObject Pageable pageable) {
         Pageable limitacaoFixa = PageRequest.of(
                 pageable.getPageNumber(),
                 Math.min(pageable.getPageSize(), 100),

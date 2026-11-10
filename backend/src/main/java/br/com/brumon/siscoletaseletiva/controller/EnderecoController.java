@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -68,7 +69,7 @@ public class EnderecoController {
             @RequestParam(required = false) String bairro,
             @Parameter(description = "Parte do logradouro para filtrar (opcional)")
             @RequestParam(required = false) String logradouro,
-            Pageable pageable) {
+            @ParameterObject Pageable pageable) {
         // Se o usuário pediu 20, usa 20. Se pediu 500, limita a 100.
         Pageable limitacaoFixa = PageRequest.of(
                 pageable.getPageNumber(),
@@ -92,7 +93,7 @@ public class EnderecoController {
     }
     @Operation(summary = "Atualiza um endereço",
             description = "Mesmas validações do cadastro. O morador proprietário não pode ser alterado, por isso idMorador não faz parte do corpo. " +
-                    "Solicitações já criadas não são afetadas, pois guardam uma cópia do endereço (RN04).")
+                    "Solicitações já criadas não são afetadas, pois guardam uma cópia do endereço.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Endereço atualizado"),
             @ApiResponse(responseCode = "400", description = "Entrada inválida",
@@ -109,7 +110,7 @@ public class EnderecoController {
     }
     @Operation(summary = "Exclui um endereço",
             description = "Remove o endereço do cadastro do morador. Solicitações existentes não são afetadas, " +
-                    "pois guardam uma cópia do endereço de atendimento (RN04).")
+                    "pois guardam uma cópia do endereço de atendimento.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Endereço excluído"),
             @ApiResponse(responseCode = "404", description = "Endereço não encontrado",

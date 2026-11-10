@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -54,7 +55,7 @@ public class MoradorController {
             //o sistema não vai dar erro se a pessoa não enviar nenhum nome.
             @Parameter(description = "Parte do nome para filtrar (opcional)")
             @RequestParam(required = false) String nome,
-            Pageable pageable) {
+            @ParameterObject Pageable pageable) {
         Pageable limitacaoFixa = PageRequest.of(
                 pageable.getPageNumber(),
                 Math.min(pageable.getPageSize(), 100),

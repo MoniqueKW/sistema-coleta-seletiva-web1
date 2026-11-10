@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -55,7 +56,7 @@ public class SolicitacaoController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dataInicio,
             @Parameter(description = "Data de criação final (opcional)")
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dataFim,
-            Pageable pageable) {
+            @ParameterObject Pageable pageable) {
         Pageable limitacaoFixa = PageRequest.of(
                 pageable.getPageNumber(),
                 Math.min(pageable.getPageSize(), 100),
@@ -129,7 +130,7 @@ public class SolicitacaoController {
     }
     @Operation(summary = "Atualiza uma solicitação",
             description = "Só é possível enquanto a situação for SOLICITADA. Permite corrigir ponto, endereço, observações e itens, com nova validação. " +
-                    "É preciso enviar a versão atual: se outra alteração aconteceu antes, retorna conflito (RN06).")
+                    "É preciso enviar a versão atual: se outra alteração aconteceu antes, retorna conflito.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Solicitação atualizada"),
             @ApiResponse(responseCode = "400", description = "Entrada inválida",

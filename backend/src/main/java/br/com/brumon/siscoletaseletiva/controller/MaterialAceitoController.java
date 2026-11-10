@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -63,7 +64,7 @@ public class MaterialAceitoController {
     public ResponseEntity<Page<MaterialAceitoResponseDTO>> listar(
             @Parameter(description = "Id do ponto de coleta")
             @PathVariable Integer idPonto,
-            Pageable pageable) {
+            @ParameterObject Pageable pageable) {
         Pageable limitacaoFixa = PageRequest.of(
                 pageable.getPageNumber(),
                 Math.min(pageable.getPageSize(), 100),
