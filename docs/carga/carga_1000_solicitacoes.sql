@@ -1,7 +1,7 @@
 -- =====================================================================================================
 -- CARGA DE TESTE PARA O RNF04 (desempenho): 1.000 solicitações com itens e histórico.
 --
--- NÃO é migration do Flyway: fica em docs/carga/ e roda só quando você quiser medir.
+-- 
 -- Pré-requisito: o banco já foi migrado (V1 a V15) e tem os dados de demonstração da V14
 --   (usa os materiais Papel, Plástico, Vidro e Metal).
 -- Como rodar (psql, na raiz do projeto):
@@ -16,7 +16,7 @@
 -- Roda numa única transação: se algo falhar, nada fica gravado.
 -- =====================================================================================================
 
--- Garante que os acentos (Plástico etc.) cheguem corretos mesmo em terminal Windows.
+-- Garante que os acentos (Plástico etc.) cheguem corretos mesmo em terminal.
 SET client_encoding TO 'UTF8';
 
 BEGIN;
@@ -35,7 +35,7 @@ END $$;
 
 SELECT setseed(0.42);
 
--- ---------------------------------------------------------------- 1) cadastros de apoio
+-- 1) cadastros de apoio
 -- 200 moradores de teste, cada um com 1 endereço (média de 5 solicitações por morador).
 INSERT INTO coleta_seletiva.morador (nome, email, telefone)
 SELECT 'Morador Carga ' || g,
@@ -93,7 +93,7 @@ FROM coleta_seletiva.pontocoleta p
 WHERE p.nome LIKE 'CARGA - Ponto %'
 ON CONFLICT (email) DO NOTHING;
 
--- ---------------------------------------------------------------- 2) sorteio das 1.000 solicitações
+--  2) sorteio das 1.000 solicitações
 -- Os números aleatórios ficam numa tabela temporária para cada um ser sorteado UMA vez por linha.
 CREATE TEMP TABLE carga_sorteio ON COMMIT DROP AS
 SELECT g AS n, random() AS r_morador, random() AS r_ponto, random() AS r_situacao, random() AS r_data
@@ -118,7 +118,7 @@ SELECT s.n,
        now() - interval '4 days' - s.r_data * interval '86 days' AS criado
 FROM carga_sorteio s;
 
--- ---------------------------------------------------------------- 3) solicitações
+-- 3) solicitações
 -- Copia o endereço do morador (RN04) e usa a "versão" coerente com o número de mudanças de situação.
 INSERT INTO coleta_seletiva.solicitacao
     (id_ponto, id_morador, protocolo_unico,
@@ -140,7 +140,7 @@ FROM carga_base b
 JOIN LATERAL (SELECT * FROM coleta_seletiva.endereco
                WHERE id_morador = b.id_morador ORDER BY id LIMIT 1) e ON TRUE;
 
--- ---------------------------------------------------------------- 4) itens (1 a 3 por solicitação)
+-- 4) itens (1 a 3 por solicitação)
 -- Materiais distintos dentro da mesma solicitação. Só as CONCLUIDA têm quantidade efetiva (RF15):
 -- o primeiro item sempre é positivo (regra do RF13) e os demais podem ser zero.
 INSERT INTO coleta_seletiva.itemsolicitacao (id_solicitacao, id_material, copia_unidade, qtd_estimada, qtd_efetiva)
@@ -157,7 +157,7 @@ JOIN (SELECT id, unidade, row_number() OVER (ORDER BY id) - 1 AS pos
        WHERE nome IN ('Papel', 'Plástico', 'Vidro', 'Metal')) mat
   ON mat.pos = (b.n + j) % 4;
 
--- ---------------------------------------------------------------- 5) histórico
+-- 5) histórico
 -- Criação (quem fez foi o morador) ...
 INSERT INTO coleta_seletiva.historico
     (id_solicitacao, situacao_anterior, situacao_nova, data, responsavel, motivo, id_operador)
@@ -197,7 +197,7 @@ ANALYZE coleta_seletiva.pontocoleta;
 ANALYZE coleta_seletiva.morador;
 ANALYZE coleta_seletiva.endereco;
 
--- ---------------------------------------------------------------- conferência (o resultado deve bater com isto)
+-- conferência (o resultado deve bater com isto)
 --   solicitações da carga ............ 1000
 --   itens ............................ ~2000 (1 a 3 por solicitação)
 --   histórico ........................ 1000 + uma linha por mudança de situação
@@ -216,7 +216,7 @@ SELECT situacao, count(*) AS total
   FROM coleta_seletiva.solicitacao WHERE protocolo_unico LIKE 'CG-%'
  GROUP BY situacao ORDER BY situacao;
 
--- Para conferir se o banco usa os índices (rode depois da carga; troque o id_ponto por um existente):
+-- Para conferir se o banco usa os índices (rodar depois da carga; trocar o id_ponto por um existente):
 --   EXPLAIN (ANALYZE, BUFFERS)
 --   SELECT * FROM coleta_seletiva.solicitacao
 --    WHERE id_ponto = <id> AND situacao = 'AGENDADA' ORDER BY data_criacao DESC LIMIT 20;

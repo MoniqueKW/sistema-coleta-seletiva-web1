@@ -2,8 +2,8 @@
 -- LIMPEZA DA CARGA DE TESTE (desfaz o carga_1000_solicitacoes.sql).
 --
 -- Apaga SÓ o que a carga criou: moradores carga<N>@teste.local, pontos 'CARGA - Ponto <N>',
--- operadores operador.carga<N>@teste.local e tudo ligado a eles (inclusive solicitações que você
--- tenha criado pela API usando esses moradores ou pontos durante a medição).
+-- operadores operador.carga<N>@teste.local e tudo ligado a eles (inclusive solicitações que forem
+-- criadas pela API usando esses moradores ou pontos durante a medição).
 -- Os dados de demonstração da V14 e o seu histórico real não são tocados.
 --
 -- Como rodar:
