@@ -98,7 +98,7 @@ Ou, se preferir, apenas acione o run na IDE.
 | 🧭 Swagger UI (testar)     | http://localhost:8080/swagger-ui/index.html |
 | 📄 Especificação OpenAPI (JSON)  | http://localhost:8080/v3/api-docs          |
 
-Uma cópia da especificação fica versionada em [`docs/api/apisiscoletaseletiva.json`](docs/api/api-docs.json).
+Uma cópia da especificação fica versionada em [`docs/api/api-docsjson`]
 
 ---
 
