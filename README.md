@@ -94,7 +94,7 @@ Ou, se preferir, acionar o run na IDE.
 | 🧭 Swagger UI (testar)     | http://localhost:8080/swagger-ui/index.html |
 | 📄 Especificação OpenAPI (JSON)  | http://localhost:8080/v3/api-docs          |
 
-Uma cópia da especificação fica versionada em [`docs/api/apisiscoletaseletiva.json`](docs/api/apisiscoletaseletiva.json).
+Uma cópia da especificação fica versionada em [`docs/api/apisiscoletaseletiva.json`](docs/api/api-docs.json).
 
 ---
 
@@ -170,9 +170,10 @@ backend/                      Código da API (Spring Boot)
     db/migration/             Migrações Flyway (V1 a V15): estrutura, ajustes, dados de demonstração e índices
 docs/
   api/                        Especificação OpenAPI (JSON)
-  bdSchema/                   Script SQL do banco
-  diagramaDer/                Diagrama entidade-relacionamento (PNG e PDF)
-  carga/                      Scripts de carga de teste (ver abaixo)
+  dbCarga/                    Scripts de carga de teste (ver abaixo)
+  dbDadosDemonstrativos/      Script de dados demonstrativos (já incluso no versionamento do Flyway)
+  dbSchema/                   Script SQL do banco
+  diagramaER/                 Diagrama entidade-relacionamento (PNG e PDF)
 ```
 
 ## 🗃️ Banco de dados
