@@ -57,6 +57,8 @@ As credenciais **não ficam no repositório**; são lidas do ambiente:
 | `SENHA`   | sim         | —          | Senha do usuário do PostgreSQL |
 | `USUARIO` | não         | `postgres` | Usuário do PostgreSQL        |
 
+Desta forma, execute:
+
 🐧 Linux / macOS:
 ```bash
 export SENHA=sua_senha
@@ -67,14 +69,14 @@ export SENHA=sua_senha
 $env:SENHA="sua_senha"
 ```
 
-Se for rodar pela IDE, defina as mesmas variáveis na configuração de execução da aplicação em `src/main/resources/application.properties`.
+Se for rodar pela IDE, defina as mesmas variáveis na configuração de execução da aplicação em `src/main/resources/application.properties` nos campos de usuário (que aceita padrão) e senha.
 
 
 > O banco é acessado em `jdbc:postgresql://localhost:5432/coleta_seletiva`. Para usar outro endereço, altere `spring.datasource.url` em `src/main/resources/application.properties`.
 
 ### 3️⃣ ▶️ Subir a aplicação
 
-Abra o terminal **dentro da pasta `backend/`** (onde ficam o `pom.xml` e o `mvnw.cmd`) e execute:
+Com o terminal **dentro da pasta `backend/`** (onde ficam o `pom.xml` e o `mvnw.cmd`), execute:
 
 🐧 Linux / macOS:
 ```bash
@@ -85,7 +87,7 @@ Abra o terminal **dentro da pasta `backend/`** (onde ficam o `pom.xml` e o `mvnw
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
-Ou, se preferir, acionar o run na IDE.
+Ou, se preferir, apenas acione o run na IDE.
 
 🌐 A API sobe em **http://localhost:8080**.
 
