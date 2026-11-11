@@ -74,6 +74,8 @@ Se for rodar pela IDE, defina as mesmas variáveis na configuração de execuç�
 
 ### 3️⃣ ▶️ Subir a aplicação
 
+Abra o terminal **dentro da pasta `backend/`** (onde ficam o `pom.xml` e o `mvnw.cmd`) e execute:
+
 🐧 Linux / macOS:
 ```bash
 ./mvnw spring-boot:run
