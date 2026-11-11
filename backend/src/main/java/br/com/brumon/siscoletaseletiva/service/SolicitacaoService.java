@@ -319,6 +319,9 @@ public class SolicitacaoService {
             solicitacao.setCopiaUf(endereco.getUf());
             solicitacao.setCopiaCep(endereco.getCep());
         }
+        if (solicitacaodto.observacoes() != null) {
+            solicitacao.setObservacoes(solicitacaodto.observacoes());
+        }
         //verifica se o ponto aceita recolhimento domiciliar se o usuario tiver mudado na solicitacao
         if (Boolean.TRUE.equals(recDomiciliarFinal) && !Boolean.TRUE.equals(ponto.getRecolhimentoDomiciliar())) {
             throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
