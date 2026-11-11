@@ -30,7 +30,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
-@Tag(name = "Solicitações", description = "Solicitações de recolhimento, agendamento e execução")
+@Tag(name = "Solicitações", description = "Solicitações de recolhimento, agendamento e execução (RF08 a RF14)")
 @RequestMapping("/solicitacoes")
 public class SolicitacaoController {
     private final SolicitacaoService solicitacaoServ;
@@ -38,7 +38,7 @@ public class SolicitacaoController {
         this.solicitacaoServ = solicitacaoServ;
     }
     @Operation(summary = "Lista solicitações com paginação e filtros",
-            description = "Todos os filtros são opcionais e combinados. Datas no formato ISO com fuso (ex: 2026-11-10T08:00:00-03:00). Tamanho máximo de página: 100.")
+            description = "RF09. Todos os filtros são opcionais e combinados. Datas no formato ISO com fuso (ex: 2026-11-10T08:00:00-03:00). Tamanho máximo de página: 100.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Página de solicitações"),
             @ApiResponse(responseCode = "400", description = "Parâmetro de filtro ou paginação inválido",
@@ -66,7 +66,7 @@ public class SolicitacaoController {
                 dataInicio, dataFim, limitacaoFixa));
     }
     @Operation(summary = "Busca uma solicitação pelo id",
-            description = "Retorna os dados da solicitação.")
+            description = "RF09. Retorna os dados da solicitação.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Solicitação encontrada"),
             @ApiResponse(responseCode = "404", description = "Solicitação não encontrada",
@@ -108,7 +108,7 @@ public class SolicitacaoController {
         return ResponseEntity.ok(solicitacao);
     }
     @Operation(summary = "Cria uma solicitação de recolhimento",
-            description = "Gera o protocolo e registra a situação SOLICITADA. O ponto precisa estar ativo e com recolhimento domiciliar, " +
+            description = "RF08 e RN01. Gera o protocolo e registra a situação SOLICITADA. O ponto precisa estar ativo e com recolhimento domiciliar, " +
                     "e todos os materiais precisam estar ativos e aceitos pelo ponto, sem repetição e dentro do limite. " +
                     "Se algo falhar, nada é gravado. O idOperador é opcional (use quando o operador criar pelo morador).")
     @ApiResponses({
@@ -129,8 +129,8 @@ public class SolicitacaoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(solicitacaoCriada);
     }
     @Operation(summary = "Atualiza uma solicitação",
-            description = "Só é possível enquanto a situação for SOLICITADA. Permite corrigir ponto, endereço, observações e itens, com nova validação. " +
-                    "É preciso enviar a versão atual: se outra alteração aconteceu antes, retorna conflito.")
+            description = "RN04. Só é possível enquanto a situação for SOLICITADA. Permite corrigir ponto, endereço, observações e itens, com nova validação. " +
+                    "É preciso enviar a versão atual: se outra alteração aconteceu antes, retorna conflito (RN06).")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Solicitação atualizada"),
             @ApiResponse(responseCode = "400", description = "Entrada inválida",
@@ -153,7 +153,7 @@ public class SolicitacaoController {
         return ResponseEntity.ok(solicitacaoAtualizada);
     }
     @Operation(summary = "Agenda uma solicitação",
-            description = "Só vale para solicitação SOLICITADA. A data e hora precisam ser futuras. Altera a situação para AGENDADA e registra no histórico.")
+            description = "RF10. Só vale para solicitação SOLICITADA. A data e hora precisam ser futuras. Altera a situação para AGENDADA e registra no histórico.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Solicitação agendada"),
             @ApiResponse(responseCode = "400", description = "Data ausente ou no passado",
@@ -174,7 +174,7 @@ public class SolicitacaoController {
         return ResponseEntity.ok(solicitacaoAgendada);
     }
     @Operation(summary = "Recusa uma solicitação",
-            description = "Só vale para solicitação SOLICITADA e exige motivo. A recusa é uma situação final e fica no histórico.")
+            description = "RF11. Só vale para solicitação SOLICITADA e exige motivo. A recusa é uma situação final e fica no histórico.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Solicitação recusada"),
             @ApiResponse(responseCode = "404", description = "Solicitação ou operador não encontrado",
@@ -194,7 +194,7 @@ public class SolicitacaoController {
         return ResponseEntity.ok(solicitacaoRecusada);
     }
     @Operation(summary = "Inicia o recolhimento",
-            description = "Só vale para solicitação AGENDADA. Altera a situação para EM_RECOLHIMENTO.")
+            description = "RF13. Só vale para solicitação AGENDADA. Altera a situação para EM_RECOLHIMENTO.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Recolhimento iniciado"),
             @ApiResponse(responseCode = "404", description = "Solicitação ou operador não encontrado",
@@ -212,7 +212,7 @@ public class SolicitacaoController {
         return ResponseEntity.ok(solicitacao);
     }
     @Operation(summary = "Cancela uma solicitação",
-            description = "Só vale para solicitação SOLICITADA ou AGENDADA e exige motivo. O idOperador é opcional (o morador também pode cancelar).")
+            description = "RF12. Só vale para solicitação SOLICITADA ou AGENDADA e exige motivo. O idOperador é opcional (o morador também pode cancelar).")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Solicitação cancelada"),
             @ApiResponse(responseCode = "404", description = "Solicitação ou operador não encontrado",
@@ -232,7 +232,7 @@ public class SolicitacaoController {
         return ResponseEntity.ok(solicitacaoCancelada);
     }
     @Operation(summary = "Conclui uma solicitação",
-            description = "Só vale para solicitação EM_RECOLHIMENTO. Informe a quantidade efetiva de todos os itens (zero para item não recolhido), " +
+            description = "RF13. Só vale para solicitação EM_RECOLHIMENTO. Informe a quantidade efetiva de todos os itens (zero para item não recolhido), " +
                     "com pelo menos um item positivo.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Solicitação concluída"),
@@ -254,7 +254,7 @@ public class SolicitacaoController {
         return ResponseEntity.ok(solicitacaoConcluida);
     }
     @Operation(summary = "Reagenda uma solicitação",
-            description = "Vale para solicitação AGENDADA ou EM_RECOLHIMENTO (tentativa sem sucesso). Exige justificativa, informação da tentativa e nova data futura. " +
+            description = "RF14. Vale para solicitação AGENDADA ou EM_RECOLHIMENTO (tentativa sem sucesso). Exige justificativa, informação da tentativa e nova data futura. " +
                     "A situação volta para AGENDADA e a tentativa anterior fica no histórico.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Solicitação reagendada"),

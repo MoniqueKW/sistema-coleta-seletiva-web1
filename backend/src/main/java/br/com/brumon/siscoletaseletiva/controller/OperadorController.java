@@ -22,7 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@Tag(name = "Operadores", description = "Operadores vinculados a pontos de coleta")
+@Tag(name = "Operadores", description = "Operadores vinculados a pontos de coleta (RF07)")
 @RequestMapping("/pontos/{idPonto}/operadores")
 public class OperadorController {
     private final OperadorService operadorServ;
@@ -30,7 +30,7 @@ public class OperadorController {
         this.operadorServ = operadorServ;
     }
     @Operation(summary = "Cadastra um operador em um ponto de coleta",
-            description = "Cria o operador já vinculado ao ponto informado na URL. O e-mail é normalizado (sem espaços e em minúsculas) e não pode repetir.")
+            description = "RF07. Cria o operador já vinculado ao ponto informado na URL. O e-mail é normalizado (sem espaços e em minúsculas) e não pode repetir.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Operador cadastrado"),
             @ApiResponse(responseCode = "400", description = "Entrada inválida: nome ou e-mail fora do formato",
@@ -102,7 +102,7 @@ public class OperadorController {
         return ResponseEntity.ok(operador);
     }
     @Operation(summary = "Atualiza um operador",
-            description = "Atualiza nome e e-mail e vincula o operador ao ponto informado na URL. O e-mail só é rejeitado se já pertencer a outro operador.")
+            description = "RF07. Atualiza nome e e-mail e vincula o operador ao ponto informado na URL. O e-mail só é rejeitado se já pertencer a outro operador.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Operador atualizado"),
             @ApiResponse(responseCode = "400", description = "Entrada inválida",
@@ -123,7 +123,7 @@ public class OperadorController {
         return ResponseEntity.ok(operadorAtualizado);
     }
     @Operation(summary = "Exclui um operador",
-            description = "Só é possível excluir operador sem registros no histórico de solicitações, para preservar quem fez cada alteração.")
+            description = "RN03. Só é possível excluir operador sem registros no histórico de solicitações, para preservar quem fez cada alteração.")
     @Parameter(name = "idPonto", in = ParameterIn.PATH, required = true,
             description = "Id do ponto de coleta na URL (esta operação não o usa para filtrar)")
     @ApiResponses({

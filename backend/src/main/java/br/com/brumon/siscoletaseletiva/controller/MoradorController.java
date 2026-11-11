@@ -21,7 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@Tag(name = "Moradores", description = "Cadastro e consulta de moradores")
+@Tag(name = "Moradores", description = "Cadastro e consulta de moradores (RF01)")
 @RequestMapping("/moradores")
 public class MoradorController {
     private final MoradorService moradorServ;
@@ -29,7 +29,7 @@ public class MoradorController {
         this.moradorServ = moradorServ;
     }
     @Operation(summary = "Cadastra um morador",
-            description = "Exige nome e e-mail válido. O e-mail é normalizado (sem espaços e em minúsculas) antes de checar duplicidade. " +
+            description = "RF01. Exige nome e e-mail válido. O e-mail é normalizado (sem espaços e em minúsculas) antes de checar duplicidade. " +
                     "O telefone é opcional: a pontuação é removida e o prefixo 55 é acrescentado quando vier só com DDD e número.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Morador cadastrado"),
@@ -91,7 +91,7 @@ public class MoradorController {
         return ResponseEntity.ok(morador);
     }
     @Operation(summary = "Atualiza um morador",
-            description = "Mesmas validações do cadastro. O e-mail só é rejeitado se já pertencer a outro morador.")
+            description = "RF01. Mesmas validações do cadastro. O e-mail só é rejeitado se já pertencer a outro morador.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Morador atualizado"),
             @ApiResponse(responseCode = "400", description = "Entrada inválida",
@@ -109,7 +109,7 @@ public class MoradorController {
         return ResponseEntity.ok(moradorAtualizado);
     }
     @Operation(summary = "Exclui um morador",
-            description = "Só é possível excluir morador sem solicitações vinculadas, para preservar o histórico dos recolhimentos.")
+            description = "RN03. Só é possível excluir morador sem solicitações vinculadas, para preservar o histórico dos recolhimentos.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Morador excluído"),
             @ApiResponse(responseCode = "404", description = "Morador não encontrado",

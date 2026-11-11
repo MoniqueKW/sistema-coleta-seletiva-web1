@@ -22,7 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@Tag(name = "Endereços", description = "Endereços vinculados a moradores")
+@Tag(name = "Endereços", description = "Endereços vinculados a moradores (RF02)")
 @RequestMapping("/enderecos")
 public class EnderecoController {
 
@@ -31,7 +31,7 @@ public class EnderecoController {
         this.enderecoService = enderecoService;
     }
     @Operation(summary = "Cadastra um endereço para um morador",
-            description = "Exige logradouro, número, bairro, município, UF (2 letras maiúsculas) e CEP. " +
+            description = "RF02. Exige logradouro, número, bairro, município, UF (2 letras maiúsculas) e CEP. " +
                     "Quando o imóvel não tiver numeração, informe \"S/N\" no campo número. O complemento é opcional. " +
                     "Cada endereço pertence a um único morador, informado em idMorador.")
     @ApiResponses({
@@ -92,7 +92,7 @@ public class EnderecoController {
         return ResponseEntity.ok(endereco);
     }
     @Operation(summary = "Atualiza um endereço",
-            description = "Mesmas validações do cadastro. O morador proprietário não pode ser alterado, por isso idMorador não faz parte do corpo. " +
+            description = "RF02. Mesmas validações do cadastro. O morador proprietário não pode ser alterado, por isso idMorador não faz parte do corpo. " +
                     "Solicitações já criadas não são afetadas, pois guardam uma cópia do endereço.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Endereço atualizado"),
@@ -110,7 +110,7 @@ public class EnderecoController {
     }
     @Operation(summary = "Exclui um endereço",
             description = "Remove o endereço do cadastro do morador. Solicitações existentes não são afetadas, " +
-                    "pois guardam uma cópia do endereço de atendimento.")
+                    "pois guardam uma cópia do endereço de atendimento (RN04).")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Endereço excluído"),
             @ApiResponse(responseCode = "404", description = "Endereço não encontrado",

@@ -23,7 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@Tag(name = "Materiais", description = "Cadastro e consulta de materiais recicláveis")
+@Tag(name = "Materiais", description = "Cadastro e consulta de materiais recicláveis (RF03)")
 @RequestMapping("/materiais")
 public class MaterialController {
     private final MaterialService materialServ;
@@ -31,7 +31,7 @@ public class MaterialController {
         this.materialServ = materialServ;
     }
     @Operation(summary = "Cadastra um material reciclável",
-            description = "Exige nome e unidade de medida. Descrição e orientação de preparo são opcionais. O nome não pode repetir.")
+            description = "RF03. Exige nome e unidade de medida. Descrição e orientação de preparo são opcionais. O nome não pode repetir.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Material cadastrado"),
             @ApiResponse(responseCode = "400", description = "Entrada inválida: nome ou unidade ausente ou fora do formato",
@@ -82,7 +82,7 @@ public class MaterialController {
         return ResponseEntity.ok(material);
     }
     @Operation(summary = "Atualiza um material",
-            description = "Mesmas validações do cadastro. O nome só é rejeitado se já pertencer a outro material. A situação não é alterada aqui, use o endpoint de situação.")
+            description = "RF03. Mesmas validações do cadastro. O nome só é rejeitado se já pertencer a outro material. A situação não é alterada aqui, use o endpoint de situação.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Material atualizado"),
             @ApiResponse(responseCode = "400", description = "Entrada inválida",
@@ -101,7 +101,7 @@ public class MaterialController {
         return ResponseEntity.ok(materialAtualizado);
     }
     @Operation(summary = "Altera a situação de um material",
-            description = "Ativa ou inativa o material. Material inativo não pode entrar em novas solicitações, mas os registros existentes são preservados.")
+            description = "RF03 e RN03. Ativa ou inativa o material. Material inativo não pode entrar em novas solicitações, mas os registros existentes são preservados.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Situação alterada"),
             @ApiResponse(responseCode = "400", description = "Situação ausente ou inválida",
@@ -119,7 +119,7 @@ public class MaterialController {
     }
 
     @Operation(summary = "Exclui um material",
-            description = "Só é possível excluir material sem vínculos com pontos e sem solicitações, para preservar o histórico. Nos demais casos, inative o material.")
+            description = "RN03. Só é possível excluir material sem vínculos com pontos e sem solicitações, para preservar o histórico. Nos demais casos, inative o material.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Material excluído"),
             @ApiResponse(responseCode = "404", description = "Material não encontrado",

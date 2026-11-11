@@ -19,7 +19,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
-@Tag(name = "Resumo gerencial", description = "Indicadores de solicitações e quantidades recolhidas")
+@Tag(name = "Resumo gerencial", description = "Indicadores de solicitações e quantidades recolhidas (RF15)")
 @RequestMapping("/resumo")
 public class ResumoController {
     private final ResumoService resumoServ;

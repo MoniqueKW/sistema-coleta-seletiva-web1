@@ -22,7 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@Tag(name = "Materiais aceitos", description = "Materiais aceitos em cada ponto de coleta")
+@Tag(name = "Materiais aceitos", description = "Materiais aceitos em cada ponto de coleta (RF05, RN05)")
 @RequestMapping("/pontos/{idPonto}/materiais")
 public class MaterialAceitoController {
     private final MaterialAceitoService materialAceitoServ;
@@ -32,7 +32,7 @@ public class MaterialAceitoController {
     }
 
     @Operation(summary = "Vincula um material a um ponto de coleta",
-            description = "Associa um material ativo ao ponto informado na URL. Observações e limite por solicitação são opcionais; " +
+            description = "RF05. Associa um material ativo ao ponto informado na URL. Observações e limite por solicitação são opcionais; " +
                     "o limite, se informado, deve ser maior que zero. O mesmo material não pode ser vinculado duas vezes ao mesmo ponto.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Material vinculado ao ponto"),
@@ -52,7 +52,7 @@ public class MaterialAceitoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(associacaoCriada);
     }
     @Operation(summary = "Lista os materiais aceitos por um ponto de coleta",
-            description = "Retorna os materiais vinculados ao ponto, com observações e limite. Tamanho máximo de página: 100.")
+            description = "RF06. Retorna os materiais vinculados ao ponto, com observações e limite. Tamanho máximo de página: 100.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Página de materiais aceitos"),
             @ApiResponse(responseCode = "400", description = "Parâmetro de paginação inválido",
@@ -74,7 +74,7 @@ public class MaterialAceitoController {
     }
 
     @Operation(summary = "Atualiza o vínculo de um material com o ponto",
-            description = "Altera observações e limite por solicitação. O material do vínculo não pode ser trocado; para isso, remova o vínculo e crie outro. " +
+            description = "RF05. Altera observações e limite por solicitação. O material do vínculo não pode ser trocado; para isso, remova o vínculo e crie outro. " +
                     "O limite, se informado, deve ser maior que zero.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Vínculo atualizado"),
@@ -94,7 +94,7 @@ public class MaterialAceitoController {
         return ResponseEntity.ok(associacaoAtualizada);
     }
     @Operation(summary = "Remove o vínculo de um material com o ponto",
-            description = "A remoção é bloqueada enquanto houver solicitações em andamento com esse material no ponto. " +
+            description = "RN05. A remoção é bloqueada enquanto houver solicitações em andamento com esse material no ponto. " +
                     "O operador deve resolver ou cancelar esses atendimentos antes.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Vínculo removido"),

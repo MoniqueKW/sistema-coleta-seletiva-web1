@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@Tag(name = "Históricos", description = "Consulta do histórico de alterações das solicitações")
+@Tag(name = "Históricos", description = "Consulta do histórico de alterações das solicitações (RF09, RN03)")
 @RequestMapping("/historicos")
 public class HistoricoController {
     private final HistoricoService historicoServ;
@@ -28,7 +28,7 @@ public class HistoricoController {
     }
 
     @Operation(summary = "Lista o histórico de alterações com paginação e filtros",
-            description = "Mostra situação anterior e nova, data, responsável, motivo e informações da tentativa. " +
+            description = "RF09 e RN03. Mostra situação anterior e nova, data, responsável, motivo e informações da tentativa. " +
                     "Filtros opcionais por solicitação e por operador, que podem ser combinados. Tamanho máximo de página: 100. " +
                     "O histórico é gerado automaticamente a cada mudança de situação, por isso só há consulta.")
     @ApiResponses({

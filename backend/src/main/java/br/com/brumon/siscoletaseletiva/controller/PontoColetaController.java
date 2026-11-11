@@ -23,7 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@Tag(name = "Pontos de coleta", description = "Cadastro e consulta de pontos de coleta")
+@Tag(name = "Pontos de coleta", description = "Cadastro e consulta de pontos de coleta (RF04, RF06)")
 @RequestMapping("/pontos")
 public class PontoColetaController {
     private PontoColetaService pontoColetaServ;
@@ -32,7 +32,7 @@ public class PontoColetaController {
         this.pontoColetaServ = pontoColetaServ;
     }
     @Operation(summary = "Cadastra um ponto de coleta",
-            description = "Exige nome, endereço completo e se realiza recolhimento domiciliar. Contato e horários são opcionais.")
+            description = "RF04. Exige nome, endereço completo e se realiza recolhimento domiciliar. Contato e horários são opcionais.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Ponto de coleta cadastrado"),
             @ApiResponse(responseCode = "400", description = "Entrada inválida: campo obrigatório ausente ou fora do formato",
@@ -89,7 +89,7 @@ public class PontoColetaController {
         return ResponseEntity.ok(ponto);
     }
     @Operation(summary = "Atualiza um ponto de coleta",
-            description = "Mesmas validações do cadastro. A situação não é alterada aqui, use o endpoint de situação.")
+            description = "RF04. Mesmas validações do cadastro. A situação não é alterada aqui, use o endpoint de situação.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Ponto de coleta atualizado"),
             @ApiResponse(responseCode = "400", description = "Entrada inválida",
@@ -106,7 +106,7 @@ public class PontoColetaController {
         return ResponseEntity.ok(pontoAtualizado);
     }
     @Operation(summary = "Altera a situação de um ponto de coleta",
-            description = "Ativa ou inativa o ponto. A inativação é bloqueada enquanto houver solicitações abertas vinculadas a ele.")
+            description = "RF04 e RN05. Ativa ou inativa o ponto. A inativação é bloqueada enquanto houver solicitações abertas vinculadas a ele.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Situação alterada"),
             @ApiResponse(responseCode = "400", description = "Situação ausente ou inválida",
@@ -126,7 +126,7 @@ public class PontoColetaController {
         return ResponseEntity.ok(pontoAtualizado);
     }
     @Operation(summary = "Exclui um ponto de coleta",
-            description = "Só é possível excluir ponto sem materiais associados e sem solicitações, para preservar o histórico. Nos demais casos, inative o ponto.")
+            description = "RN03. Só é possível excluir ponto sem materiais associados e sem solicitações, para preservar o histórico. Nos demais casos, inative o ponto.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Ponto de coleta excluído"),
             @ApiResponse(responseCode = "404", description = "Ponto de coleta não encontrado",
