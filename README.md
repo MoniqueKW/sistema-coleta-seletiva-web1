@@ -167,7 +167,7 @@ backend/                      Código da API (Spring Boot)
   src/main/java/.../          controller, service, repository, specification, model, dto, exception, config
   src/main/resources/
     application.properties
-    db/migration/             Migrações Flyway (V1 a V15): estrutura, ajustes, dados de demonstração e índices
+    db/migration/             Migrações Flyway (V1 a V16): estrutura, ajustes, dados de demonstração e índices
 docs/
   api/                        Especificação OpenAPI (JSON)
   dbCarga/                    Scripts de carga de teste (ver abaixo)
@@ -178,7 +178,7 @@ docs/
 
 ## 🗃️ Banco de dados
 
-O modelo está no diagrama em [`docs/diagramaDer/`](docs/diagramaDer/) e o script completo em [`docs/bdSchema/scriptColetaSeletiva.sql`](docs/bdSchema/scriptColetaSeletiva.sql). O Flyway aplica as migrações automaticamente, e o Hibernate apenas **valida** o schema (`ddl-auto=validate`). A migração `V15` cria os índices coerentes com os filtros da API (solicitações por morador, ponto, situação e período; materiais aceitos; histórico; pontos por município e bairro, entre outros).
+O modelo está no diagrama em [`docs/diagramaDer/`](docs/diagramaDer/) e o script completo em [`docs/bdSchema/scriptColetaSeletiva.sql`](docs/bdSchema/scriptColetaSeletiva.sql). O Flyway aplica as migrações automaticamente, e o Hibernate apenas **valida** o schema (`ddl-auto=validate`). A migração `V15` cria os índices coerentes com os filtros da API (solicitações por morador, ponto, situação e período; materiais aceitos; histórico; pontos por município e bairro, entre outros), assim como requisitado no PDF do projeto.
 
 ## ⚡ Carga de teste (desempenho)
 
