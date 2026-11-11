@@ -57,7 +57,7 @@ As credenciais **não ficam no repositório**; são lidas do ambiente:
 | `SENHA`   | sim         | —          | Senha do usuário do PostgreSQL |
 | `USUARIO` | não         | `postgres` | Usuário do PostgreSQL        |
 
-Desta forma, execute:
+Desta forma, **dentro da pasta `backend/`**, execute:
 
 🐧 Linux / macOS:
 ```bash
