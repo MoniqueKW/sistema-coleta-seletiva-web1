@@ -99,7 +99,7 @@ public class SolicitacaoService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
         return converterParaDTO(solicitacao);
     }
-
+    //faz todas as verificacoes, como a de não fazer solicitacoes com pontos inativos, etc.
     @Transactional
     public SolicitacaoResponseDTO salvarSolicitacao(SolicitacaoRequestDTO solicitacaodto, Integer idOperador) {
         Morador morador = repMorador.findById(solicitacaodto.idMorador())
@@ -202,7 +202,7 @@ public class SolicitacaoService {
         return converterParaDTO(solicitacao);
     }
 
-    //atualizacao nao muda situacao, so muda os dados dela antes dela sair de "SOLICITADA"
+    //atualizacao nao muda os dados dela antes dela sair de "SOLICITADA"
     @Transactional
     public SolicitacaoResponseDTO atualizarSolicitacao (Integer id, Integer idOperador,
                                                         SolicitacaoUpdateRequestDTO solicitacaodto) {

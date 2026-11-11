@@ -124,7 +124,7 @@ public class PontoColetaService {
         PontoColeta pontoSalvo = rep.save(ponto);
         return converterParaDTO(pontoSalvo);
     }
-    //apaga se nao tiver associacoes (ou seja, so pra testar)
+    //apaga só se nao tiver associacoes de materiais
     @Transactional
     public void deleteById(Integer idPonto) {
         PontoColeta ponto = rep.findById(idPonto)
