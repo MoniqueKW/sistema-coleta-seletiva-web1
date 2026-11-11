@@ -142,7 +142,7 @@ public class SolicitacaoController {
     })
     //esse recebe um dto so pra ele, pois nem os ids e a solicitacao podem ser alterados,
     //ent fiz um dto so pra update da solicitacao, sem esses dados
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<SolicitacaoResponseDTO> atualizarSolicitacao(
             @Parameter(description = "Id da solicitação")
             @PathVariable Integer id,
