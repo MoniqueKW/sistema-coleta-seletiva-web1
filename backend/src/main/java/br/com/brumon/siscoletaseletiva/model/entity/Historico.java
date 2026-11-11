@@ -15,7 +15,7 @@ import java.time.OffsetDateTime;
 public class Historico {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_historico")
+    @Column(name = "id")
     private Integer id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_solicitacao", nullable = false)

@@ -2,7 +2,7 @@
 -- CARGA DE TESTE PARA O RNF04 (desempenho): 1.000 solicitações com itens e histórico.
 --
 -- 
--- Pré-requisito: o banco já foi migrado (V1 a V15) e tem os dados de demonstração da V14
+-- Pré-requisito: o banco já foi migrado (V1 a V16) e tem os dados de demonstração da V14
 --   (usa os materiais Papel, Plástico, Vidro e Metal).
 -- Como rodar (psql, na raiz do projeto):
 --   psql -U postgres -d coleta_seletiva -f docs/carga/carga_1000_solicitacoes.sql

@@ -41,7 +41,7 @@ CREATE SEQUENCE coleta_seletiva.endereco_id_seq
 ALTER SEQUENCE coleta_seletiva.endereco_id_seq OWNED BY coleta_seletiva.endereco.id;
 
 CREATE TABLE coleta_seletiva.historico (
-    id_historico integer NOT NULL,
+    id integer NOT NULL,
     id_solicitacao integer NOT NULL,
     situacao_anterior character varying(50),
     situacao_nova character varying(50) NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE coleta_seletiva.historico (
     id_operador integer
 );
 
-CREATE SEQUENCE coleta_seletiva.historico_id_historico_seq
+CREATE SEQUENCE coleta_seletiva.historico_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -60,7 +60,7 @@ CREATE SEQUENCE coleta_seletiva.historico_id_historico_seq
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE coleta_seletiva.historico_id_historico_seq OWNED BY coleta_seletiva.historico.id_historico;
+ALTER SEQUENCE coleta_seletiva.historico_id_seq OWNED BY coleta_seletiva.historico.id;
 
 CREATE TABLE coleta_seletiva.itemsolicitacao (
     id_solicitacao integer NOT NULL,
@@ -117,7 +117,7 @@ ALTER SEQUENCE coleta_seletiva.morador_id_seq OWNED BY coleta_seletiva.morador.i
 
 CREATE TABLE coleta_seletiva.operador (
     id integer NOT NULL,
-    id_ponto integer,
+    id_ponto integer NOT NULL,
     nome character varying(150) NOT NULL,
     email character varying(255) NOT NULL
 );
@@ -191,7 +191,7 @@ ALTER SEQUENCE coleta_seletiva.solicitacao_id_seq OWNED BY coleta_seletiva.solic
 
 ALTER TABLE ONLY coleta_seletiva.endereco ALTER COLUMN id SET DEFAULT nextval('coleta_seletiva.endereco_id_seq'::regclass);
 
-ALTER TABLE ONLY coleta_seletiva.historico ALTER COLUMN id_historico SET DEFAULT nextval('coleta_seletiva.historico_id_historico_seq'::regclass);
+ALTER TABLE ONLY coleta_seletiva.historico ALTER COLUMN id SET DEFAULT nextval('coleta_seletiva.historico_id_seq'::regclass);
 
 ALTER TABLE ONLY coleta_seletiva.material ALTER COLUMN id SET DEFAULT nextval('coleta_seletiva.material_id_seq'::regclass);
 
@@ -207,7 +207,7 @@ ALTER TABLE ONLY coleta_seletiva.endereco
     ADD CONSTRAINT endereco_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY coleta_seletiva.historico
-    ADD CONSTRAINT historico_pkey PRIMARY KEY (id_historico);
+    ADD CONSTRAINT historico_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY coleta_seletiva.itemsolicitacao
     ADD CONSTRAINT itemsolicitacao_pkey PRIMARY KEY (id_solicitacao, id_material);
