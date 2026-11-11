@@ -36,7 +36,7 @@ Projeto desenvolvido por alunos do *Instituto Federal de Sergipe (IFS)*:
 
 ## 🚀 Como executar
 
-Todos os comandos abaixo partem da pasta `backend/`.
+Todos os comandos abaixo partem da pasta `backend/`, então é preciso estar nela para as coisas aqui abaixo rodarem sem erro.
 
 ### 1️⃣ 🗄️ Criar o banco de dados
 
