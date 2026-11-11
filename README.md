@@ -174,6 +174,7 @@ docs/
   dbDadosDemonstrativos/      Script de dados demonstrativos (já incluso no versionamento do Flyway)
   dbSchema/                   Script SQL do banco
   diagramaER/                 Diagrama entidade-relacionamento (PNG e PDF)
+  relatorio/                  Relatório atual do projeto (PDF)
 ```
 
 ## 🗃️ Banco de dados
