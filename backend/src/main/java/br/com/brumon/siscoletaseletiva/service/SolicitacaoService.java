@@ -114,7 +114,7 @@ public class SolicitacaoService {
         if (ponto.getSituacao() != SituacaoPonto.ATIVO) {
             throw new RegraNegocioException("O ponto de coleta não está ativo.");
         }
-        if (solicitacaodto.recolhimentoDomiciliar() && !ponto.getRecolhimentoDomiciliar()) {
+        if (!Boolean.TRUE.equals(ponto.getRecolhimentoDomiciliar())) {
             throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
         }
         if (solicitacaodto.itens() == null || solicitacaodto.itens().isEmpty()) {
@@ -182,7 +182,6 @@ public class SolicitacaoService {
                 .situacao(SituacaoSolicitacao.SOLICITADA)
                 .dataCriacao(OffsetDateTime.now(ZoneOffset.UTC))
                 .observacoes(solicitacaodto.observacoes())
-                .recolhimentoDomiciliar(solicitacaodto.recolhimentoDomiciliar())
                 //nao escrevemos .version() pq o hibernate vai controlar
                 //esse campo para evitar concorrencias
                 .build());
@@ -235,6 +234,9 @@ public class SolicitacaoService {
                 if (ponto.getSituacao() != SituacaoPonto.ATIVO) {
                     throw new RegraNegocioException("O ponto de coleta não está ativo.");
                 }
+                if (!Boolean.TRUE.equals(ponto.getRecolhimentoDomiciliar())) {
+                    throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
+                }
             }
             solicitacao.setPontoColeta(ponto);
         }
@@ -246,9 +248,6 @@ public class SolicitacaoService {
                 throw new RegraNegocioException("Operador não pertence ao ponto de coleta desta solicitação");
             }
         }
-        //defino a situacao do recolhimentoDomiciliar aqui para usar mais abaixo
-        Boolean recDomiciliarFinal = solicitacaodto.recolhimentoDomiciliar() != null
-                ? solicitacaodto.recolhimentoDomiciliar() : solicitacao.getRecolhimentoDomiciliar();
         //colocando oq o usuario mandou na lista para essa nova lista abaixo, caso nao mandou nada,
         // a lista é preenchida com os itens que ja tavam antes
         List<ItemSolicitacaoRequestDTO> itensParaValidar;
@@ -322,11 +321,6 @@ public class SolicitacaoService {
         if (solicitacaodto.observacoes() != null) {
             solicitacao.setObservacoes(solicitacaodto.observacoes());
         }
-        //verifica se o ponto aceita recolhimento domiciliar se o usuario tiver mudado na solicitacao
-        if (Boolean.TRUE.equals(recDomiciliarFinal) && !Boolean.TRUE.equals(ponto.getRecolhimentoDomiciliar())) {
-            throw new RegraNegocioException("Este ponto de coleta não oferece recolhimento domiciliar.");
-        }
-        solicitacao.setRecolhimentoDomiciliar(recDomiciliarFinal);
         // abaixo, isso força o Hibernate a incrementar a versão da Solicitação no final da transação,
         // mesmo que o usuário só tenha alterado a lista de itens, ou seja, se não alterou nenhum campo
         // de solicitação, só a lista de itemSolicitacao. Dessa forma, ainda assim, o hibernate incrementa
@@ -585,7 +579,6 @@ public class SolicitacaoService {
                 solicitacao.getDataAgendamento(),
                 solicitacao.getDataConclusao(),
                 solicitacao.getObservacoes(),
-                solicitacao.getRecolhimentoDomiciliar(),
                 solicitacao.getVersao(),
                 itens
         );

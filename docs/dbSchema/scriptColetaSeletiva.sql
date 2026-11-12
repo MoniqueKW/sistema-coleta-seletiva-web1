@@ -175,8 +175,7 @@ CREATE TABLE coleta_seletiva.solicitacao (
     data_agendamento timestamp with time zone,
     data_conclusao timestamp with time zone,
     observacoes text,
-    versao integer DEFAULT 0 NOT NULL,
-    recolhimento_domiciliar boolean DEFAULT false NOT NULL
+    versao integer DEFAULT 0 NOT NULL
 );
 
 CREATE SEQUENCE coleta_seletiva.solicitacao_id_seq

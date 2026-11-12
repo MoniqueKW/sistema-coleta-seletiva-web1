@@ -14,7 +14,6 @@ public record SolicitacaoUpdateRequestDTO(
         Integer idEndereco,
         @Size(max = 255)
         String observacoes,
-        Boolean recolhimentoDomiciliar,
         //a versao precisa ser passada para conferir se bate com a versao atual e impedir
         //problemas de concorrencia com a versao
         @NotNull

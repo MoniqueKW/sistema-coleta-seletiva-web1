@@ -13,8 +13,6 @@ public record SolicitacaoRequestDTO(
         Integer idEndereco,
         @Size(max = 255)
         String observacoes,
-        @NotNull
-        Boolean recolhimentoDomiciliar,
         @NotEmpty
         List<@Valid ItemSolicitacaoRequestDTO> itens
 ) {

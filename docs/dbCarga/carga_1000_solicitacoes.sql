@@ -2,7 +2,7 @@
 -- CARGA DE TESTE PARA O RNF04 (desempenho): 1.000 solicitações com itens e histórico.
 --
 -- 
--- Pré-requisito: o banco já foi migrado (V1 a V16) e tem os dados de demonstração da V14
+-- Pré-requisito: o banco já foi migrado (V1 a V17) e tem os dados de demonstração da V14
 --   (usa os materiais Papel, Plástico, Vidro e Metal).
 -- Como rodar (psql, na raiz do projeto):
 --   psql -U postgres -d coleta_seletiva -f docs/carga/carga_1000_solicitacoes.sql
@@ -123,7 +123,7 @@ FROM carga_sorteio s;
 INSERT INTO coleta_seletiva.solicitacao
     (id_ponto, id_morador, protocolo_unico,
      copia_logradouro, copia_numero, copia_bairro, copia_municipio, copia_uf, copia_cep, copia_complemento,
-     situacao, data_criacao, data_agendamento, data_conclusao, observacoes, versao, recolhimento_domiciliar)
+     situacao, data_criacao, data_agendamento, data_conclusao, observacoes, versao)
 SELECT b.id_ponto, b.id_morador, 'CG-' || lpad(b.n::text, 6, '0'),
        e.logradouro, e.numero, e.bairro, e.municipio, e.uf, e.cep, e.complemento,
        b.situacao,
@@ -134,8 +134,7 @@ SELECT b.id_ponto, b.id_morador, 'CG-' || lpad(b.n::text, 6, '0'),
        CASE b.situacao WHEN 'SOLICITADA' THEN 0
                        WHEN 'EM_RECOLHIMENTO' THEN 2
                        WHEN 'CONCLUIDA' THEN 3
-                       ELSE 1 END,
-       TRUE
+                       ELSE 1 END
 FROM carga_base b
 JOIN LATERAL (SELECT * FROM coleta_seletiva.endereco
                WHERE id_morador = b.id_morador ORDER BY id LIMIT 1) e ON TRUE;

@@ -50,28 +50,27 @@ ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO coleta_seletiva.solicitacao
     (id_ponto, id_morador, protocolo_unico, copia_logradouro, copia_numero, copia_bairro, copia_municipio, copia_uf,
-     copia_cep, copia_complemento, situacao, data_criacao, observacoes, versao, recolhimento_domiciliar)
+     copia_cep, copia_complemento, situacao, data_criacao, observacoes, versao)
 SELECT p.id, mo.id, 'SC-DEMO0001', e.logradouro, e.numero, e.bairro, e.municipio, e.uf, e.cep, e.complemento,
-       'SOLICITADA', now() - interval '1 day', 'Material separado na garagem.', 0, TRUE
+       'SOLICITADA', now() - interval '1 day', 'Material separado na garagem.', 0
 FROM coleta_seletiva.pontocoleta p, coleta_seletiva.morador mo
 JOIN coleta_seletiva.endereco e ON e.id_morador = mo.id
 WHERE p.nome = 'Cooperativa Recicla Aracaju' AND mo.email = 'maria.silva@example.com';
 
 INSERT INTO coleta_seletiva.solicitacao
     (id_ponto, id_morador, protocolo_unico, copia_logradouro, copia_numero, copia_bairro, copia_municipio, copia_uf,
-     copia_cep, copia_complemento, situacao, data_criacao, data_agendamento, observacoes, versao, recolhimento_domiciliar)
+     copia_cep, copia_complemento, situacao, data_criacao, data_agendamento, observacoes, versao)
 SELECT p.id, mo.id, 'SC-DEMO0002', e.logradouro, e.numero, e.bairro, e.municipio, e.uf, e.cep, e.complemento,
-       'AGENDADA', now() - interval '2 days', now() + interval '3 days', NULL, 1, TRUE
+       'AGENDADA', now() - interval '2 days', now() + interval '3 days', NULL, 1
 FROM coleta_seletiva.pontocoleta p, coleta_seletiva.morador mo
 JOIN coleta_seletiva.endereco e ON e.id_morador = mo.id
 WHERE p.nome = 'Cooperativa Recicla Aracaju' AND mo.email = 'joao.santos@example.com';
 
 INSERT INTO coleta_seletiva.solicitacao
     (id_ponto, id_morador, protocolo_unico, copia_logradouro, copia_numero, copia_bairro, copia_municipio, copia_uf,
-     copia_cep, copia_complemento, situacao, data_criacao, data_agendamento, data_conclusao, observacoes, versao,
-     recolhimento_domiciliar)
+     copia_cep, copia_complemento, situacao, data_criacao, data_agendamento, data_conclusao, observacoes, versao)
 SELECT p.id, mo.id, 'SC-DEMO0003', e.logradouro, e.numero, e.bairro, e.municipio, e.uf, e.cep, e.complemento,
-       'CONCLUIDA', now() - interval '7 days', now() - interval '5 days', now() - interval '5 days', NULL, 3, TRUE
+       'CONCLUIDA', now() - interval '7 days', now() - interval '5 days', now() - interval '5 days', NULL, 3
 FROM coleta_seletiva.pontocoleta p, coleta_seletiva.morador mo
 JOIN coleta_seletiva.endereco e ON e.id_morador = mo.id
 WHERE p.nome = 'Cooperativa Recicla Aracaju' AND mo.email = 'maria.silva@example.com';

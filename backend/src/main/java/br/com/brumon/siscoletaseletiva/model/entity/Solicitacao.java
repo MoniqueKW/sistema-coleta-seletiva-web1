@@ -54,11 +54,6 @@ public class Solicitacao {
     private OffsetDateTime dataConclusao;
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
-    // adicionei para cumprir a RN01 do projeto, onde deixa a entender que um morador
-    // pode escolher a modalidade de recolhimento domiciliar a uma solicitação se o ponto
-    // atrelado a esta permitir. Com esse atributo, dá pra validar isso.
-    @Column(name = "recolhimento_domiciliar", nullable = false)
-    private Boolean recolhimentoDomiciliar;
     @Version
     @Column(name = "versao", nullable = false)
     private Integer versao;

@@ -22,7 +22,6 @@ public record SolicitacaoResponseDTO(
         OffsetDateTime dataAgendamento,
         OffsetDateTime dataConclusao,
         String observacoes,
-        Boolean recolhimentoDomiciliar,
         Integer versao,
         List<ItemSolicitacaoResponseDTO> itens
 ) {
