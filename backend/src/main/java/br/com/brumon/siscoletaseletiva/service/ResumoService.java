@@ -35,6 +35,7 @@ public class ResumoService {
         boolean temPeriodo = dataInicio != null && dataFim != null;
         Map<SituacaoSolicitacao, Long> totais = new EnumMap<>(SituacaoSolicitacao.class);
         for (SituacaoSolicitacao situacao : SituacaoSolicitacao.values()) {
+            //o L força o numero a ser interpretado como um Long e não um Integer
             totais.put(situacao, 0L);
         }
         for (ResumoSituacaoDTO linha : repSolicitacao.contarPorSituacao(
@@ -55,7 +56,7 @@ public class ResumoService {
         return repItem.somarQuantidadeEfetiva(SituacaoSolicitacao.CONCLUIDA,
                 temPeriodo ? dataInicio : INICIO_PADRAO, temPeriodo ? dataFim : FIM_PADRAO);
     }
-
+    //dava pra usar la em cima em resumoPorSituacao tb, mas ia ficar meio poluido
     private void validarPeriodo(OffsetDateTime dataInicio, OffsetDateTime dataFim) {
         if (dataInicio != null && dataFim != null && dataInicio.isAfter(dataFim)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
